@@ -1,0 +1,87 @@
+from django.contrib.auth import get_user_model
+from rest_framework import serializers
+
+from .models import Comment, Post, Subject
+
+
+User = get_user_model()
+
+
+class SubjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subject
+        fields = ["id", "name", "slug"]
+
+
+class AuthorSerializer(serializers.ModelSerializer):
+    display_name = serializers.CharField(source="profile.display_name")
+    level = serializers.IntegerField(source="profile.level")
+
+    class Meta:
+        model = User
+        fields = ["username", "display_name", "level"]
+
+
+class SubjectSummarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subject
+        fields = ["slug", "name"]
+
+
+class PostListSerializer(serializers.ModelSerializer):
+    subject = SubjectSummarySerializer()
+    author = AuthorSerializer()
+    excerpt = serializers.SerializerMethodField()
+    image = serializers.ImageField(read_only=True)
+
+    class Meta:
+        model = Post
+        fields = [
+            "id",
+            "subject",
+            "title",
+            "excerpt",
+            "score",
+            "author",
+            "created_at",
+            "image",
+        ]
+
+    def get_excerpt(self, obj: Post) -> str:
+        return obj.body[:160]
+
+
+class PostDetailSerializer(serializers.ModelSerializer):
+    subject = SubjectSummarySerializer()
+    author = AuthorSerializer()
+    image = serializers.ImageField(read_only=True)
+
+    class Meta:
+        model = Post
+        fields = [
+            "id",
+            "subject",
+            "title",
+            "body",
+            "score",
+            "author",
+            "created_at",
+            "updated_at",
+            "image",
+        ]
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = AuthorSerializer()
+    image = serializers.ImageField(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = [
+            "id",
+            "body",
+            "score",
+            "author",
+            "created_at",
+            "image",
+        ]

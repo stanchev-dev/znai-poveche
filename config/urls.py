@@ -8,6 +8,7 @@ urlpatterns = [
 
     # Web pages
     path('', include('apps.common.urls')),
+    path('', include('apps.accounts.urls')),
 
     # API routes
     path('api/', include('apps.common.api_urls')),
