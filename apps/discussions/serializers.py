@@ -98,6 +98,16 @@ class PostCreateSerializer(serializers.ModelSerializer):
         model = Post
         fields = ["subject", "title", "body", "image"]
 
+    def validate_title(self, value: str) -> str:
+        if not value.strip():
+            raise serializers.ValidationError("Title cannot be empty.")
+        return value
+
+    def validate_body(self, value: str) -> str:
+        if not value.strip():
+            raise serializers.ValidationError("Body cannot be empty.")
+        return value
+
 
 class CommentCreateSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(required=False, allow_null=True)
@@ -105,3 +115,8 @@ class CommentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ["body", "image"]
+
+    def validate_body(self, value: str) -> str:
+        if not value.strip():
+            raise serializers.ValidationError("Body cannot be empty.")
+        return value

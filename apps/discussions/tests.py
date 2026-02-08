@@ -28,7 +28,7 @@ class PostCreatePointsTests(APITestCase):
             {
                 "subject": self.subject.slug,
                 "title": "A post title",
-                "body": "This body has more than thirty characters.",
+                "body": "Short body",
             },
             format="json",
         )
@@ -50,7 +50,7 @@ class PostCreatePointsTests(APITestCase):
             {
                 "subject": self.subject.slug,
                 "title": "Another post title",
-                "body": "This body has more than thirty characters.",
+                "body": "Short body",
             },
             format="json",
         )
@@ -64,7 +64,7 @@ class PostCreatePointsTests(APITestCase):
         payload = {
             "subject": self.subject.slug,
             "title": "A post title",
-            "body": "This body has more than thirty characters.",
+            "body": "Short body",
         }
         for _ in range(3):
             response = self.client.post(
@@ -80,6 +80,29 @@ class PostCreatePointsTests(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+
+    def test_post_create_rejects_whitespace_title_or_body(self):
+        response = self.client.post(
+            reverse("api-posts-list"),
+            {
+                "subject": self.subject.slug,
+                "title": "   ",
+                "body": "Valid body",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        response = self.client.post(
+            reverse("api-posts-list"),
+            {
+                "subject": self.subject.slug,
+                "title": "Valid title",
+                "body": "   ",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class CommentCreatePointsTests(APITestCase):
@@ -101,7 +124,7 @@ class CommentCreatePointsTests(APITestCase):
     def test_comment_create_awards_points(self):
         response = self.client.post(
             reverse("api-posts-comments", kwargs={"post_id": self.post.id}),
-            {"body": "This comment has enough length."},
+            {"body": "Ok"},
             format="json",
         )
 
@@ -116,14 +139,22 @@ class CommentCreatePointsTests(APITestCase):
                 reverse(
                     "api-posts-comments", kwargs={"post_id": self.post.id}
                 ),
-                {"body": "This comment has enough length."},
+                {"body": "Ok"},
                 format="json",
             )
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         response = self.client.post(
             reverse("api-posts-comments", kwargs={"post_id": self.post.id}),
-            {"body": "This comment has enough length."},
+            {"body": "Ok"},
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+
+    def test_comment_create_rejects_whitespace_body(self):
+        response = self.client.post(
+            reverse("api-posts-comments", kwargs={"post_id": self.post.id}),
+            {"body": "   "},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
