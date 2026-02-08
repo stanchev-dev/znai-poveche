@@ -40,10 +40,6 @@ def apply_base_points(profile: Profile, points_to_add: int) -> None:
         profile.daily_base_points += points_to_add
         profile.reputation_points += points_to_add
         update_fields.extend(["daily_base_points", "reputation_points"])
-        level = (profile.reputation_points // 25) + 1
-        if level > profile.max_level_reached:
-            profile.max_level_reached = level
-            update_fields.append("max_level_reached")
 
     if update_fields:
         profile.save(update_fields=update_fields)
@@ -97,8 +93,7 @@ class PostListView(ListCreateAPIView):
         return queryset
 
     def perform_create(self, serializer):
-        body = serializer.validated_data["body"].strip()
-        points_to_add = 2 if len(body) >= 30 else 0
+        points_to_add = 2
         with transaction.atomic():
             profile = Profile.objects.select_for_update().get(
                 user=self.request.user
@@ -149,8 +144,7 @@ class PostCommentListView(ListCreateAPIView):
         return self.queryset.filter(post_id=self.kwargs["post_id"]).all()
 
     def perform_create(self, serializer):
-        body = serializer.validated_data["body"].strip()
-        points_to_add = 1 if len(body) >= 15 else 0
+        points_to_add = 1
         with transaction.atomic():
             post = get_object_or_404(Post, pk=self.kwargs["post_id"])
             profile = Profile.objects.select_for_update().get(
