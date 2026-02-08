@@ -135,6 +135,7 @@ REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
     **REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"],
     "post_create": "3/hour",
     "comment_create": "10/hour",
+    "vote": "50/hour",
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
