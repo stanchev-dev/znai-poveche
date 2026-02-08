@@ -120,3 +120,7 @@ class CommentCreateSerializer(serializers.ModelSerializer):
         if not value.strip():
             raise serializers.ValidationError("Body cannot be empty.")
         return value
+
+
+class VoteInputSerializer(serializers.Serializer):
+    value = serializers.ChoiceField(choices=[1, -1])

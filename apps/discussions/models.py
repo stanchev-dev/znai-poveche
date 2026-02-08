@@ -65,3 +65,71 @@ class Comment(models.Model):
 
     def __str__(self) -> str:
         return f"Comment #{self.id} on {self.post_id}"
+
+
+class PostVote(models.Model):
+    UPVOTE = 1
+    DOWNVOTE = -1
+    VOTE_CHOICES = (
+        (UPVOTE, "Upvote"),
+        (DOWNVOTE, "Downvote"),
+    )
+
+    voter = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="post_votes",
+    )
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="votes",
+    )
+    value = models.SmallIntegerField(choices=VOTE_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["voter", "post"],
+                name="unique_post_vote_per_user",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"PostVote {self.value} by {self.voter_id} on {self.post_id}"
+
+
+class CommentVote(models.Model):
+    UPVOTE = 1
+    DOWNVOTE = -1
+    VOTE_CHOICES = (
+        (UPVOTE, "Upvote"),
+        (DOWNVOTE, "Downvote"),
+    )
+
+    voter = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="comment_votes",
+    )
+    comment = models.ForeignKey(
+        Comment,
+        on_delete=models.CASCADE,
+        related_name="votes",
+    )
+    value = models.SmallIntegerField(choices=VOTE_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["voter", "comment"],
+                name="unique_comment_vote_per_user",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return (
+            f"CommentVote {self.value} by {self.voter_id} on {self.comment_id}"
+        )
