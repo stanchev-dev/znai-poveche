@@ -85,3 +85,23 @@ class CommentSerializer(serializers.ModelSerializer):
             "created_at",
             "image",
         ]
+
+
+class PostCreateSerializer(serializers.ModelSerializer):
+    subject = serializers.SlugRelatedField(
+        slug_field="slug",
+        queryset=Subject.objects.all(),
+    )
+    image = serializers.ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = Post
+        fields = ["subject", "title", "body", "image"]
+
+
+class CommentCreateSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = Comment
+        fields = ["body", "image"]
