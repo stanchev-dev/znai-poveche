@@ -16,6 +16,7 @@ class PostAdmin(admin.ModelAdmin):
     list_filter = ("subject", "created_at")
     search_fields = ("title", "body", "author__username")
     autocomplete_fields = ("subject", "author")
+    exclude = ("score",)
 
 
 @admin.register(Comment)
@@ -24,3 +25,4 @@ class CommentAdmin(admin.ModelAdmin):
     list_filter = ("created_at",)
     search_fields = ("body", "author__username")
     autocomplete_fields = ("post", "author")
+    exclude = ("score",)
