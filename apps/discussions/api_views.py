@@ -69,6 +69,10 @@ def apply_base_points(profile: Profile, points_to_add: int) -> None:
         profile.daily_base_points += points_to_add
         profile.reputation_points += points_to_add
         update_fields.extend(["daily_base_points", "reputation_points"])
+        new_level = calculate_level(profile.reputation_points)
+        if new_level > profile.max_level_reached:
+            profile.max_level_reached = new_level
+            update_fields.append("max_level_reached")
 
     if update_fields:
         profile.save(update_fields=update_fields)
