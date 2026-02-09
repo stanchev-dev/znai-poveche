@@ -1,11 +1,20 @@
 from django.db import IntegrityError, transaction
-from django.db.models import F, Q
+from django.db.models import (
+    ExpressionWrapper,
+    F,
+    IntegerField,
+    OuterRef,
+    Q,
+    Subquery,
+    Sum,
+)
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.generics import ListCreateAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -26,6 +35,22 @@ from .throttles import CommentCreateThrottle, PostCreateThrottle, VoteThrottle
 
 class PostPagination(PageNumberPagination):
     page_size = 10
+
+
+class LeaderboardPagination(PageNumberPagination):
+    page_size = 20
+
+    def get_paginated_response(self, data):
+        return Response(
+            {
+                "scope": getattr(self, "scope", None),
+                "subject": getattr(self, "subject", None),
+                "count": self.page.paginator.count,
+                "next": self.get_next_link(),
+                "previous": self.get_previous_link(),
+                "results": data,
+            }
+        )
 
 
 def apply_base_points(profile: Profile, points_to_add: int) -> None:
@@ -305,3 +330,116 @@ class CommentVoteAPIView(BaseVoteAPIView):
     target_model = Comment
     vote_model = CommentVote
     target_field = "comment"
+
+
+class LeaderboardAPIView(APIView):
+    permission_classes = [AllowAny]
+    pagination_class = LeaderboardPagination
+
+    def get(self, request):
+        scope = request.query_params.get("scope", "global")
+        if scope not in {"global", "subject"}:
+            return Response(
+                {"detail": "Invalid scope."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        subject = None
+        if scope == "subject":
+            subject_slug = request.query_params.get("subject")
+            if not subject_slug:
+                return Response(
+                    {"detail": "Subject is required."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            subject = get_object_or_404(Subject, slug=subject_slug)
+            queryset = self._get_subject_queryset(subject)
+        else:
+            queryset = Profile.objects.select_related("user").order_by(
+                "-reputation_points",
+                "user_id",
+            )
+
+        paginator = self.pagination_class()
+        paginator.scope = scope
+        paginator.subject = (
+            SubjectSerializer(subject).data if subject is not None else None
+        )
+        page = paginator.paginate_queryset(queryset, request, view=self)
+        results = self._build_results(
+            page,
+            paginator,
+            request,
+            scope=scope,
+        )
+        return paginator.get_paginated_response(results)
+
+    def _get_subject_queryset(self, subject: Subject):
+        post_score_subquery = (
+            Post.objects.filter(
+                author_id=OuterRef("user_id"),
+                subject=subject,
+            )
+            .values("author_id")
+            .annotate(total_score=Sum("score"))
+            .values("total_score")
+        )
+        comment_score_subquery = (
+            Comment.objects.filter(
+                author_id=OuterRef("user_id"),
+                post__subject=subject,
+            )
+            .values("author_id")
+            .annotate(total_score=Sum("score"))
+            .values("total_score")
+        )
+
+        queryset = Profile.objects.select_related("user").annotate(
+            post_score=Coalesce(
+                Subquery(post_score_subquery, output_field=IntegerField()),
+                0,
+            ),
+            comment_score=Coalesce(
+                Subquery(comment_score_subquery, output_field=IntegerField()),
+                0,
+            ),
+        )
+        queryset = queryset.annotate(
+            subject_score=ExpressionWrapper(
+                F("post_score") + F("comment_score"),
+                output_field=IntegerField(),
+            )
+        ).filter(subject_score__gt=0)
+        return queryset.order_by("-subject_score", "user_id")
+
+    def _build_results(
+        self,
+        page,
+        paginator: LeaderboardPagination,
+        request,
+        *,
+        scope: str,
+    ):
+        if page is None:
+            return []
+        page_number = paginator.page.number
+        page_size = paginator.get_page_size(request) or len(page)
+        offset = (page_number - 1) * page_size
+        results = []
+        for index, profile in enumerate(page):
+            results.append(
+                {
+                    "rank": offset + index + 1,
+                    "user_id": profile.user_id,
+                    "username": profile.user.get_username(),
+                    "display_name": profile.display_name,
+                    "level": profile.level,
+                    "reputation_points": profile.reputation_points,
+                    "subject_score": (
+                        int(profile.subject_score)
+                        if scope == "subject"
+                        else None
+                    ),
+                }
+            )
+        return results
