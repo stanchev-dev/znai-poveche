@@ -60,6 +60,52 @@ class PostCreatePointsTests(APITestCase):
         self.assertEqual(profile.reputation_points, 30)
         self.assertEqual(profile.daily_base_points, 30)
 
+    def test_post_create_updates_max_level_reached(self):
+        profile = Profile.objects.get(user=self.user)
+        profile.reputation_points = 24
+        profile.max_level_reached = 1
+        profile.daily_base_points = 0
+        profile.daily_base_points_date = timezone.localdate()
+        profile.save()
+
+        response = self.client.post(
+            reverse("api-posts-list"),
+            {
+                "subject": self.subject.slug,
+                "title": "Level up post",
+                "body": "Short body",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        profile.refresh_from_db()
+        self.assertEqual(profile.reputation_points, 26)
+        self.assertEqual(profile.max_level_reached, 2)
+
+    def test_post_create_updates_max_level_reached_multiple_levels(self):
+        profile = Profile.objects.get(user=self.user)
+        profile.reputation_points = 49
+        profile.max_level_reached = 2
+        profile.daily_base_points = 0
+        profile.daily_base_points_date = timezone.localdate()
+        profile.save()
+
+        response = self.client.post(
+            reverse("api-posts-list"),
+            {
+                "subject": self.subject.slug,
+                "title": "Second level up post",
+                "body": "Short body",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        profile.refresh_from_db()
+        self.assertEqual(profile.reputation_points, 51)
+        self.assertEqual(profile.max_level_reached, 3)
+
     def test_post_create_throttle(self):
         payload = {
             "subject": self.subject.slug,
