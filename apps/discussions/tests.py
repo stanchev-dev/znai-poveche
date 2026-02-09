@@ -348,3 +348,152 @@ class VoteTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         profile.refresh_from_db()
         self.assertEqual(profile.daily_base_points, 10)
+
+
+class LeaderboardTests(APITestCase):
+    def setUp(self):
+        cache.clear()
+        self.subject_one = Subject.objects.create(name="Subject One")
+        self.subject_two = Subject.objects.create(name="Subject Two")
+        self.user_one = User.objects.create_user(
+            username="user_one",
+            password="testpass123",
+        )
+        self.user_two = User.objects.create_user(
+            username="user_two",
+            password="testpass123",
+        )
+        self.user_three = User.objects.create_user(
+            username="user_three",
+            password="testpass123",
+        )
+        self.user_four = User.objects.create_user(
+            username="user_four",
+            password="testpass123",
+        )
+
+    def test_global_leaderboard_orders_by_reputation_and_id(self):
+        Profile.objects.filter(user=self.user_one).update(
+            reputation_points=40
+        )
+        Profile.objects.filter(user=self.user_two).update(
+            reputation_points=90
+        )
+        Profile.objects.filter(user=self.user_three).update(
+            reputation_points=90
+        )
+
+        response = self.client.get(reverse("leaderboard"))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        results = response.data["results"]
+        self.assertEqual(results[0]["user_id"], self.user_two.id)
+        self.assertEqual(results[1]["user_id"], self.user_three.id)
+        self.assertEqual(results[2]["user_id"], self.user_one.id)
+        self.assertIsNone(results[0]["subject_score"])
+
+    def test_subject_leaderboard_scores_and_order(self):
+        post_one = Post.objects.create(
+            subject=self.subject_one,
+            author=self.user_one,
+            title="Post One",
+            body="Body",
+            score=2,
+        )
+        Post.objects.create(
+            subject=self.subject_one,
+            author=self.user_one,
+            title="Post Two",
+            body="Body",
+            score=4,
+        )
+        post_two = Post.objects.create(
+            subject=self.subject_one,
+            author=self.user_two,
+            title="Post Three",
+            body="Body",
+            score=5,
+        )
+        subject_two_post = Post.objects.create(
+            subject=self.subject_two,
+            author=self.user_two,
+            title="Other Subject Post",
+            body="Body",
+            score=10,
+        )
+
+        Comment.objects.create(
+            post=post_one,
+            author=self.user_one,
+            body="Comment",
+            score=3,
+        )
+        Comment.objects.create(
+            post=post_two,
+            author=self.user_two,
+            body="Comment",
+            score=1,
+        )
+        Comment.objects.create(
+            post=post_one,
+            author=self.user_three,
+            body="Comment",
+            score=2,
+        )
+        Comment.objects.create(
+            post=post_one,
+            author=self.user_three,
+            body="Other comment",
+            score=0,
+        )
+        Comment.objects.create(
+            post=subject_two_post,
+            author=self.user_two,
+            body="Subject two comment",
+            score=4,
+        )
+        Comment.objects.create(
+            post=Post.objects.create(
+                subject=self.subject_two,
+                author=self.user_one,
+                title="Subject Two Post",
+                body="Body",
+                score=7,
+            ),
+            author=self.user_one,
+            body="Subject two comment",
+            score=5,
+        )
+
+        response = self.client.get(
+            reverse("leaderboard"),
+            {"scope": "subject", "subject": self.subject_one.slug},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        results = response.data["results"]
+        self.assertEqual(results[0]["user_id"], self.user_one.id)
+        self.assertEqual(results[0]["subject_score"], 9)
+        self.assertEqual(results[1]["user_id"], self.user_two.id)
+        self.assertEqual(results[1]["subject_score"], 6)
+        self.assertEqual(results[2]["user_id"], self.user_three.id)
+        self.assertEqual(results[2]["subject_score"], 2)
+        self.assertNotIn(self.user_four.id, [item["user_id"] for item in results])
+
+    def test_subject_scope_requires_subject(self):
+        response = self.client.get(reverse("leaderboard"), {"scope": "subject"})
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_invalid_scope_returns_400(self):
+        response = self.client.get(reverse("leaderboard"), {"scope": "other"})
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_subject_not_found_returns_404(self):
+        response = self.client.get(
+            reverse("leaderboard"),
+            {"scope": "subject", "subject": "missing"},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

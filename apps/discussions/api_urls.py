@@ -2,6 +2,7 @@ from django.urls import path
 
 from .api_views import (
     CommentVoteAPIView,
+    LeaderboardAPIView,
     PostCommentListView,
     PostDetailView,
     PostListView,
@@ -28,4 +29,5 @@ urlpatterns = [
         CommentVoteAPIView.as_view(),
         name="api-comments-vote",
     ),
+    path("leaderboard/", LeaderboardAPIView.as_view(), name="leaderboard"),
 ]
