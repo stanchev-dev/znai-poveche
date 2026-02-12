@@ -184,6 +184,47 @@ class ListingAPITests(APITestCase):
             status.HTTP_400_BAD_REQUEST,
         )
 
+
+    def test_owner_can_upgrade_listing_to_vip(self):
+        self.client.force_authenticate(self.owner)
+        vip_until = (timezone.now() + timedelta(days=3)).isoformat()
+
+        response = self.client.patch(
+            reverse("listing-vip-upgrade", kwargs={"pk": self.listing.pk}),
+            {"vip_until": vip_until},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.listing.refresh_from_db()
+        self.assertIsNotNone(self.listing.vip_until)
+        self.assertTrue(self.listing.vip_until > timezone.now())
+
+    def test_non_owner_cannot_upgrade_listing_to_vip(self):
+        self.client.force_authenticate(self.other_user)
+        vip_until = (timezone.now() + timedelta(days=3)).isoformat()
+
+        response = self.client.patch(
+            reverse("listing-vip-upgrade", kwargs={"pk": self.listing.pk}),
+            {"vip_until": vip_until},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_upgrade_requires_future_vip_until(self):
+        self.client.force_authenticate(self.owner)
+        vip_until = (timezone.now() - timedelta(hours=1)).isoformat()
+
+        response = self.client.patch(
+            reverse("listing-vip-upgrade", kwargs={"pk": self.listing.pk}),
+            {"vip_until": vip_until},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("vip_until", response.data)
+
     def test_list_has_excerpt_and_detail_has_full_description(self):
         list_response = self.client.get(reverse("listing-list-create"))
         self.assertEqual(list_response.status_code, status.HTTP_200_OK)

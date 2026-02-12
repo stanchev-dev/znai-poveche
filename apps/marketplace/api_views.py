@@ -13,6 +13,7 @@ from .serializers import (
     ListingCreateSerializer,
     ListingDetailSerializer,
     ListingListSerializer,
+    ListingVipUpgradeSerializer,
 )
 
 
@@ -106,6 +107,15 @@ class ListingListCreateAPIView(generics.GenericAPIView):
                 {field_name: ["Must be a valid decimal number."]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class ListingVipUpgradeAPIView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ListingVipUpgradeSerializer
+    queryset = Listing.objects.all()
+
+    def get_queryset(self):
+        return super().get_queryset().filter(owner=self.request.user)
 
 
 class ListingDetailAPIView(generics.RetrieveAPIView):
