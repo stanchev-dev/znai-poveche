@@ -117,6 +117,24 @@ class ListingAPITests(APITestCase):
         self.assertEqual(result_ids[0], vip_listing.id)
         self.assertTrue(response.data["results"][0]["is_vip"])
 
+    def test_non_vip_ordering_uses_created_at_desc(self):
+        older_non_vip = self.listing
+        newer_non_vip = Listing.objects.create(
+            subject=self.math,
+            owner=self.other_user,
+            price_per_hour="55.00",
+            online_only=True,
+            description="Newer non-VIP",
+            contact_phone="+359222222",
+            vip_until=timezone.now() - timedelta(days=1),
+        )
+
+        response = self.client.get(reverse("listing-list-create"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        result_ids = [item["id"] for item in response.data["results"]]
+        self.assertLess(result_ids.index(newer_non_vip.id), result_ids.index(older_non_vip.id))
+        self.assertFalse(response.data["results"][result_ids.index(newer_non_vip.id)]["is_vip"])
+
     def test_filters_subject_online_only_and_price(self):
         listing_two = Listing.objects.create(
             subject=self.physics,
