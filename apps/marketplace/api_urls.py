@@ -4,6 +4,7 @@ from .api_views import (
     ListingContactAPIView,
     ListingDetailAPIView,
     ListingListCreateAPIView,
+    ListingVipUpgradeAPIView,
 )
 
 urlpatterns = [
@@ -21,5 +22,10 @@ urlpatterns = [
         "listings/<int:pk>/contact/",
         ListingContactAPIView.as_view(),
         name="listing-contact",
+    ),
+    path(
+        "listings/<int:pk>/vip/",
+        ListingVipUpgradeAPIView.as_view(),
+        name="listing-vip-upgrade",
     ),
 ]
