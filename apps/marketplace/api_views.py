@@ -27,6 +27,12 @@ class ListingListCreateAPIView(generics.GenericAPIView):
         "owner__profile",
     )
     pagination_class = ListingPagination
+    serializer_class = ListingListSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return ListingCreateSerializer
+        return ListingListSerializer
 
     def get_permissions(self):
         if self.request.method == "POST":
@@ -74,7 +80,7 @@ class ListingListCreateAPIView(generics.GenericAPIView):
         ).order_by("-is_vip_int", "-vip_until", "-created_at")
 
         page = self.paginate_queryset(queryset)
-        serializer = ListingListSerializer(page, many=True)
+        serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
     def post(self, request, *args, **kwargs):
