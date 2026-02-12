@@ -1,6 +1,6 @@
 from decimal import Decimal, InvalidOperation
 
-from django.db.models import Case, IntegerField, Value, When
+from django.db.models import Case, DateTimeField, F, IntegerField, Value, When
 from django.utils import timezone
 from rest_framework import generics, status
 from rest_framework.pagination import PageNumberPagination
@@ -13,6 +13,7 @@ from .serializers import (
     ListingCreateSerializer,
     ListingDetailSerializer,
     ListingListSerializer,
+    ListingVipUpgradeSerializer,
 )
 
 
@@ -76,8 +77,17 @@ class ListingListCreateAPIView(generics.GenericAPIView):
                 When(vip_until__gt=now, then=Value(1)),
                 default=Value(0),
                 output_field=IntegerField(),
-            )
-        ).order_by("-is_vip_int", "-vip_until", "-created_at")
+            ),
+            vip_until_sort=Case(
+                When(vip_until__gt=now, then=F("vip_until")),
+                default=Value(None),
+                output_field=DateTimeField(),
+            ),
+        ).order_by(
+            "-is_vip_int",
+            F("vip_until_sort").desc(nulls_last=True),
+            "-created_at",
+        )
 
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
@@ -106,6 +116,15 @@ class ListingListCreateAPIView(generics.GenericAPIView):
                 {field_name: ["Must be a valid decimal number."]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class ListingVipUpgradeAPIView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ListingVipUpgradeSerializer
+    queryset = Listing.objects.all()
+
+    def get_queryset(self):
+        return super().get_queryset().filter(owner=self.request.user)
 
 
 class ListingDetailAPIView(generics.RetrieveAPIView):

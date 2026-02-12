@@ -117,3 +117,14 @@ class ListingContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Listing
         fields = ["contact_phone", "contact_email", "contact_url"]
+
+
+class ListingVipUpgradeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Listing
+        fields = ["vip_until"]
+
+    def validate_vip_until(self, value):
+        if value <= timezone.now():
+            raise serializers.ValidationError("vip_until must be in the future.")
+        return value
