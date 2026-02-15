@@ -64,9 +64,13 @@ class AdminActionsAPIView(APIView):
         target = report.target
         if target is not None:
             target.delete()
+        resolved_at = timezone.now()
+        Report.objects.filter(pk=report.pk).update(
+            status=Report.STATUS_RESOLVED,
+            resolved_at=resolved_at,
+        )
         report.status = Report.STATUS_RESOLVED
-        report.resolved_at = timezone.now()
-        report.save(update_fields=["status", "resolved_at"])
+        report.resolved_at = resolved_at
         return Response(
             {"success": True, "report_id": report.id},
             status=status.HTTP_200_OK,
