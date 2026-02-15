@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Начало{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-3">Предмети</h1>
+<div id="subjects-alert"></div>
+<div id="subjects-list" class="row g-3"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/home.js' %}"></script>
+{% endblock %}
