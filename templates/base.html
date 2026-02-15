@@ -23,21 +23,23 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="mainNav">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link" href="{% url 'marketplace-page' %}">Маркетплейс</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'leaderboard-page' %}">Класация</a></li>
-      </ul>
-      <ul class="navbar-nav align-items-center">
-        {% if user.is_authenticated %}
-          <li class="nav-item dropdown">
-            <button
-              class="btn avatar-btn dropdown-toggle p-0 border-0 bg-transparent"
-              type="button"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-              aria-label="Меню на профила"
-            >
-              <span class="avatar-shell" aria-hidden="true">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center navbar-actions">
+        <li class="nav-item">
+          <a class="nav-link nav-action-link" href="{% url 'marketplace-page' %}">Маркетплейс</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link nav-action-link" href="{% url 'leaderboard-page' %}">Класация</a>
+        </li>
+        <li class="nav-item dropdown account-nav-item">
+          <button
+            class="btn account-menu-toggle dropdown-toggle border-0 bg-transparent"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            aria-label="Меню на профила"
+          >
+            <span class="avatar-btn" aria-hidden="true">
+              <span class="avatar-shell">
                 <span class="avatar-frame">
                   <img
                     src="{% user_avatar_url user %}"
@@ -46,16 +48,19 @@
                   >
                 </span>
               </span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            </span>
+            <span class="account-menu-label">{% user_nav_label user %}</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            {% if user.is_authenticated %}
               <li><a class="dropdown-item" href="{% url 'profile' %}">Твоят профил</a></li>
               <li><button type="button" class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal">Изход</button></li>
-            </ul>
-          </li>
-        {% else %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Вход</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Регистрация</a></li>
-        {% endif %}
+            {% else %}
+              <li><a class="dropdown-item" href="{% url 'login' %}">Вход</a></li>
+              <li><a class="dropdown-item" href="{% url 'register' %}">Регистрация</a></li>
+            {% endif %}
+          </ul>
+        </li>
       </ul>
     </div>
   </div>
