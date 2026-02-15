@@ -230,8 +230,8 @@ def compute_vote_deltas(
     if existing_value == new_value:
         return 0, 0
     if existing_value == 1 and new_value == -1:
-        return -2, -3
-    return 2, 3
+        return -2, -2
+    return 2, 2
 
 
 class BaseVoteAPIView(APIView):
