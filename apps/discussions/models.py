@@ -1,6 +1,19 @@
+from uuid import uuid4
+
 from django.conf import settings
 from django.db import models
+from django.core.files.uploadedfile import UploadedFile
 from django.utils.text import slugify
+
+from apps.common.images import process_image, validate_image_upload
+
+
+def post_image_upload_to(instance, filename):
+    return f"posts/{uuid4().hex}.webp"
+
+
+def comment_image_upload_to(instance, filename):
+    return f"comments/{uuid4().hex}.webp"
 
 
 class Subject(models.Model):
@@ -21,7 +34,7 @@ class Subject(models.Model):
 
 class Post(models.Model):
     subject = models.ForeignKey(
-        Subject,
+        "Subject",
         on_delete=models.PROTECT,
         related_name="posts",
     )
@@ -32,7 +45,11 @@ class Post(models.Model):
     )
     title = models.CharField(max_length=120)
     body = models.TextField()
-    image = models.ImageField(upload_to="posts/", blank=True, null=True)
+    image = models.ImageField(
+        upload_to=post_image_upload_to,
+        blank=True,
+        null=True,
+    )
     score = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -42,6 +59,16 @@ class Post(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+    def save(self, *args, **kwargs):
+        if (
+            self.image
+            and getattr(self.image, "_committed", True) is False
+            and isinstance(getattr(self.image, "file", None), UploadedFile)
+        ):
+            validate_image_upload(self.image)
+            self.image = process_image(self.image, max_side=1600, quality=80)
+        super().save(*args, **kwargs)
 
 
 class Comment(models.Model):
@@ -56,7 +83,11 @@ class Comment(models.Model):
         related_name="comments",
     )
     body = models.TextField()
-    image = models.ImageField(upload_to="comments/", blank=True, null=True)
+    image = models.ImageField(
+        upload_to=comment_image_upload_to,
+        blank=True,
+        null=True,
+    )
     score = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -65,6 +96,16 @@ class Comment(models.Model):
 
     def __str__(self) -> str:
         return f"Comment #{self.id} on {self.post_id}"
+
+    def save(self, *args, **kwargs):
+        if (
+            self.image
+            and getattr(self.image, "_committed", True) is False
+            and isinstance(getattr(self.image, "file", None), UploadedFile)
+        ):
+            validate_image_upload(self.image)
+            self.image = process_image(self.image, max_side=1600, quality=80)
+        super().save(*args, **kwargs)
 
 
 class PostVote(models.Model):

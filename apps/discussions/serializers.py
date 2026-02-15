@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from apps.common.images import process_image, validate_image_upload
+
 from .models import Comment, Post, Subject
 
 
@@ -108,6 +110,22 @@ class PostCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Body cannot be empty.")
         return value
 
+    def validate_image(self, value):
+        if value is None:
+            return value
+        validate_image_upload(value)
+        return value
+
+    def create(self, validated_data):
+        image = validated_data.get("image")
+        if image is not None:
+            validated_data["image"] = process_image(
+                image,
+                max_side=1600,
+                quality=80,
+            )
+        return super().create(validated_data)
+
 
 class CommentCreateSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(required=False, allow_null=True)
@@ -120,6 +138,22 @@ class CommentCreateSerializer(serializers.ModelSerializer):
         if not value.strip():
             raise serializers.ValidationError("Body cannot be empty.")
         return value
+
+    def validate_image(self, value):
+        if value is None:
+            return value
+        validate_image_upload(value)
+        return value
+
+    def create(self, validated_data):
+        image = validated_data.get("image")
+        if image is not None:
+            validated_data["image"] = process_image(
+                image,
+                max_side=1600,
+                quality=80,
+            )
+        return super().create(validated_data)
 
 
 class VoteInputSerializer(serializers.Serializer):
