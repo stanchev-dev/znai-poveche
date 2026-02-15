@@ -117,6 +117,47 @@ class ModerationAPITests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_can_create_new_report_after_previous_is_resolved(self):
+        self.client.force_authenticate(self.user)
+        first_response = self.client.post(
+            reverse("report-create"),
+            {
+                "target_type": "post",
+                "target_id": self.post.id,
+                "reason": Report.REASON_ABUSE,
+            },
+            format="json",
+        )
+        self.assertEqual(first_response.status_code, status.HTTP_201_CREATED)
+        first_report_id = first_response.data["id"]
+
+        self.client.force_authenticate(self.admin)
+        resolve_response = self.client.post(
+            reverse("admin-actions"),
+            {
+                "action": "set_status",
+                "report_id": first_report_id,
+                "status": Report.STATUS_RESOLVED,
+            },
+            format="json",
+        )
+        self.assertEqual(resolve_response.status_code, status.HTTP_200_OK)
+
+        self.client.force_authenticate(self.user)
+        second_response = self.client.post(
+            reverse("report-create"),
+            {
+                "target_type": "post",
+                "target_id": self.post.id,
+                "reason": Report.REASON_SPAM,
+            },
+            format="json",
+        )
+        self.assertEqual(second_response.status_code, status.HTTP_201_CREATED)
+        second_report_id = second_response.data["id"]
+
+        self.assertNotEqual(first_report_id, second_report_id)
+
     def test_guest_cannot_access_admin_endpoints(self):
         reports_response = self.client.get(reverse("admin-report-list"))
         actions_response = self.client.post(
