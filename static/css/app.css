@@ -29,6 +29,31 @@ h6 {
 .brand-logo {
   font-weight: 800;
   letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #0f172a;
+}
+
+.brand-logo:hover,
+.brand-logo:focus {
+  color: #0f172a;
+}
+
+.brand-logo-mark {
+  width: auto;
+  height: 24px;
+  display: block;
+}
+
+.brand-logo-text {
+  line-height: 1;
+}
+
+@media (max-width: 576px) {
+  .brand-logo-mark {
+    height: 22px;
+  }
 }
 
 .avatar-btn {
