@@ -42,7 +42,7 @@ h6 {
 
 .brand-logo-mark {
   width: auto;
-  height: 85px;
+  height: 87px;
   display: block;
 }
 
@@ -123,12 +123,12 @@ h6 {
 }
 
 .nav-action-link {
-  font-size: 1.35rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.25;
   color: #334155;
   border-radius: 0.5rem;
-  padding: 0.72rem 0.9rem !important;
+  padding: 0.62rem 0.9rem !important;
   transition: color 0.18s ease, background-color 0.18s ease;
 }
 
@@ -158,9 +158,9 @@ h6 {
 }
 
 .account-menu-label {
-  font-size: 1.32rem;
+  font-size: 1.08rem;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.25;
   color: #475569;
   max-width: 172px;
   white-space: nowrap;
@@ -170,8 +170,8 @@ h6 {
 
 @media (max-width: 399.98px) {
   .nav-action-link {
-    font-size: 1.1rem;
-    padding: 0.6rem 0.75rem !important;
+    font-size: 1rem;
+    padding: 0.55rem 0.75rem !important;
   }
 
   .account-menu-toggle {
@@ -179,7 +179,7 @@ h6 {
   }
 
   .account-menu-label {
-    font-size: 1.08rem;
+    font-size: 0.98rem;
   }
 }
 
