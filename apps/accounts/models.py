@@ -10,6 +10,7 @@ class Profile(models.Model):
         related_name="profile",
     )
     display_name = models.CharField(max_length=50, blank=True)
+    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
     reputation_points = models.IntegerField(default=0)
     max_level_reached = models.PositiveIntegerField(default=1)
     daily_base_points = models.PositiveIntegerField(default=0)
