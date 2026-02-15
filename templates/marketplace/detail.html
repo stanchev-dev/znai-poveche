@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Детайли обява{% endblock %}
+
+{% block content %}
+<div id="listing-alert"></div>
+<div id="listing-detail"></div>
+<div class="mt-3">
+  <button id="contacts-btn" class="btn btn-primary">Виж контакти</button>
+</div>
+<div id="contacts-wrap" class="mt-3"></div>
+<div id="listing-meta" data-listing-id="{{ listing_id }}"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/marketplace_detail.js' %}"></script>
+{% endblock %}

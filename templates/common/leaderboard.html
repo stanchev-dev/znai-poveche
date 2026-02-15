@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Класация{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-3">Класация</h1>
+<div class="row g-2 mb-3">
+  <div class="col-md-3">
+    <select id="scope-select" class="form-select">
+      <option value="global">Глобална</option>
+      <option value="subject">По предмет</option>
+    </select>
+  </div>
+  <div class="col-md-4" id="subject-wrap" style="display:none;">
+    <select id="subject-select" class="form-select"></select>
+  </div>
+</div>
+<div id="leaderboard-alert"></div>
+<table class="table table-striped" id="leaderboard-table">
+  <thead>
+    <tr><th>#</th><th>Потребител</th><th>Ниво</th><th>Точки</th><th id="subject-score-head" style="display:none;">Предметен резултат</th></tr>
+  </thead>
+  <tbody id="leaderboard-body"></tbody>
+</table>
+<div class="d-flex justify-content-between mt-3">
+  <button class="btn btn-outline-secondary" id="prev-btn">Предишна</button>
+  <button class="btn btn-outline-secondary" id="next-btn">Следваща</button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/leaderboard.js' %}"></script>
+{% endblock %}
