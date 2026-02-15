@@ -5,10 +5,25 @@
 
 {% block content %}
 <section class="hero-section rounded-4 p-4 p-md-5 mb-5">
-  <div class="row align-items-center g-4">
+  <svg class="hero-wave" viewBox="0 0 1200 460" aria-hidden="true" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="heroWaveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
+        <stop offset="52%" stop-color="#6F3BF5" stop-opacity="0.72" />
+        <stop offset="100%" stop-color="#4F46E5" stop-opacity="0.86" />
+      </linearGradient>
+      <radialGradient id="heroWaveGlow" cx="82%" cy="14%" r="58%">
+        <stop offset="0%" stop-color="#A78BFA" stop-opacity="0.42" />
+        <stop offset="100%" stop-color="#A78BFA" stop-opacity="0" />
+      </radialGradient>
+    </defs>
+    <path fill="url(#heroWaveGradient)" d="M0 0h1200v172c-98 49-212 74-336 77-158 6-232-43-365-41-148 2-286 59-499 95V0z" />
+    <ellipse cx="940" cy="88" rx="300" ry="146" fill="url(#heroWaveGlow)" />
+  </svg>
+  <div class="hero-content row align-items-center g-4">
     <div class="col-lg-8">
       <h1 class="display-6 fw-bold mb-3">Учи по-умно всеки ден със Знай повече</h1>
-      <p class="lead text-secondary mb-4">Открий материали, следи развитието си и бъди част от общност, която учи заедно.</p>
+      <p class="hero-description lead text-secondary mb-4">Открий материали, следи развитието си и бъди част от общност, която учи заедно.</p>
       <div class="d-flex flex-wrap gap-2">
         <a class="btn btn-dark" href="#subjects-section">Разгледай предмети</a>
         <a class="btn btn-outline-dark" href="{% url 'marketplace-page' %}">Маркетплейс</a>
