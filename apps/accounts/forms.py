@@ -38,6 +38,17 @@ class ProfileUpdateForm(forms.ModelForm):
         }
 
 
+class DisplayNameUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ("display_name",)
+        widgets = {
+            "display_name": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Въведи име за показване"}
+            ),
+        }
+
+
 class DeleteAccountForm(forms.Form):
     confirmation = forms.CharField(
         max_length=10,

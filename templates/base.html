@@ -1,4 +1,4 @@
-{% load static %}
+{% load static accounts_extras %}
 <!doctype html>
 <html lang="bg">
 <head>
@@ -31,7 +31,7 @@
               aria-label="Меню на профила"
             >
               <img
-                src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}{% static 'img/default-avatar.svg' %}{% endif %}"
+                src="{% user_avatar_url user %}"
                 alt="Аватар"
                 class="nav-avatar"
               >
