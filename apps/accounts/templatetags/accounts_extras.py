@@ -2,6 +2,7 @@ from django import template
 from django.templatetags.static import static
 from django.db.utils import OperationalError, ProgrammingError
 
+from apps.accounts.models import Profile
 from apps.accounts.utils import profile_has_avatar_column
 
 register = template.Library()
@@ -25,3 +26,22 @@ def user_avatar_url(user):
         return default_avatar
 
     return default_avatar
+
+
+@register.simple_tag
+def user_nav_label(user):
+    if not getattr(user, "is_authenticated", False):
+        return "Акаунт"
+
+    username = user.get_username()
+
+    try:
+        display_name = (
+            Profile.objects.filter(user=user)
+            .values_list("display_name", flat=True)
+            .first()
+        )
+    except (OperationalError, ProgrammingError, ValueError):
+        return username
+
+    return (display_name or "").strip() or username

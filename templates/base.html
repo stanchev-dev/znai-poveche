@@ -49,13 +49,7 @@
                 </span>
               </span>
             </span>
-            <span class="account-menu-label">
-              {% if user.is_authenticated %}
-                {% firstof user.profile.display_name user.get_username %}
-              {% else %}
-                Акаунт
-              {% endif %}
-            </span>
+            <span class="account-menu-label">{% user_nav_label user %}</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end shadow-sm">
             {% if user.is_authenticated %}
