@@ -116,3 +116,78 @@ h6 {
   max-width: 920px;
   margin: 0 auto;
 }
+
+
+.navbar-actions {
+  gap: 0.25rem;
+}
+
+.nav-action-link {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #334155;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem !important;
+  transition: color 0.18s ease, background-color 0.18s ease;
+}
+
+.nav-action-link:hover,
+.nav-action-link:focus {
+  color: #0f172a;
+  background-color: #eef2f7;
+}
+
+.account-nav-item {
+  margin-left: 0.2rem;
+}
+
+.account-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  border-radius: 999px;
+  padding: 0.2rem 0.35rem 0.2rem 0.2rem;
+  color: #334155;
+}
+
+.account-menu-toggle:hover,
+.account-menu-toggle:focus-visible {
+  color: #0f172a;
+  background-color: #eef2f7 !important;
+}
+
+.account-menu-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #475569;
+  max-width: 172px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 991.98px) {
+  .navbar-actions {
+    align-items: stretch;
+    padding-top: 0.5rem;
+  }
+
+  .navbar-actions .nav-item {
+    width: 100%;
+  }
+
+  .account-nav-item {
+    margin-left: 0;
+  }
+
+  .account-menu-toggle {
+    width: 100%;
+    justify-content: flex-start;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .account-menu-label {
+    max-width: calc(100vw - 9rem);
+  }
+}
