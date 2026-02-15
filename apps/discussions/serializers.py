@@ -90,6 +90,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class PostCreateSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
     subject = serializers.SlugRelatedField(
         slug_field="slug",
         queryset=Subject.objects.all(),
@@ -98,7 +99,7 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ["subject", "title", "body", "image"]
+        fields = ["id", "subject", "title", "body", "image"]
 
     def validate_title(self, value: str) -> str:
         if not value.strip():
@@ -128,11 +129,12 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
 
 class CommentCreateSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
     image = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Comment
-        fields = ["body", "image"]
+        fields = ["id", "body", "image"]
 
     def validate_body(self, value: str) -> str:
         if not value.strip():
