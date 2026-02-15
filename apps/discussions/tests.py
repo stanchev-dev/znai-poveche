@@ -1,7 +1,15 @@
+import io
+import shutil
+import tempfile
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
+from PIL import Image
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -543,3 +551,153 @@ class LeaderboardTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+TEMP_MEDIA_ROOT = tempfile.mkdtemp()
+
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
+class DiscussionImageUploadTests(APITestCase):
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
+
+    def setUp(self):
+        cache.clear()
+        self.user = User.objects.create_user(
+            username="image-user",
+            password="testpass123",
+        )
+        self.subject = Subject.objects.create(name="Images")
+        self.client.force_authenticate(self.user)
+
+    def _image_upload(self, *, size=(800, 600), format="JPEG", name="image.jpg"):
+        image = Image.new("RGB", size, color=(10, 140, 200))
+        buffer = io.BytesIO()
+        image.save(buffer, format=format)
+        buffer.seek(0)
+        content_type = {
+            "JPEG": "image/jpeg",
+            "PNG": "image/png",
+            "WEBP": "image/webp",
+        }[format]
+        return SimpleUploadedFile(name, buffer.getvalue(), content_type=content_type)
+
+    def _noise_upload(self, *, size=(2200, 2200), name="big.png"):
+        noise = Image.effect_noise(size, 100)
+        image = noise.convert("RGB")
+        buffer = io.BytesIO()
+        image.save(buffer, format="PNG")
+        data = buffer.getvalue()
+        self.assertGreater(len(data), 2 * 1024 * 1024)
+        return SimpleUploadedFile(name, data, content_type="image/png")
+
+    def test_post_upload_valid_image_saved_as_webp(self):
+        response = self.client.post(
+            reverse("api-posts-list"),
+            {
+                "subject": self.subject.slug,
+                "title": "Image post",
+                "body": "Body with image",
+                "image": self._image_upload(format="PNG", name="img.png"),
+            },
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        post = Post.objects.get(id=response.data["id"])
+        self.assertTrue(post.image)
+        self.assertTrue(post.image.name.endswith(".webp"))
+
+    def test_post_upload_is_resized_to_max_1600(self):
+        response = self.client.post(
+            reverse("api-posts-list"),
+            {
+                "subject": self.subject.slug,
+                "title": "Large image post",
+                "body": "Body with large image",
+                "image": self._image_upload(size=(3000, 2000), format="JPEG"),
+            },
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        post = Post.objects.get(id=response.data["id"])
+        with Image.open(post.image.path) as stored:
+            self.assertEqual(max(stored.size), 1600)
+
+    def test_post_upload_rejects_invalid_image_bytes(self):
+        bad_file = SimpleUploadedFile(
+            "broken.jpg",
+            b"not-an-image",
+            content_type="image/jpeg",
+        )
+        response = self.client.post(
+            reverse("api-posts-list"),
+            {
+                "subject": self.subject.slug,
+                "title": "Bad image post",
+                "body": "Body",
+                "image": bad_file,
+            },
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("image", response.data)
+
+    def test_post_upload_rejects_files_larger_than_2mb(self):
+        response = self.client.post(
+            reverse("api-posts-list"),
+            {
+                "subject": self.subject.slug,
+                "title": "Big image post",
+                "body": "Body",
+                "image": self._noise_upload(),
+            },
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("image", response.data)
+
+    def test_comment_upload_valid_image_saved_as_webp(self):
+        post = Post.objects.create(
+            subject=self.subject,
+            author=self.user,
+            title="Seed",
+            body="Seed body",
+        )
+
+        response = self.client.post(
+            reverse("api-posts-comments", kwargs={"post_id": post.id}),
+            {
+                "body": "Comment with image",
+                "image": self._image_upload(format="JPEG", name="comment.jpg"),
+            },
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        comment = Comment.objects.get(id=response.data["id"])
+        self.assertTrue(comment.image)
+        self.assertTrue(comment.image.name.endswith(".webp"))
+
+    @patch("apps.common.images.ImageOps.exif_transpose")
+    def test_exif_transpose_is_called(self, exif_transpose_mock):
+        exif_transpose_mock.side_effect = lambda img: img
+
+        response = self.client.post(
+            reverse("api-posts-list"),
+            {
+                "subject": self.subject.slug,
+                "title": "Exif image post",
+                "body": "Body",
+                "image": self._image_upload(format="JPEG"),
+            },
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        exif_transpose_mock.assert_called()
