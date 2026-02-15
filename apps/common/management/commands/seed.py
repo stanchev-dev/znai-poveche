@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
+from django.utils.text import slugify
 
 from apps.accounts.models import Profile
 from apps.discussions.models import Subject
@@ -17,8 +18,12 @@ class Command(BaseCommand):
             "Химия",
             "Физика",
         ]
-        for name in subjects:
-            Subject.objects.get_or_create(name=name)
+        for index, name in enumerate(subjects, start=1):
+            desired_slug = slugify(name) or f"subject-{index}"
+            Subject.objects.update_or_create(
+                slug=desired_slug,
+                defaults={"name": name},
+            )
 
         user_model = get_user_model()
         admin, admin_created = user_model.objects.get_or_create(
