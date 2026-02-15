@@ -4,9 +4,26 @@
 {% block title %}Начало{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-3">Предмети</h1>
-<div id="subjects-alert"></div>
-<div id="subjects-list" class="row g-3"></div>
+<section class="hero-section rounded-4 p-4 p-md-5 mb-5">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-8">
+      <h1 class="display-6 fw-bold mb-3">Учи по-умно всеки ден със Знай повече</h1>
+      <p class="lead text-secondary mb-4">Открий материали, следи развитието си и бъди част от общност, която учи заедно.</p>
+      <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-dark" href="#subjects-section">Разгледай предмети</a>
+        <a class="btn btn-outline-dark" href="{% url 'marketplace-page' %}">Маркетплейс</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="subjects-section">
+  <div class="d-flex justify-content-between align-items-end mb-3">
+    <h2 class="h3 mb-0">Предмети</h2>
+  </div>
+  <div id="subjects-alert"></div>
+  <div id="subjects-list" class="row g-3"></div>
+</section>
 {% endblock %}
 
 {% block extra_js %}
