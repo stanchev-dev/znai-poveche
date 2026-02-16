@@ -42,7 +42,7 @@ class SubjectSerializer(serializers.ModelSerializer):
         normalized = normalize_hex(obj.theme_color)
         if not normalized:
             return FALLBACK_LIGHT_COLOR
-        return lighten_hex(normalized, 0.55)
+        return lighten_hex(normalized, 0.532)
 
 
 class AuthorSerializer(serializers.ModelSerializer):

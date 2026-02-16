@@ -60,8 +60,8 @@ class ListingListCreateAPIView(generics.GenericAPIView):
             .order_by(
                 "-is_vip_int",
                 F("vip_until_sort").desc(nulls_last=True),
-                "-created_at",
                 "-id",
+                "-created_at",
             )
         )
 
