@@ -36,16 +36,6 @@
         <input id="contact_phone" name="contact_phone" type="text" class="form-control">
       </div>
 
-      <div class="mb-3">
-        <label for="contact_email" class="form-label">Имейл</label>
-        <input id="contact_email" name="contact_email" type="email" class="form-control">
-      </div>
-
-      <div class="mb-3">
-        <label for="contact_url" class="form-label">Линк за контакт</label>
-        <input id="contact_url" name="contact_url" type="url" class="form-control">
-      </div>
-
       <button type="submit" class="btn btn-primary">Публикувай</button>
     </form>
   </div>
@@ -109,8 +99,6 @@
       online_only: form.online_only.checked,
       description: form.description.value,
       contact_phone: form.contact_phone.value,
-      contact_email: form.contact_email.value,
-      contact_url: form.contact_url.value,
     };
 
     const response = await window.apiUtils.apiFetch('/api/listings/', {

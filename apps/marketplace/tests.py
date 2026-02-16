@@ -62,14 +62,14 @@ class ListingAPITests(APITestCase):
             [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN],
         )
 
-    def test_auth_user_can_create_listing(self):
+    def test_auth_user_can_create_listing_without_email_and_url(self):
         self.client.force_authenticate(self.other_user)
         payload = {
             "subject": self.physics.slug,
             "price_per_hour": "60.50",
             "online_only": True,
             "description": "Experienced tutor",
-            "contact_email": "teacher@example.com",
+            "contact_phone": "+359123456",
         }
 
         response = self.client.post(
@@ -82,6 +82,9 @@ class ListingAPITests(APITestCase):
         created = Listing.objects.get(pk=response.data["id"])
         self.assertEqual(created.owner, self.other_user)
         self.assertEqual(created.subject, self.physics)
+        self.assertEqual(created.contact_phone, payload["contact_phone"])
+        self.assertFalse(created.contact_email)
+        self.assertFalse(created.contact_url)
 
     def test_create_fails_when_all_contacts_missing(self):
         self.client.force_authenticate(self.owner)

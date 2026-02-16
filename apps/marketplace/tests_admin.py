@@ -30,6 +30,33 @@ class ListingAdminTests(TestCase):
             contact_email="owner@example.com",
         )
 
+    def test_admin_can_save_listing_with_empty_email_and_url(self):
+        self.client.force_login(self.admin_user)
+
+        change_url = reverse("admin:marketplace_listing_change", args=[self.listing.pk])
+        response = self.client.post(
+            change_url,
+            {
+                "subject": self.subject.pk,
+                "owner": self.owner.pk,
+                "price_per_hour": "45.00",
+                "online_only": "on",
+                "description": "Tutor listing",
+                "contact_phone": "",
+                "contact_email": "",
+                "contact_url": "",
+                "vip_until_0": "",
+                "vip_until_1": "",
+                "_save": "Save",
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.listing.refresh_from_db()
+        self.assertFalse(self.listing.contact_email)
+        self.assertFalse(self.listing.contact_url)
+
     def test_admin_changelist_shows_listing(self):
         self.client.force_login(self.admin_user)
 
