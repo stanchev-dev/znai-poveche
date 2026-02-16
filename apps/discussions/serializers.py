@@ -12,7 +12,7 @@ User = get_user_model()
 class SubjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subject
-        fields = ["id", "name", "slug"]
+        fields = ["id", "name", "slug", "theme_color", "tile_image"]
 
 
 class AuthorSerializer(serializers.ModelSerializer):
