@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -16,12 +17,24 @@ class SubjectSummarySerializer(serializers.ModelSerializer):
 
 
 class OwnerSerializer(serializers.ModelSerializer):
-    display_name = serializers.CharField(source="profile.display_name")
-    level = serializers.IntegerField(source="profile.level")
+    display_name = serializers.SerializerMethodField()
+    level = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ["username", "display_name", "level"]
+
+    def get_display_name(self, obj) -> str:
+        try:
+            return obj.profile.display_name or obj.get_username()
+        except ObjectDoesNotExist:
+            return obj.get_username()
+
+    def get_level(self, obj) -> int:
+        try:
+            return obj.profile.level
+        except ObjectDoesNotExist:
+            return 1
 
 
 class ListingListSerializer(serializers.ModelSerializer):
