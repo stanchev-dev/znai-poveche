@@ -192,8 +192,7 @@ h6 {
   background-image: url("../img/istoriq.svg");
 }
 
-.subject-tile[data-subject-slug="biologiqgit add .
-"]::after {
+.subject-tile[data-subject-slug="biologiq"]::after {
   background-image: url("../img/biologiq.svg");
 }
 
