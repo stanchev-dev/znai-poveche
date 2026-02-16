@@ -5,8 +5,9 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import override_settings
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from PIL import Image
@@ -18,6 +19,21 @@ from apps.discussions.models import Comment, Post, Subject
 
 
 User = get_user_model()
+
+
+class SubjectThemeColorTests(TestCase):
+    def test_clean_normalizes_hex_color_without_hash(self):
+        subject = Subject(name="Matematika", theme_color="1da1f2")
+
+        subject.full_clean()
+
+        self.assertEqual(subject.theme_color, "#1DA1F2")
+
+    def test_clean_rejects_invalid_hex_color(self):
+        subject = Subject(name="Biologia", theme_color="#XYZ123")
+
+        with self.assertRaises(ValidationError):
+            subject.full_clean()
 
 
 class PostCreatePointsTests(APITestCase):
