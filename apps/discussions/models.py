@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.core.files.uploadedfile import UploadedFile
 from django.core.validators import RegexValidator
@@ -46,9 +47,40 @@ class Subject(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    def clean(self):
+        super().clean()
+        if not self.theme_color:
+            return
+
+        theme_color = self.theme_color.strip()
+        if not theme_color:
+            self.theme_color = ""
+            return
+
+        if not theme_color.startswith("#"):
+            theme_color = f"#{theme_color}"
+
+        if not theme_color or len(theme_color) != 7:
+            raise ValidationError(
+                {
+                    "theme_color": (
+                        "Въведете валиден HEX цвят (пример: #1DA1F2)."
+                    )
+                }
+            )
+
+        self.theme_color = theme_color.upper()
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
+
+        if self.theme_color:
+            theme_color = self.theme_color.strip()
+            if theme_color and not theme_color.startswith("#"):
+                self.theme_color = f"#{theme_color}".upper()
+            else:
+                self.theme_color = theme_color.upper()
         super().save(*args, **kwargs)
 
 
