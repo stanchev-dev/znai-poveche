@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Публикувай публикация{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <h1 class="h3 mb-3">Публикувай публикация</h1>
+    <div id="publish-errors"></div>
+
+    <form id="post-publish-form" class="card card-body">
+      <div class="mb-3">
+        <label for="subject" class="form-label">Предмет</label>
+        <select id="subject" name="subject" class="form-select" required>
+          <option value="">Зареждане...</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="title" class="form-label">Заглавие</label>
+        <input id="title" name="title" type="text" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="body" class="form-label">Съдържание</label>
+        <textarea id="body" name="body" rows="7" class="form-control" required></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Публикувай</button>
+    </form>
+  </div>
+</div>
+
+{{ prefill_subject|json_script:"prefill-subject" }}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const form = document.getElementById('post-publish-form');
+  const errorsBox = document.getElementById('publish-errors');
+  const subjectSelect = document.getElementById('subject');
+  const prefillSubject = JSON.parse(document.getElementById('prefill-subject').textContent || '""');
+
+  function renderErrors(errorData) {
+    const items = [];
+
+    if (typeof errorData === 'string') {
+      items.push(errorData);
+    } else if (Array.isArray(errorData)) {
+      errorData.forEach((entry) => items.push(String(entry)));
+    } else if (errorData && typeof errorData === 'object') {
+      Object.entries(errorData).forEach(([field, messages]) => {
+        if (Array.isArray(messages)) {
+          messages.forEach((msg) => items.push(`${field}: ${msg}`));
+        } else {
+          items.push(`${field}: ${messages}`);
+        }
+      });
+    }
+
+    if (!items.length) {
+      items.push('Възникна грешка при публикуване.');
+    }
+
+    errorsBox.innerHTML = `
+      <div class="alert alert-danger">
+        <ul class="mb-0">${items.map((item) => `<li>${item}</li>`).join('')}</ul>
+      </div>
+    `;
+  }
+
+  async function loadSubjects() {
+    const response = await window.apiUtils.apiFetch('/api/subjects/');
+    if (!response.ok) {
+      subjectSelect.innerHTML = '<option value="">Неуспешно зареждане</option>';
+      return;
+    }
+
+    const subjects = await response.json();
+    subjectSelect.innerHTML = '<option value="">Избери предмет</option>' + subjects
+      .map((subject) => `<option value="${subject.slug}">${subject.name}</option>`)
+      .join('');
+
+    if (prefillSubject) {
+      const exists = subjects.some((subject) => subject.slug === prefillSubject);
+      if (exists) {
+        subjectSelect.value = prefillSubject;
+      }
+    }
+  }
+
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    errorsBox.innerHTML = '';
+
+    const payload = {
+      subject: form.subject.value,
+      title: form.title.value,
+      body: form.body.value,
+    };
+
+    const response = await window.apiUtils.apiFetch('/api/posts/', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      const redirectTo = `/subjects/${encodeURIComponent(form.subject.value)}/`;
+      window.location.assign(redirectTo);
+      return;
+    }
+
+    if (response.status === 400) {
+      const data = await response.json();
+      renderErrors(data);
+      return;
+    }
+
+    renderErrors('Сървърна грешка. Опитай отново.');
+  });
+
+  loadSubjects();
+})();
+</script>
+{% endblock %}
