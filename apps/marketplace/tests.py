@@ -282,6 +282,7 @@ class ListingAPITests(APITestCase):
 
 
     def test_listing_pagination_is_stable_with_id_tiebreaker(self):
+        Listing.objects.all().delete()
         base_time = timezone.now() - timedelta(days=1)
         created_ids = []
         for index in range(25):
