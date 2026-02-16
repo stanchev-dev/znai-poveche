@@ -95,7 +95,7 @@ class ListingListCreateAPIView(generics.GenericAPIView):
         return self.get_paginated_response(serializer.data)
 
     def post(self, request, *args, **kwargs):
-        create_serializer = ListingCreateSerializer(
+        create_serializer = self.get_serializer(
             data=request.data,
             context={"request": request},
         )
