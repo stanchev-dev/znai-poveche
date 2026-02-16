@@ -79,7 +79,7 @@ def apply_base_points(profile: Profile, points_to_add: int) -> None:
 
 
 class SubjectListView(ListAPIView):
-    queryset = Subject.objects.all()
+    queryset = Subject.objects.order_by("sort_order", "name")
     serializer_class = SubjectSerializer
 
 

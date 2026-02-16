@@ -5,9 +5,11 @@ from .models import Comment, Post, Subject
 
 @admin.register(Subject)
 class SubjectAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug")
+    list_display = ("name", "sort_order", "theme_color", "slug")
+    list_editable = ("sort_order", "theme_color")
     search_fields = ("name", "slug")
     prepopulated_fields = {"slug": ("name",)}
+    ordering = ("sort_order", "name")
 
 
 @admin.register(Post)

@@ -3,6 +3,7 @@ from uuid import uuid4
 from django.conf import settings
 from django.db import models
 from django.core.files.uploadedfile import UploadedFile
+from django.core.validators import RegexValidator
 from django.utils.text import slugify
 
 from apps.common.images import process_image, validate_image_upload
@@ -19,9 +20,28 @@ def comment_image_upload_to(instance, filename):
 class Subject(models.Model):
     name = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(max_length=60, unique=True, blank=True)
+    sort_order = models.PositiveIntegerField(default=0, db_index=True)
+    theme_color = models.CharField(
+        max_length=7,
+        blank=True,
+        default="",
+        validators=[
+            RegexValidator(
+                regex=r"^#[0-9A-Fa-f]{6}$",
+                message="Въведете валиден HEX цвят (пример: #1DA1F2).",
+            )
+        ],
+        help_text="HEX цвят за плочката на началната страница (пример: #1DA1F2).",
+    )
+    tile_image = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        help_text="Път до static изображение за плочката (пример: img/subjects/math.svg).",
+    )
 
     class Meta:
-        ordering = ["name"]
+        ordering = ["sort_order", "name"]
 
     def __str__(self) -> str:
         return self.name
