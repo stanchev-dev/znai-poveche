@@ -64,7 +64,6 @@
           <ul class="dropdown-menu dropdown-menu-end shadow-sm">
             {% if user.is_authenticated %}
               <li><a class="dropdown-item" href="{% url 'profile' %}">Твоят профил</a></li>
-              <li><button type="button" class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal">Изход</button></li>
             {% else %}
               <li><a class="dropdown-item" href="{% url 'login' %}">Вход</a></li>
               <li><a class="dropdown-item" href="{% url 'register' %}">Регистрация</a></li>
