@@ -81,6 +81,16 @@ class ListingCreateSerializer(serializers.ModelSerializer):
         slug_field="slug",
         queryset=Subject.objects.all(),
     )
+    contact_email = serializers.EmailField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+    )
+    contact_url = serializers.URLField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+    )
 
     class Meta:
         model = Listing
