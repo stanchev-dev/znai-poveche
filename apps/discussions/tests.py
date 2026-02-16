@@ -15,10 +15,27 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from apps.accounts.models import Profile
+from apps.discussions.admin import SubjectAdminForm
 from apps.discussions.models import Comment, Post, Subject
 
 
 User = get_user_model()
+
+
+class SubjectAdminFormTests(TestCase):
+    def test_theme_color_is_normalized_in_admin_form(self):
+        form = SubjectAdminForm(
+            data={
+                "name": "Matematika",
+                "slug": "matematika",
+                "sort_order": 0,
+                "theme_color": "1da1f2",
+                "tile_image": "",
+            }
+        )
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["theme_color"], "#1DA1F2")
 
 
 class SubjectThemeColorTests(TestCase):

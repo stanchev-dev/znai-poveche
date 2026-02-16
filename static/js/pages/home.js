@@ -15,7 +15,7 @@
       .replaceAll("'", '&#39;');
   }
 
-  const res = await window.apiUtils.apiFetch('/api/subjects/');
+  const res = await window.apiUtils.apiFetch('/api/subjects/', { cache: 'no-store' });
   if (!res.ok) {
     showAlert('Невалидна заявка');
     return;
@@ -31,7 +31,9 @@
     .map((subject) => {
       const name = escapeHtml(subject.name);
       const slug = encodeURIComponent(subject.slug);
-      const tileBg = subject.theme_color || '#5b6ee1';
+      const tileBg = /^#[0-9A-Fa-f]{6}$/.test(subject.theme_color || '')
+        ? subject.theme_color
+        : '#5b6ee1';
       const imageMarkup = subject.tile_image
         ? `<img src="/static/${escapeHtml(subject.tile_image)}" class="subject-tile-ill" alt="" aria-hidden="true" loading="lazy" decoding="async" />`
         : '';
