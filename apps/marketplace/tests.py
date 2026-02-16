@@ -143,6 +143,31 @@ class ListingAPITests(APITestCase):
         self.assertEqual(result_ids[0], vip_listing.id)
         self.assertTrue(response.data["results"][0]["is_vip"])
 
+    def test_vip_created_before_newer_non_vip_stays_first(self):
+        vip_listing = Listing.objects.create(
+            subject=self.math,
+            owner=self.other_user,
+            price_per_hour="50.00",
+            online_only=True,
+            description="VIP listing",
+            contact_phone="+359111111",
+            vip_until=timezone.now() + timedelta(days=2),
+        )
+        newer_non_vip = Listing.objects.create(
+            subject=self.math,
+            owner=self.other_user,
+            price_per_hour="65.00",
+            online_only=False,
+            description="New non-VIP listing",
+            contact_phone="+359333333",
+        )
+
+        response = self.client.get(reverse("listing-list-create"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        result_ids = [item["id"] for item in response.data["results"]]
+        self.assertEqual(result_ids[0], vip_listing.id)
+        self.assertLess(result_ids.index(vip_listing.id), result_ids.index(newer_non_vip.id))
+
     def test_non_vip_ordering_uses_created_at_desc(self):
         older_non_vip = self.listing
         newer_non_vip = Listing.objects.create(
@@ -160,6 +185,33 @@ class ListingAPITests(APITestCase):
         result_ids = [item["id"] for item in response.data["results"]]
         self.assertLess(result_ids.index(newer_non_vip.id), result_ids.index(older_non_vip.id))
         self.assertFalse(response.data["results"][result_ids.index(newer_non_vip.id)]["is_vip"])
+
+    def test_expired_vip_is_treated_as_non_vip(self):
+        active_vip = Listing.objects.create(
+            subject=self.math,
+            owner=self.other_user,
+            price_per_hour="48.00",
+            online_only=True,
+            description="Active VIP",
+            contact_phone="+359444444",
+            vip_until=timezone.now() + timedelta(hours=6),
+        )
+        expired_vip = Listing.objects.create(
+            subject=self.math,
+            owner=self.owner,
+            price_per_hour="35.00",
+            online_only=False,
+            description="Expired VIP",
+            contact_phone="+359555555",
+            vip_until=timezone.now() - timedelta(hours=1),
+        )
+
+        response = self.client.get(reverse("listing-list-create"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        results = response.data["results"]
+        result_ids = [item["id"] for item in results]
+        self.assertEqual(result_ids[0], active_vip.id)
+        self.assertFalse(results[result_ids.index(expired_vip.id)]["is_vip"])
 
     def test_filters_subject_online_only_and_price(self):
         listing_two = Listing.objects.create(
@@ -228,6 +280,33 @@ class ListingAPITests(APITestCase):
             status.HTTP_400_BAD_REQUEST,
         )
 
+
+    def test_listing_pagination_is_stable_with_id_tiebreaker(self):
+        base_time = timezone.now() - timedelta(days=1)
+        created_ids = []
+        for index in range(25):
+            listing = Listing.objects.create(
+                subject=self.math,
+                owner=self.owner if index % 2 == 0 else self.other_user,
+                price_per_hour="40.00",
+                online_only=bool(index % 2),
+                description=f"Listing {index}",
+                contact_phone=f"+359000{index:03d}",
+            )
+            Listing.objects.filter(pk=listing.pk).update(created_at=base_time)
+            created_ids.append(listing.pk)
+
+        expected_desc_ids = sorted(created_ids, reverse=True)
+
+        page_one = self.client.get(reverse("listing-list-create"), {"page": 1})
+        self.assertEqual(page_one.status_code, status.HTTP_200_OK)
+        page_one_ids = [item["id"] for item in page_one.data["results"]]
+        self.assertEqual(page_one_ids, expected_desc_ids[:20])
+
+        page_two = self.client.get(reverse("listing-list-create"), {"page": 2})
+        self.assertEqual(page_two.status_code, status.HTTP_200_OK)
+        page_two_ids = [item["id"] for item in page_two.data["results"]]
+        self.assertEqual(page_two_ids, expected_desc_ids[20:])
 
     def test_owner_can_upgrade_listing_to_vip(self):
         self.client.force_authenticate(self.owner)
