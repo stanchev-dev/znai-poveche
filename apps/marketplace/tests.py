@@ -86,6 +86,28 @@ class ListingAPITests(APITestCase):
         self.assertFalse(created.contact_email)
         self.assertFalse(created.contact_url)
 
+    def test_create_listing_succeeds_even_when_owner_profile_missing(self):
+        self.client.force_authenticate(self.other_user)
+        self.other_user.profile.delete()
+        payload = {
+            "subject": self.physics.slug,
+            "price_per_hour": "60.50",
+            "online_only": True,
+            "description": "Experienced tutor",
+            "contact_phone": "+359123456",
+        }
+
+        response = self.client.post(
+            reverse("listing-list-create"),
+            payload,
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["owner"]["username"], self.other_user.username)
+        self.assertEqual(response.data["owner"]["display_name"], self.other_user.username)
+        self.assertEqual(response.data["owner"]["level"], 1)
+
     def test_create_fails_when_all_contacts_missing(self):
         self.client.force_authenticate(self.owner)
         payload = {
