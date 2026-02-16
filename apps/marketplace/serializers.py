@@ -97,12 +97,10 @@ class ListingCreateSerializer(serializers.ModelSerializer):
     contact_email = serializers.EmailField(
         required=False,
         allow_blank=True,
-        allow_null=True,
     )
     contact_url = serializers.URLField(
         required=False,
         allow_blank=True,
-        allow_null=True,
     )
 
     class Meta:
@@ -122,26 +120,28 @@ class ListingCreateSerializer(serializers.ModelSerializer):
         contact_email = attrs.get("contact_email", "")
         contact_url = attrs.get("contact_url", "")
 
+        attrs.setdefault("contact_email", "")
+        attrs.setdefault("contact_url", "")
+
+        contact_phone = (contact_phone or "").strip()
+        contact_email = (contact_email or "").strip()
+        contact_url = (contact_url or "").strip()
+
+        attrs["contact_phone"] = contact_phone
+        attrs["contact_email"] = contact_email
+        attrs["contact_url"] = contact_url
+
         if not (contact_phone or contact_email or contact_url):
             raise serializers.ValidationError(
-                "At least one contact must be provided."
+                "Моля, добавете поне един контакт: телефон, имейл или линк."
             )
 
         return attrs
 
     def create(self, validated_data):
         request = self.context.get("request")
-        user_email = ""
-        if request and request.user and request.user.is_authenticated:
-            user_email = request.user.email or ""
-
-        contact_email = user_email or validated_data.get("contact_email") or ""
-        if not contact_email:
-            raise serializers.ValidationError(
-                {"contact_email": "Моля, добавете имейл за контакт."}
-            )
-
-        validated_data["contact_email"] = contact_email
+        validated_data.setdefault("contact_email", "")
+        validated_data.setdefault("contact_url", "")
         return Listing.objects.create(
             owner=request.user,
             **validated_data,
