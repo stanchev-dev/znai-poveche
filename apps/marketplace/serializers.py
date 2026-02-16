@@ -130,8 +130,20 @@ class ListingCreateSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        request = self.context.get("request")
+        user_email = ""
+        if request and request.user and request.user.is_authenticated:
+            user_email = request.user.email or ""
+
+        contact_email = user_email or validated_data.get("contact_email") or ""
+        if not contact_email:
+            raise serializers.ValidationError(
+                {"contact_email": "Моля, добавете имейл за контакт."}
+            )
+
+        validated_data["contact_email"] = contact_email
         return Listing.objects.create(
-            owner=self.context["request"].user,
+            owner=request.user,
             **validated_data,
         )
 
