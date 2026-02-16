@@ -40,8 +40,32 @@ class ListingListCreateAPIView(generics.GenericAPIView):
             return [IsAuthenticated()]
         return [AllowAny()]
 
-    def get(self, request, *args, **kwargs):
+    def get_queryset(self):
         now = timezone.now()
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                is_vip_int=Case(
+                    When(vip_until__gte=now, then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField(),
+                ),
+                vip_until_sort=Case(
+                    When(vip_until__gte=now, then=F("vip_until")),
+                    default=Value(None),
+                    output_field=DateTimeField(),
+                ),
+            )
+            .order_by(
+                "-is_vip_int",
+                F("vip_until_sort").desc(nulls_last=True),
+                "-created_at",
+                "-id",
+            )
+        )
+
+    def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
 
         subject = request.query_params.get("subject")
@@ -71,24 +95,6 @@ class ListingListCreateAPIView(generics.GenericAPIView):
             if isinstance(max_value, Response):
                 return max_value
             queryset = queryset.filter(price_per_hour__lte=max_value)
-
-        queryset = queryset.annotate(
-            is_vip_int=Case(
-                When(vip_until__gt=now, then=Value(1)),
-                default=Value(0),
-                output_field=IntegerField(),
-            ),
-            vip_until_sort=Case(
-                When(vip_until__gt=now, then=F("vip_until")),
-                default=Value(None),
-                output_field=DateTimeField(),
-            ),
-        ).order_by(
-            "-is_vip_int",
-            F("vip_until_sort").desc(nulls_last=True),
-            "-created_at",
-            "-id",
-        )
 
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
