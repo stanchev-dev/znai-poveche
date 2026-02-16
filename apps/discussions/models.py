@@ -28,7 +28,7 @@ class Subject(models.Model):
         default="",
         validators=[
             RegexValidator(
-                regex=r"^#[0-9A-Fa-f]{6}$",
+                regex=r"^#?[0-9A-Fa-f]{6}$",
                 message="Въведете валиден HEX цвят (пример: #1DA1F2).",
             )
         ],
