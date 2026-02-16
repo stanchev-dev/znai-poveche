@@ -7,9 +7,9 @@
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
   <h1 class="h3 mb-0">Публикации</h1>
   {% if user.is_authenticated %}
-  <a class="btn btn-primary" href="{% url 'api-posts-list' %}">+ Публикувай</a>
+  <a class="btn btn-primary" href="{% url 'discussions-publish-page' %}?subject={{ subject_slug|urlencode }}">+ Публикувай</a>
   {% else %}
-  <a class="btn btn-outline-primary" href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">Влез, за да публикуваш</a>
+  <a class="btn btn-outline-primary" href="{% url 'login' %}?next={% url 'discussions-publish-page' %}%3Fsubject%3D{{ subject_slug|urlencode }}">Влез, за да публикуваш</a>
   {% endif %}
 </div>
 <div class="row g-2 mb-3">

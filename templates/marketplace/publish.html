@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Публикувай обява{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <h1 class="h3 mb-3">Публикувай обява</h1>
+    <div id="publish-errors"></div>
+
+    <form id="listing-publish-form" class="card card-body">
+      <div class="mb-3">
+        <label for="subject" class="form-label">Предмет</label>
+        <select id="subject" name="subject" class="form-select" required>
+          <option value="">Зареждане...</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="price_per_hour" class="form-label">Цена на час</label>
+        <input id="price_per_hour" name="price_per_hour" type="number" step="0.01" min="0" class="form-control" required>
+      </div>
+
+      <div class="form-check mb-3">
+        <input id="online_only" name="online_only" type="checkbox" class="form-check-input">
+        <label for="online_only" class="form-check-label">Само онлайн</label>
+      </div>
+
+      <div class="mb-3">
+        <label for="description" class="form-label">Описание</label>
+        <textarea id="description" name="description" class="form-control" rows="5" required></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label for="contact_phone" class="form-label">Телефон</label>
+        <input id="contact_phone" name="contact_phone" type="text" class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label for="contact_email" class="form-label">Имейл</label>
+        <input id="contact_email" name="contact_email" type="email" class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label for="contact_url" class="form-label">Линк за контакт</label>
+        <input id="contact_url" name="contact_url" type="url" class="form-control">
+      </div>
+
+      <button type="submit" class="btn btn-primary">Публикувай</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const form = document.getElementById('listing-publish-form');
+  const errorsBox = document.getElementById('publish-errors');
+  const subjectSelect = document.getElementById('subject');
+
+  function renderErrors(errorData) {
+    const items = [];
+    if (typeof errorData === 'string') {
+      items.push(errorData);
+    } else if (Array.isArray(errorData)) {
+      errorData.forEach((entry) => items.push(String(entry)));
+    } else if (errorData && typeof errorData === 'object') {
+      Object.entries(errorData).forEach(([field, messages]) => {
+        if (Array.isArray(messages)) {
+          messages.forEach((msg) => items.push(`${field}: ${msg}`));
+        } else {
+          items.push(`${field}: ${messages}`);
+        }
+      });
+    }
+
+    if (!items.length) {
+      items.push('Възникна грешка при публикуване.');
+    }
+
+    errorsBox.innerHTML = `
+      <div class="alert alert-danger">
+        <ul class="mb-0">${items.map((item) => `<li>${item}</li>`).join('')}</ul>
+      </div>
+    `;
+  }
+
+  async function loadSubjects() {
+    const response = await window.apiUtils.apiFetch('/api/subjects/');
+    if (!response.ok) {
+      subjectSelect.innerHTML = '<option value="">Неуспешно зареждане</option>';
+      return;
+    }
+
+    const subjects = await response.json();
+    subjectSelect.innerHTML = '<option value="">Избери предмет</option>' + subjects
+      .map((subject) => `<option value="${subject.slug}">${subject.name}</option>`)
+      .join('');
+  }
+
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    errorsBox.innerHTML = '';
+
+    const payload = {
+      subject: form.subject.value,
+      price_per_hour: form.price_per_hour.value,
+      online_only: form.online_only.checked,
+      description: form.description.value,
+      contact_phone: form.contact_phone.value,
+      contact_email: form.contact_email.value,
+      contact_url: form.contact_url.value,
+    };
+
+    const response = await window.apiUtils.apiFetch('/api/listings/', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      window.location.assign('/marketplace/');
+      return;
+    }
+
+    if (response.status === 400) {
+      const data = await response.json();
+      renderErrors(data);
+      return;
+    }
+
+    renderErrors('Сървърна грешка. Опитай отново.');
+  });
+
+  loadSubjects();
+})();
+</script>
+{% endblock %}
