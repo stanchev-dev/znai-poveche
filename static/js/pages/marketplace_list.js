@@ -2,10 +2,61 @@
   const list = document.getElementById('listings-list');
   const alertBox = document.getElementById('listings-alert');
   const subjectFilter = document.getElementById('subject-filter');
+  const defaultAvatar = '/static/img/default-avatar.svg';
   let nextUrl = null;
   let prevUrl = null;
 
-  function chip(owner) { return `<span class="badge bg-light text-dark">${owner.username} (${owner.display_name}, ниво ${owner.level})</span>`; }
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+
+  function avatarMarkup(owner) {
+    const displayName = owner.display_name || owner.username;
+    const initials = displayName
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((token) => token[0])
+      .join('')
+      .toUpperCase();
+    return `
+      <div class="listing-card-avatar-wrap" aria-hidden="true">
+        <img src="${defaultAvatar}" alt="" class="listing-card-avatar" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.classList.add('is-visible');">
+        <div class="listing-card-avatar-placeholder">${escapeHtml(initials || 'У')}</div>
+      </div>
+    `;
+  }
+
+  function listingCard(l) {
+    const detailsUrl = `/marketplace/${l.id}/`;
+    return `
+      <a href="${detailsUrl}" class="listing-card-link text-reset text-decoration-none" aria-label="Отвори обявата за ${escapeHtml(l.subject.name)}">
+        <article class="card listing-card">
+          <div class="listing-card-body">
+            <div class="listing-card-left">${avatarMarkup(l.owner)}</div>
+            <div class="listing-card-middle">
+              <h2 class="listing-card-title h5 mb-2">Уроци по ${escapeHtml(l.subject.name)}</h2>
+              <p class="listing-card-description mb-2">${escapeHtml(l.description_excerpt)}</p>
+              <div class="listing-card-badges">
+                <span class="badge rounded-pill text-bg-light border">${escapeHtml(l.subject.name)}</span>
+                ${l.online_only ? '<span class="badge rounded-pill text-bg-info-subtle border">Онлайн</span>' : ''}
+                ${l.is_vip ? '<span class="badge rounded-pill text-bg-warning border">ВИП</span>' : ''}
+              </div>
+            </div>
+            <div class="listing-card-right">
+              <div class="listing-card-price">${escapeHtml(l.price_per_hour)} лв./ч</div>
+              <div class="listing-card-details">Детайли <span aria-hidden="true">→</span></div>
+            </div>
+          </div>
+        </article>
+      </a>
+    `;
+  }
 
   async function loadSubjects() {
     const res = await window.apiUtils.apiFetch('/api/subjects/');
@@ -44,13 +95,7 @@
       list.innerHTML = '<div class="alert alert-info">Няма резултати</div>';
       return;
     }
-    list.innerHTML = data.results.map((l) => `<div class="card"><div class="card-body">
-      <h2 class="h5">${l.subject.name} ${l.is_vip ? '<span class="badge text-bg-warning">VIP</span>' : ''}</h2>
-      <p>${l.description_excerpt}</p>
-      <p>Цена/час: <strong>${l.price_per_hour}</strong> | ${l.online_only ? 'Онлайн' : 'Присъствено'}</p>
-      ${chip(l.owner)}
-      <div class="mt-2"><a class="btn btn-sm btn-primary" href="/marketplace/${l.id}/">Детайли</a></div>
-    </div></div>`).join('');
+    list.innerHTML = data.results.map((l) => listingCard(l)).join('');
   }
 
   document.getElementById('apply-filters').onclick = () => load(buildUrl());
