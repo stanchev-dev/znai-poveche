@@ -31,16 +31,19 @@
     .map((subject) => {
       const name = escapeHtml(subject.name);
       const slug = encodeURIComponent(subject.slug);
-      const tileBg = /^#[0-9A-Fa-f]{6}$/.test(subject.theme_color || '')
-        ? subject.theme_color
-        : '#5b6ee1';
+      const tileBgDark = /^#[0-9A-Fa-f]{6}$/.test(subject.theme_color_dark || '')
+        ? subject.theme_color_dark
+        : '#2563EB';
+      const tileBgLight = /^#[0-9A-Fa-f]{6}$/.test(subject.theme_color_light || '')
+        ? subject.theme_color_light
+        : '#60A5FA';
       const imageMarkup = subject.tile_image
         ? `<img src="/static/${escapeHtml(subject.tile_image)}" class="subject-tile-ill" alt="" aria-hidden="true" loading="lazy" decoding="async" />`
         : '';
 
       return `
         <div class="col-12 col-md-6 col-xl-4">
-          <a class="subject-tile text-decoration-none" href="/subjects/${slug}/" style="--tile-bg: ${escapeHtml(tileBg)};">
+          <a class="subject-tile text-decoration-none" href="/subjects/${slug}/" style="--c1: ${escapeHtml(tileBgDark)}; --c2: ${escapeHtml(tileBgLight)};">
             <div class="subject-tile-content">
               <h3 class="subject-tile-title">${name}</h3>
             </div>

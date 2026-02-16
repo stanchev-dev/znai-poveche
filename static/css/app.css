@@ -113,7 +113,8 @@ h6 {
 }
 
 .subject-tile {
-  --tile-bg: #5b6ee1;
+  --c1: #2563eb;
+  --c2: #60a5fa;
   min-height: 156px;
   width: 100%;
   display: flex;
@@ -123,7 +124,8 @@ h6 {
   padding: 1.2rem 1.3rem;
   border-radius: 16px;
   color: #ffffff;
-  background: var(--tile-bg);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(135deg, var(--c1) 0%, var(--c2) 100%);
   box-shadow: 0 0.65rem 1.2rem rgba(15, 23, 42, 0.16);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -131,8 +133,8 @@ h6 {
 .subject-tile:hover,
 .subject-tile:focus-visible {
   color: #ffffff;
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 1rem 1.8rem rgba(15, 23, 42, 0.22);
+  transform: translateY(-2px);
+  box-shadow: 0 0.9rem 1.6rem rgba(15, 23, 42, 0.2);
 }
 
 .subject-tile:focus-visible {

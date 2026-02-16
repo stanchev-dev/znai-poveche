@@ -53,6 +53,32 @@ class SubjectThemeColorTests(TestCase):
             subject.full_clean()
 
 
+class SubjectSerializerColorTests(APITestCase):
+    def test_subject_list_returns_gradient_colors_from_theme_color(self):
+        Subject.objects.create(
+            name="Matematika",
+            theme_color="#0984E3",
+        )
+
+        response = self.client.get(reverse("api-subjects-list"))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]["theme_color_dark"], "#0984E3")
+        self.assertEqual(response.data[0]["theme_color_light"], "#8CC5F2")
+
+    def test_subject_list_returns_fallback_gradient_for_invalid_or_empty_color(self):
+        Subject.objects.create(
+            name="Biologia",
+            theme_color="",
+        )
+
+        response = self.client.get(reverse("api-subjects-list"))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]["theme_color_dark"], "#2563EB")
+        self.assertEqual(response.data[0]["theme_color_light"], "#60A5FA")
+
+
 class PostCreatePointsTests(APITestCase):
     def setUp(self):
         cache.clear()

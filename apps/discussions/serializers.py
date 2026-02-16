@@ -2,6 +2,12 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from apps.common.images import process_image, validate_image_upload
+from apps.common.utils import (
+    FALLBACK_DARK_COLOR,
+    FALLBACK_LIGHT_COLOR,
+    lighten_hex,
+    normalize_hex,
+)
 
 from .models import Comment, Post, Subject
 
@@ -10,9 +16,33 @@ User = get_user_model()
 
 
 class SubjectSerializer(serializers.ModelSerializer):
+    theme_color = serializers.SerializerMethodField()
+    theme_color_dark = serializers.SerializerMethodField()
+    theme_color_light = serializers.SerializerMethodField()
+
     class Meta:
         model = Subject
-        fields = ["id", "name", "slug", "theme_color", "tile_image"]
+        fields = [
+            "id",
+            "name",
+            "slug",
+            "theme_color",
+            "theme_color_dark",
+            "theme_color_light",
+            "tile_image",
+        ]
+
+    def get_theme_color(self, obj: Subject) -> str:
+        return normalize_hex(obj.theme_color) or FALLBACK_DARK_COLOR
+
+    def get_theme_color_dark(self, obj: Subject) -> str:
+        return normalize_hex(obj.theme_color) or FALLBACK_DARK_COLOR
+
+    def get_theme_color_light(self, obj: Subject) -> str:
+        normalized = normalize_hex(obj.theme_color)
+        if not normalized:
+            return FALLBACK_LIGHT_COLOR
+        return lighten_hex(normalized, 0.55)
 
 
 class AuthorSerializer(serializers.ModelSerializer):
