@@ -37,17 +37,12 @@
       const tileBgLight = /^#[0-9A-Fa-f]{6}$/.test(subject.theme_color_light || '')
         ? subject.theme_color_light
         : '#60A5FA';
-      const imageMarkup = subject.tile_image
-        ? `<img src="/static/${escapeHtml(subject.tile_image)}" class="subject-tile-ill" alt="" aria-hidden="true" loading="lazy" decoding="async" />`
-        : '';
-
       return `
         <div class="col-12 col-md-6 col-xl-4">
-          <a class="subject-tile text-decoration-none" href="/subjects/${slug}/" style="--c1: ${escapeHtml(tileBgDark)}; --c2: ${escapeHtml(tileBgLight)};">
+          <a class="subject-tile text-decoration-none" data-subject-slug="${escapeHtml(subject.slug)}" href="/subjects/${slug}/" style="--c1: ${escapeHtml(tileBgDark)}; --c2: ${escapeHtml(tileBgLight)};">
             <div class="subject-tile-content">
               <h3 class="subject-tile-title">${name}</h3>
             </div>
-            ${imageMarkup}
           </a>
         </div>
       `;

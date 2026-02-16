@@ -119,15 +119,35 @@ h6 {
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 1rem;
   padding: 1.2rem 1.3rem;
+  padding-right: 12rem;
   border-radius: 16px;
   color: #ffffff;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
   background: linear-gradient(135deg, var(--c1) 0%, var(--c2) 100%);
   box-shadow: 0 0.65rem 1.2rem rgba(15, 23, 42, 0.16);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.subject-tile::after {
+  content: "";
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 160px;
+  height: 160px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 1;
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.12));
 }
 
 .subject-tile:hover,
@@ -144,6 +164,8 @@ h6 {
 
 .subject-tile-content {
   min-width: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .subject-tile-title {
@@ -154,23 +176,70 @@ h6 {
   line-height: 1.2;
 }
 
-.subject-tile-ill {
-  width: clamp(64px, 18vw, 110px);
-  max-height: 112px;
-  object-fit: contain;
-  flex-shrink: 0;
-  filter: drop-shadow(0 8px 18px rgba(15, 23, 42, 0.23));
+.subject-tile[data-subject-slug="matematika"]::after {
+  background-image: url("../img/matematika.svg");
+}
+
+.subject-tile[data-subject-slug="fizika"]::after {
+  background-image: url("../img/fizika.svg");
+}
+
+.subject-tile[data-subject-slug="himiq"]::after {
+  background-image: url("../img/himiq.svg");
+}
+
+.subject-tile[data-subject-slug="istoriq"]::after {
+  background-image: url("../img/istoriq.svg");
+}
+
+.subject-tile[data-subject-slug="biologia"]::after {
+  background-image: url("../img/biologiq.svg");
+}
+
+.subject-tile[data-subject-slug="bulgarski-ezik"]::after {
+  background-image: url("../img/bulgarski.svg");
+}
+
+.subject-tile[data-subject-slug="informacionni-tehnologii"]::after {
+  background-image: url("../img/informacionni-tehnologii.svg");
+}
+
+.subject-tile[data-subject-slug="drugi"]::after {
+  background-image: url("../img/drugo.svg");
+}
+
+.subject-tile[data-subject-slug="literatura"]::after {
+  background-image: url("../img/literatura.svg");
+}
+
+@media (max-width: 992px) {
+  .subject-tile {
+    padding-right: 10rem;
+  }
+
+  .subject-tile::after {
+    width: 130px;
+    height: 130px;
+    right: 16px;
+    opacity: 0.85;
+  }
 }
 
 @media (max-width: 767.98px) {
   .subject-tile {
     min-height: 138px;
     padding: 1rem 1.05rem;
+    padding-right: 8rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .subject-tile::after {
+    display: none;
   }
 
-  .subject-tile-ill {
-    width: clamp(56px, 23vw, 90px);
-    max-height: 88px;
+  .subject-tile {
+    padding-right: 1.05rem;
   }
 }
 
