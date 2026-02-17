@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Верификация за учители | Знай повече{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center g-4">
+  <div class="col-12 col-lg-9">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body p-4 p-md-5">
+        <h2 class="h3 mb-3">Верификация за учители</h2>
+        <p class="mb-4">Кандидатствай за значка „Проверен учител“, която се показва в профила и в обявите ти. Верификацията помага на учениците да изберат надежден преподавател.</p>
+
+        <h3 class="h5 mb-3">Какво приемаме като доказателство</h3>
+        <ul class="mb-0">
+          <li>Служебен училищен имейл (препоръчително) — пример: ime.familiya@school.bg</li>
+          <li>Линк към училището, в което работиш (препоръчително) — официален сайт на училището или страница „Екип/Учители“</li>
+          <li>Документ (по избор, ако училището няма сайт) — качи диплома/удостоверение. Преди да качиш: закрий ЕГН и адрес.</li>
+        </ul>
+      </div>
+    </div>
+
+    {% if verification_request %}
+      <div class="alert alert-info" role="alert">
+        {% if verification_request.status == "PENDING" %}
+          Заявката ти е в процес на разглеждане.
+        {% elif verification_request.status == "APPROVED" %}
+          Статус: Одобрена — Проверен учител
+        {% elif verification_request.status == "REJECTED" %}
+          Статус: Отказана
+          {% if verification_request.admin_note %}
+            <div class="mt-2"><strong>Бележка:</strong> {{ verification_request.admin_note }}</div>
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% if can_submit %}
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4 p-md-5">
+          <h3 class="h5 mb-3">Заявка за верификация</h3>
+          <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="mb-3">
+              <label class="form-label" for="{{ form.subjects.id_for_label }}">Предмети</label>
+              {{ form.subjects }}
+              {% if form.subjects.help_text %}<div class="form-text">{{ form.subjects.help_text }}</div>{% endif %}
+              {% for error in form.subjects.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="{{ form.school_email.id_for_label }}">Служебен училищен имейл</label>
+              {{ form.school_email }}
+              {% for error in form.school_email.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="{{ form.school_url.id_for_label }}">Линк към училището/профила ти</label>
+              {{ form.school_url }}
+              {% for error in form.school_url.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="{{ form.proof_file.id_for_label }}">Документ (по избор)</label>
+              {{ form.proof_file }}
+              <div class="form-text">Закрий ЕГН и адрес. Не качвай лична карта.</div>
+              {% for error in form.proof_file.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label" for="{{ form.note.id_for_label }}">Бележка</label>
+              {{ form.note }}
+              {% if form.note.help_text %}<div class="form-text">{{ form.note.help_text }}</div>{% endif %}
+              {% for error in form.note.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Изпрати заявка</button>
+          </form>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
