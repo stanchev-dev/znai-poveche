@@ -653,7 +653,7 @@ h6 {
   bottom: -0.15em;
   background: var(--brand-purple, #6f2cf3);
   border-radius: 999px;
-  transform: rotate(-2.5deg) skewX(-12deg);
+  transform: rotate(-2deg) skewX(-12deg);
   transform-origin: center;
   z-index: -1;
   pointer-events: none;
