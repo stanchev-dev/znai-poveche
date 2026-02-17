@@ -40,6 +40,7 @@
 
   function listingCard(l) {
     const detailsUrl = `/marketplace/${l.id}/`;
+    const isOnlineOnly = l.online_only === true;
     return `
       <a href="${detailsUrl}" class="listing-card-link text-reset text-decoration-none" aria-label="Отвори обявата за ${escapeHtml(l.subject.name)}">
         <article class="card listing-card">
@@ -50,13 +51,13 @@
               <p class="listing-card-description mb-2">${escapeHtml(l.description_excerpt)}</p>
               <div class="listing-card-badges">
                 <span class="badge rounded-pill text-bg-light border">${escapeHtml(l.subject.name)}</span>
-                ${l.online_only ? '<span class="badge rounded-pill text-bg-info-subtle border">Онлайн</span>' : ''}
+                ${isOnlineOnly ? '<span class="badge rounded-pill text-bg-info-subtle border">Online</span>' : ''}
                 ${l.is_vip ? '<span class="badge rounded-pill text-bg-warning border">ВИП</span>' : ''}
                 ${roleBadge(l.owner)}
               </div>
             </div>
             <div class="listing-card-right">
-              <div class="listing-card-price">${escapeHtml(l.price_per_hour)} лв./ч</div>
+              <div class="listing-card-price">${escapeHtml(l.price_per_hour)} €/ч</div>
               <div class="listing-card-details">Детайли <span aria-hidden="true">→</span></div>
             </div>
           </div>
