@@ -622,6 +622,19 @@ h6 {
   margin-bottom: 0;
 }
 
+.home-section-pill {
+  display: inline-block;
+  padding: 0.2em 0.7em;
+  margin-right: 0.6rem;
+  border-radius: 9999px;
+  background: var(--brand-purple, #6f2cf3);
+  color: #ffffff;
+  font-size: 0.65em;
+  font-weight: 700;
+  line-height: 1.1;
+  vertical-align: middle;
+}
+
 .section-title-purple {
   color: var(--brand-purple, #6f2cf3);
   text-align: center;
