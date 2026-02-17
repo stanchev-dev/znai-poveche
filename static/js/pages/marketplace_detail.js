@@ -25,7 +25,7 @@
     <p>${l.description}</p>
     <p>Цена/час: <strong>${l.price_per_hour}</strong></p>
     <p>${l.online_only ? 'Онлайн' : 'Присъствено'}</p>
-    <p>Автор: <span class="badge bg-light text-dark">${l.owner.username} (${l.owner.display_name}, ниво ${l.owner.level})</span></p>
+    <p>Автор: <span class="badge bg-light text-dark">${l.owner.username} (${l.owner.display_name}, ниво ${l.owner.level})</span> <span class="badge rounded-pill text-bg-light border">${l.owner.role_label || (l.owner.role === "teacher" ? "Учител" : "Учащ")}</span></p>
   </div></div>`;
 
   document.getElementById('contacts-btn').onclick = async () => {

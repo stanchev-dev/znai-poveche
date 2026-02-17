@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from apps.discussions.models import Subject
+from apps.accounts.models import Profile
 from apps.marketplace.models import Listing
 
 
@@ -23,6 +24,8 @@ class ListingAPITests(APITestCase):
             username="other",
             password="testpass123",
         )
+        self.owner.profile.role = Profile.Role.TEACHER
+        self.owner.profile.save(update_fields=["role"])
         self.math = Subject.objects.create(name="Math")
         self.physics = Subject.objects.create(name="Physics")
 
@@ -44,6 +47,10 @@ class ListingAPITests(APITestCase):
         self.assertNotIn("contact_url", result)
         self.assertIn("description_excerpt", result)
         self.assertLessEqual(len(result["description_excerpt"]), 160)
+        self.assertEqual(result["owner"]["role"], Profile.Role.TEACHER)
+        self.assertEqual(result["owner"]["role_label"], "Учител")
+        self.assertEqual(result["author_role"], Profile.Role.TEACHER)
+        self.assertEqual(result["author_role_label"], "Учител")
 
         detail_response = self.client.get(
             reverse("listing-detail", kwargs={"pk": self.listing.pk})
@@ -52,6 +59,10 @@ class ListingAPITests(APITestCase):
         self.assertNotIn("contact_phone", detail_response.data)
         self.assertNotIn("contact_email", detail_response.data)
         self.assertNotIn("contact_url", detail_response.data)
+        self.assertEqual(detail_response.data["owner"]["role"], Profile.Role.TEACHER)
+        self.assertEqual(detail_response.data["owner"]["role_label"], "Учител")
+        self.assertEqual(detail_response.data["author_role"], Profile.Role.TEACHER)
+        self.assertEqual(detail_response.data["author_role_label"], "Учител")
 
     def test_guest_cannot_get_contact(self):
         response = self.client.get(
@@ -107,6 +118,10 @@ class ListingAPITests(APITestCase):
         self.assertEqual(response.data["owner"]["username"], self.other_user.username)
         self.assertEqual(response.data["owner"]["display_name"], self.other_user.username)
         self.assertEqual(response.data["owner"]["level"], 1)
+        self.assertEqual(response.data["owner"]["role"], Profile.Role.LEARNER)
+        self.assertEqual(response.data["owner"]["role_label"], "Учащ")
+        self.assertEqual(response.data["author_role"], Profile.Role.LEARNER)
+        self.assertEqual(response.data["author_role_label"], "Учащ")
 
     def test_create_fails_when_all_contacts_missing(self):
         self.client.force_authenticate(self.owner)

@@ -6,7 +6,6 @@ from .views import (
     profile_delete_view,
     profile_view,
     register_view,
-    teacher_verify_view,
 )
 
 urlpatterns = [
@@ -14,6 +13,5 @@ urlpatterns = [
     path("register/", register_view, name="register"),
     path("logout/", logout_view, name="logout"),
     path("profile/", profile_view, name="profile"),
-    path("verification/", teacher_verify_view, name="teacher-verify"),
     path("profile/delete/", profile_delete_view, name="profile-delete"),
 ]
