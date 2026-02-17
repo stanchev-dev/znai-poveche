@@ -25,9 +25,9 @@
     </button>
     <div class="collapse navbar-collapse" id="mainNav">
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center navbar-actions">
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown subjects-dropdown">
           <a class="nav-link nav-action-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Предмети</a>
-          <ul class="dropdown-menu" style="min-width: 220px; max-height: 320px; overflow-y: auto;">
+          <ul class="dropdown-menu subjects-menu" style="min-width: 220px; max-height: 320px; overflow-y: auto;">
             {% for subject in nav_subjects %}
               <li><a class="dropdown-item" href="{% url 'subjects-page' slug=subject.slug %}">{{ subject.name }}</a></li>
             {% empty %}
