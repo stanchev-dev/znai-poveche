@@ -7,7 +7,11 @@
 
   const alertBox = document.getElementById('listing-alert');
   const detail = document.getElementById('listing-detail');
+  const gallery = document.getElementById('listing-gallery');
+  const info = document.getElementById('listing-info');
+  const price = document.getElementById('listing-price');
   const contactsWrap = document.getElementById('contacts-wrap');
+  const contactsBtn = document.getElementById('contacts-btn');
   const defaultImage = '/static/img/default-avatar.svg';
 
   function escapeHtml(value) {
@@ -32,27 +36,34 @@
   const res = await window.apiUtils.apiFetch(`/api/listings/${listingId}/`);
   if (res.status === 404) {
     alertBox.innerHTML = '<div class="alert alert-warning">Не е намерено</div>';
-    document.getElementById('contacts-btn').style.display = 'none';
+    detail.style.display = 'none';
     return;
   }
   if (res.status === 400) {
     alertBox.innerHTML = '<div class="alert alert-warning">Невалидна заявка</div>';
+    detail.style.display = 'none';
     return;
   }
+
   const l = await res.json();
-  detail.innerHTML = `<div class="card"><div class="card-body">
-    <div class="mb-3"><img src="${l.image || defaultImage}" alt="Снимка на обява" class="img-fluid rounded" style="max-height:260px;object-fit:cover;" onerror="this.src='${defaultImage}'"></div>
-    <h1 class="h4">${escapeHtml(l.subject.name)} ${l.is_vip ? '<span class="badge text-bg-warning">VIP</span>' : ''}</h1>
+  gallery.innerHTML = `<div class="card"><div class="card-body p-2 p-md-3">
+    <img src="${l.image || defaultImage}" alt="Снимка на обява" class="img-fluid rounded marketplace-detail-image" onerror="this.src='${defaultImage}'">
+  </div></div>`;
+
+  info.innerHTML = `<div class="card"><div class="card-body">
+    <h1 class="h3 mb-3">${escapeHtml(l.subject.name)} ${l.is_vip ? '<span class="badge text-bg-warning">VIP</span>' : ''}</h1>
     <div class="listing-card-badges mb-3">
       <span class="badge rounded-pill listing-pill subject-badge" style="${window.subjectBadgeUtils.getSubjectBadgeStyle(l.subject)}">${escapeHtml(l.subject.name)}</span>
       ${l.lesson_mode_label ? `<span class="badge rounded-pill listing-pill lesson-mode-badge ${lessonModeBadgeClass(l.lesson_mode)}">${escapeHtml(l.lesson_mode_label)}</span>` : ''}
+      <span class="badge bg-light text-dark">${escapeHtml(l.owner.username)} (${escapeHtml(l.owner.display_name)}, ниво ${escapeHtml(l.owner.level)})</span>
+      <span class="badge rounded-pill listing-pill role-badge ${roleBadgeClass(l.owner.role)}">${escapeHtml(l.owner.role_label || (l.owner.role === 'teacher' ? 'Учител' : 'Учащ'))}</span>
     </div>
-    <p>${l.description}</p>
-    <p>Цена/час: <strong>${l.price_per_hour} €/ч</strong></p>
-    <p>Автор: <span class="badge bg-light text-dark">${escapeHtml(l.owner.username)} (${escapeHtml(l.owner.display_name)}, ниво ${escapeHtml(l.owner.level)})</span> <span class="badge rounded-pill listing-pill role-badge ${roleBadgeClass(l.owner.role)}">${escapeHtml(l.owner.role_label || (l.owner.role === "teacher" ? "Учител" : "Учащ"))}</span></p>
+    <p class="mb-0">${l.description}</p>
   </div></div>`;
 
-  document.getElementById('contacts-btn').onclick = async () => {
+  price.textContent = `${l.price_per_hour} €/ч`;
+
+  contactsBtn.onclick = async () => {
     if (!isAuthenticated) {
       contactsWrap.innerHTML = `<div class="alert alert-warning">Трябва да сте логнати. <a href="${loginUrl}">Вход</a></div>`;
       return;
