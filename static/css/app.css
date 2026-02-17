@@ -599,11 +599,4 @@ h6 {
 
 .benefit-title { color: #111; }
 
-.benefit-link {
-  text-decoration: none;
-  font-weight: 600;
-  color: var(--brand-purple, #6f2cf3);
-}
-
-.benefit-link:hover { text-decoration: underline; }
 
