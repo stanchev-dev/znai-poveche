@@ -375,12 +375,12 @@ h6 {
 
 .subjects-dropdown-trigger.show,
 .subjects-dropdown-trigger:active {
-  color: #fff;
-  background-color: #6f2cf3;
+  color: #0f172a;
+  background-color: rgba(238, 242, 247, 0.92);
 }
 
 .subjects-dropdown-trigger:focus-visible {
-  box-shadow: 0 0 0 0.2rem rgba(196, 181, 253, 0.55);
+  box-shadow: 0 0 0 0.2rem rgba(15, 23, 42, 0.12);
   outline: none;
 }
 
@@ -521,6 +521,40 @@ h6 {
   align-items: center;
   justify-content: space-between;
   min-height: calc(1.5em + 0.75rem + 2px);
+}
+
+/* Keep subject dropdown triggers neutral on interaction states. */
+.navbar .subjects-dropdown-trigger:not(.marketplace-subject-trigger):hover,
+.navbar .subjects-dropdown-trigger:not(.marketplace-subject-trigger):focus,
+.navbar .subjects-dropdown-trigger:not(.marketplace-subject-trigger):active,
+.navbar .subjects-dropdown-trigger:not(.marketplace-subject-trigger):focus-visible,
+.navbar .subjects-dropdown-trigger:not(.marketplace-subject-trigger).show {
+  color: #0f172a;
+  background-color: rgba(238, 242, 247, 0.92);
+  border-color: transparent;
+}
+
+.navbar .subjects-dropdown-trigger:not(.marketplace-subject-trigger):focus-visible {
+  box-shadow: 0 0 0 0.2rem rgba(15, 23, 42, 0.12);
+}
+
+.marketplace-subject-dropdown .marketplace-subject-trigger:hover,
+.marketplace-subject-dropdown .marketplace-subject-trigger:focus,
+.marketplace-subject-dropdown .marketplace-subject-trigger:active,
+.marketplace-subject-dropdown .marketplace-subject-trigger:focus-visible,
+.marketplace-subject-dropdown .marketplace-subject-trigger.show {
+  color: #111827;
+  background-color: #f8fafc;
+  border-color: #e5e7eb;
+}
+
+.marketplace-subject-dropdown .marketplace-subject-trigger:focus-visible {
+  box-shadow: 0 0 0 0.2rem rgba(15, 23, 42, 0.12);
+}
+
+.subjects-themed-menu .dropdown-item:active {
+  background-color: rgba(15, 23, 42, 0.24);
+  color: #ffffff;
 }
 
 .marketplace-subject-dropdown .subjects-themed-menu {
