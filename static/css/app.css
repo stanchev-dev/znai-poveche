@@ -702,3 +702,87 @@ h6 {
     padding-bottom: 1rem !important;
   }
 }
+
+.info-page-shell {
+  margin-inline: -0.75rem;
+}
+
+.info-page-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #ffffff 0%, #f7f2ff 100%);
+  border: 1px solid rgba(111, 44, 243, 0.15);
+}
+
+.info-page-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: min(520px, 72%);
+  height: 5px;
+  background: linear-gradient(90deg, rgba(111, 44, 243, 0.95) 0%, rgba(111, 44, 243, 0.35) 60%, rgba(111, 44, 243, 0) 100%);
+}
+
+.info-page-hero h1 {
+  color: #2a0f4d;
+}
+
+.info-page-hero .lead {
+  max-width: 64ch;
+  color: #4b5563;
+}
+
+.info-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 1rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  padding: 1.25rem;
+  line-height: 1.7;
+}
+
+.info-card h2 {
+  margin-bottom: 0.75rem;
+  color: #111827;
+  font-size: clamp(1.15rem, 2.2vw, 1.4rem);
+}
+
+.info-card h3 {
+  margin-bottom: 0.55rem;
+}
+
+.info-card p:last-child {
+  margin-bottom: 0;
+}
+
+.info-toc {
+  background: #ffffff;
+}
+
+.info-toc a {
+  color: #4b5563;
+  text-decoration: none;
+}
+
+.info-toc a:hover,
+.info-toc a:focus-visible {
+  color: var(--brand-purple, #6f2cf3);
+  text-decoration: underline;
+}
+
+@media (min-width: 992px) {
+  .info-toc {
+    position: sticky;
+    top: 100px;
+  }
+
+  .info-card {
+    padding: 1.4rem 1.5rem;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .info-page-shell {
+    margin-inline: 0;
+  }
+}

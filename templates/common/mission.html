@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Нашата мисия | Знай повече{% endblock %}
+
+{% block content %}
+<div class="info-page-shell">
+  <header class="info-page-hero rounded-4 mb-4 mb-lg-5">
+    <div class="container py-4 py-lg-5">
+      <h1 class="mb-2">Нашата мисия</h1>
+      <p class="lead mb-0">Изграждаме пространство за взаимопомощ, по-добро учене и сигурни контакти между ученици и преподаватели.</p>
+    </div>
+  </header>
+
+  <div class="container my-4 my-lg-5">
+    <div class="row g-4">
+      <aside class="col-12 col-lg-4 order-1">
+        <div class="info-toc card border-0 shadow-sm">
+          <div class="card-body">
+            <h2 class="h6 mb-3">Съдържание</h2>
+            <ul class="list-unstyled mb-0 d-grid gap-2">
+              <li><a href="#intro">Какво правим</a></li>
+              <li><a href="#benefits">Защо е полезно</a></li>
+              <li><a href="#vision">Нашият фокус</a></li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+
+      <main class="col-12 col-lg-8 order-2">
+        <section id="intro" class="info-card mb-4">
+          <h2>Какво правим</h2>
+          <p class="mb-0">„Знай повече“ е общностна платформа, която съчетава форум за въпроси и отговори, механизъм за гласове и репутация и маркетплейс за уроци. Целта ни е ученето да бъде по-достъпно, а качествените отговори и полезните преподаватели да се откриват по-лесно.</p>
+        </section>
+
+        <section id="benefits" class="info-card mb-4">
+          <h2>Защо е полезно</h2>
+          <div class="row g-3">
+            <div class="col-12">
+              <article class="benefit-card p-3 p-lg-4 h-100">
+                <h3 class="h5 mb-2">Взаимопомощ по предмети</h3>
+                <p class="mb-0">Задаваш въпрос по конкретен предмет и получаваш решения, насоки и обяснения от общността.</p>
+              </article>
+            </div>
+            <div class="col-12">
+              <article class="benefit-card p-3 p-lg-4 h-100">
+                <h3 class="h5 mb-2">По-ефективно учене</h3>
+                <p class="mb-0">Системата за гласове и репутация откроява най-полезните отговори, за да стигаш по-бързо до вярната информация.</p>
+              </article>
+            </div>
+            <div class="col-12">
+              <article class="benefit-card p-3 p-lg-4 h-100">
+                <h3 class="h5 mb-2">Уроци по предмети</h3>
+                <p class="mb-0">В маркетплейса има обяви с цена на час, а контактите са видими само за влезли потребители.</p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section id="vision" class="info-card">
+          <h2>Нашият фокус</h2>
+          <p class="mb-0">Развиваме платформа с ясни правила, активно модериране и инструменти срещу злоупотреби. За нас най-важни са безопасната среда, практическата стойност на съдържанието и устойчивото изграждане на доверие между хората в общността.</p>
+        </section>
+      </main>
+    </div>
+  </div>
+</div>
+{% endblock %}
