@@ -5,8 +5,8 @@
   const tbody = document.getElementById('leaderboard-body');
   const alertBox = document.getElementById('leaderboard-alert');
   const subjectScoreHead = document.getElementById('subject-score-head');
-  let nextUrl = null;
-  let prevUrl = null;
+  const PAGE_SIZE = 20;
+  let currentUrl = null;
 
   async function loadSubjects() {
     const res = await window.apiUtils.apiFetch('/api/subjects/');
@@ -35,22 +35,29 @@
       return;
     }
     const data = await res.json();
-    nextUrl = data.next;
-    prevUrl = data.previous;
+    currentUrl = url;
     const subjectMode = data.scope === 'subject';
     subjectScoreHead.style.display = subjectMode ? '' : 'none';
 
     if (!data.results.length) {
       tbody.innerHTML = '<tr><td colspan="5">Няма резултати</td></tr>';
-      return;
+    } else {
+      tbody.innerHTML = data.results.map((r) => `<tr>
+        <td>${r.rank}</td>
+        <td>${r.username} (${r.display_name})</td>
+        <td>${r.level}</td>
+        <td>${r.reputation_points}</td>
+        <td style="display:${subjectMode ? '' : 'none'}">${subjectMode ? r.subject_score : ''}</td>
+      </tr>`).join('');
     }
-    tbody.innerHTML = data.results.map((r) => `<tr>
-      <td>${r.rank}</td>
-      <td>${r.username} (${r.display_name})</td>
-      <td>${r.level}</td>
-      <td>${r.reputation_points}</td>
-      <td style="display:${subjectMode ? '' : 'none'}">${subjectMode ? r.subject_score : ''}</td>
-    </tr>`).join('');
+
+    window.zpPagination.render({
+      containerId: 'leaderboard-pagination',
+      count: data.count,
+      pageSize: PAGE_SIZE,
+      currentUrl,
+      onPageChange: (page) => load(window.zpPagination.updatePageInUrl(currentUrl, page)),
+    });
   }
 
   scopeSelect.addEventListener('change', () => {
@@ -59,8 +66,6 @@
     load(buildUrl());
   });
   subjectSelect.addEventListener('change', () => load(buildUrl()));
-  document.getElementById('prev-btn').onclick = () => { if (prevUrl) load(prevUrl); };
-  document.getElementById('next-btn').onclick = () => { if (nextUrl) load(nextUrl); };
 
   await loadSubjects();
   await load(buildUrl());
