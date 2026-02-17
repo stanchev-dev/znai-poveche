@@ -391,6 +391,40 @@ h6 {
 }
 
 
+
+.subjects-dropdown .subjects-menu {
+  background-color: var(--footer-purple, #2a0f4d);
+  border: 1px solid rgba(196, 181, 253, 0.35);
+  border-radius: 0.75rem;
+  box-shadow: 0 0.7rem 1.4rem rgba(15, 23, 42, 0.2);
+  padding: 0.4rem;
+}
+
+.subjects-dropdown .subjects-menu .dropdown-item {
+  color: #f8f5ff;
+  border-radius: 0.5rem;
+  padding: 0.65rem 1rem;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.subjects-dropdown .subjects-menu .dropdown-item:hover,
+.subjects-dropdown .subjects-menu .dropdown-item:focus,
+.subjects-dropdown .subjects-menu .dropdown-item:focus-visible,
+.subjects-dropdown .subjects-menu .dropdown-item.active,
+.subjects-dropdown .subjects-menu .dropdown-item:active {
+  background-color: rgba(196, 181, 253, 0.45);
+  color: #ffffff;
+}
+
+.subjects-dropdown .subjects-menu .dropdown-item.disabled,
+.subjects-dropdown .subjects-menu .dropdown-item:disabled {
+  color: rgba(248, 245, 255, 0.7);
+}
+
+.subjects-dropdown .subjects-menu .dropdown-divider {
+  border-top-color: rgba(196, 181, 253, 0.28);
+}
+
 .navbar .dropdown-menu.account-menu {
   min-width: 280px;
 }
