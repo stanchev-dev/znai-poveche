@@ -612,3 +612,91 @@ h6 {
 
 .benefit-title { color: #111; }
 
+
+.site-footer {
+  background: var(--brand-purple, #6f2cf3);
+  color: #ffffff;
+}
+
+.site-footer a {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  transition: color 0.18s ease, text-decoration-color 0.18s ease;
+}
+
+.site-footer a:hover,
+.site-footer a:focus-visible {
+  color: #ffffff;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.95);
+}
+
+.site-footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.62rem;
+  margin-bottom: 0.75rem;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.site-footer-logo {
+  max-height: 44px;
+  width: auto;
+  display: block;
+}
+
+.site-footer-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.site-footer-tagline {
+  max-width: 28ch;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.site-footer-heading {
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  margin-bottom: 0.9rem;
+}
+
+.site-footer-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.site-footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.site-footer-bottom small {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+@media (max-width: 575.98px) {
+  .site-footer {
+    text-align: left;
+  }
+
+  .site-footer .container.py-5 {
+    padding-top: 2.5rem !important;
+    padding-bottom: 2.25rem !important;
+  }
+
+  .site-footer-logo {
+    max-height: 38px;
+  }
+
+  .site-footer-title {
+    font-size: 1.25rem;
+  }
+
+  .site-footer-bottom .container {
+    padding-top: 0.9rem !important;
+    padding-bottom: 1rem !important;
+  }
+}
