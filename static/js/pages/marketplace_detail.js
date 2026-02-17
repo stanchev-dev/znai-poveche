@@ -23,7 +23,7 @@
   detail.innerHTML = `<div class="card"><div class="card-body">
     <h1 class="h4">${l.subject.name} ${l.is_vip ? '<span class="badge text-bg-warning">VIP</span>' : ''}</h1>
     <p>${l.description}</p>
-    <p>Цена/час: <strong>${l.price_per_hour}</strong></p>
+    <p>Цена/час: <strong>${l.price_per_hour} €/ч</strong></p>
     <p>${l.online_only ? 'Онлайн' : 'Присъствено'}</p>
     <p>Автор: <span class="badge bg-light text-dark">${l.owner.username} (${l.owner.display_name}, ниво ${l.owner.level})</span> <span class="badge rounded-pill text-bg-light border">${l.owner.role_label || (l.owner.role === "teacher" ? "Учител" : "Учащ")}</span></p>
   </div></div>`;
