@@ -10,11 +10,11 @@ class ListingAdmin(admin.ModelAdmin):
         "subject",
         "owner",
         "price_per_hour",
-        "online_only",
+        "lesson_mode",
         "vip_until",
         "created_at",
     )
-    list_filter = ("online_only", "subject", "created_at", "vip_until")
+    list_filter = ("lesson_mode", "subject", "created_at", "vip_until")
     search_fields = (
         "owner__username",
         "owner__email",

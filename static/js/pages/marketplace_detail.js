@@ -8,6 +8,7 @@
   const alertBox = document.getElementById('listing-alert');
   const detail = document.getElementById('listing-detail');
   const contactsWrap = document.getElementById('contacts-wrap');
+  const defaultImage = '/static/img/default-avatar.svg';
 
   const res = await window.apiUtils.apiFetch(`/api/listings/${listingId}/`);
   if (res.status === 404) {
@@ -21,10 +22,10 @@
   }
   const l = await res.json();
   detail.innerHTML = `<div class="card"><div class="card-body">
-    <h1 class="h4">${l.subject.name} ${l.is_vip ? '<span class="badge text-bg-warning">VIP</span>' : ''}</h1>
+    <div class="mb-3"><img src="${l.image || defaultImage}" alt="Снимка на обява" class="img-fluid rounded" style="max-height:260px;object-fit:cover;" onerror="this.src='${defaultImage}'"></div>
+    <h1 class="h4">${l.subject.name} ${l.is_vip ? '<span class="badge text-bg-warning">VIP</span>' : ''} ${l.lesson_mode_label ? `<span class="badge rounded-pill text-bg-info-subtle border">${l.lesson_mode_label}</span>` : ''}</h1>
     <p>${l.description}</p>
     <p>Цена/час: <strong>${l.price_per_hour} €/ч</strong></p>
-    <p>${l.online_only ? 'Онлайн' : 'Присъствено'}</p>
     <p>Автор: <span class="badge bg-light text-dark">${l.owner.username} (${l.owner.display_name}, ниво ${l.owner.level})</span> <span class="badge rounded-pill text-bg-light border">${l.owner.role_label || (l.owner.role === "teacher" ? "Учител" : "Учащ")}</span></p>
   </div></div>`;
 

@@ -15,43 +15,38 @@
       .replaceAll("'", '&#39;');
   }
 
-  function avatarMarkup(owner) {
-    const displayName = owner.display_name || owner.username;
-    const initials = displayName
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((token) => token[0])
-      .join('')
-      .toUpperCase();
+  function imageMarkup(listing) {
+    const imageUrl = listing.image || defaultAvatar;
     return `
       <div class="listing-card-avatar-wrap" aria-hidden="true">
-        <img src="${defaultAvatar}" alt="" class="listing-card-avatar" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.classList.add('is-visible');">
-        <div class="listing-card-avatar-placeholder">${escapeHtml(initials || 'У')}</div>
+        <img src="${escapeHtml(imageUrl)}" alt="" class="listing-card-avatar" loading="lazy" onerror="this.src='${defaultAvatar}'">
       </div>
     `;
   }
-
 
   function roleBadge(owner) {
     const roleLabel = owner.role_label || (owner.role === 'teacher' ? 'Учител' : 'Учащ');
     return `<span class="badge rounded-pill text-bg-light border">${escapeHtml(roleLabel)}</span>`;
   }
 
+  function lessonModeBadge(listing) {
+    if (!listing.lesson_mode_label) return '';
+    return `<span class="badge rounded-pill text-bg-info-subtle border">${escapeHtml(listing.lesson_mode_label)}</span>`;
+  }
+
   function listingCard(l) {
     const detailsUrl = `/marketplace/${l.id}/`;
-    const isOnlineOnly = l.online_only === true;
     return `
       <a href="${detailsUrl}" class="listing-card-link text-reset text-decoration-none" aria-label="Отвори обявата за ${escapeHtml(l.subject.name)}">
         <article class="card listing-card">
           <div class="listing-card-body">
-            <div class="listing-card-left">${avatarMarkup(l.owner)}</div>
+            <div class="listing-card-left">${imageMarkup(l)}</div>
             <div class="listing-card-middle">
               <h2 class="listing-card-title h5 mb-2">Уроци по ${escapeHtml(l.subject.name)}</h2>
               <p class="listing-card-description mb-2">${escapeHtml(l.description_excerpt)}</p>
               <div class="listing-card-badges">
                 <span class="badge rounded-pill text-bg-light border">${escapeHtml(l.subject.name)}</span>
-                ${isOnlineOnly ? '<span class="badge rounded-pill text-bg-info-subtle border">Online</span>' : ''}
+                ${lessonModeBadge(l)}
                 ${l.is_vip ? '<span class="badge rounded-pill text-bg-warning border">ВИП</span>' : ''}
                 ${roleBadge(l.owner)}
               </div>

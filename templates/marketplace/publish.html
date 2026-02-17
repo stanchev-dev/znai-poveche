@@ -8,7 +8,7 @@
     <h1 class="h3 mb-3">Публикувай обява</h1>
     <div id="publish-errors"></div>
 
-    <form id="listing-publish-form" class="card card-body">
+    <form id="listing-publish-form" class="card card-body" enctype="multipart/form-data">
       <div class="mb-3">
         <label for="subject" class="form-label">Предмет</label>
         <select id="subject" name="subject" class="form-select" required>
@@ -21,9 +21,25 @@
         <input id="price_per_hour" name="price_per_hour" type="number" step="0.01" min="0" class="form-control" required>
       </div>
 
-      <div class="form-check mb-3">
-        <input id="online_only" name="online_only" type="checkbox" class="form-check-input">
-        <label for="online_only" class="form-check-label">Само онлайн</label>
+      <fieldset class="mb-3">
+        <legend class="col-form-label pt-0">Режим на обучение</legend>
+        <div class="form-check">
+          <input id="lesson_mode_online" name="lesson_mode" type="radio" class="form-check-input" value="online" required>
+          <label for="lesson_mode_online" class="form-check-label">Онлайн</label>
+        </div>
+        <div class="form-check">
+          <input id="lesson_mode_in_person" name="lesson_mode" type="radio" class="form-check-input" value="in_person" required>
+          <label for="lesson_mode_in_person" class="form-check-label">Присъствено</label>
+        </div>
+        <div class="form-check">
+          <input id="lesson_mode_online_and_in_person" name="lesson_mode" type="radio" class="form-check-input" value="online_and_in_person" checked required>
+          <label for="lesson_mode_online_and_in_person" class="form-check-label">Онлайн + присъствено</label>
+        </div>
+      </fieldset>
+
+      <div class="mb-3">
+        <label for="image" class="form-label">Снимка (по желание)</label>
+        <input id="image" name="image" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
       </div>
 
       <div class="mb-3">
@@ -93,17 +109,19 @@
     event.preventDefault();
     errorsBox.innerHTML = '';
 
-    const payload = {
-      subject: form.subject.value,
-      price_per_hour: form.price_per_hour.value,
-      online_only: form.online_only.checked,
-      description: form.description.value,
-      contact_phone: form.contact_phone.value,
-    };
+    const payload = new FormData();
+    payload.append('subject', form.subject.value);
+    payload.append('price_per_hour', form.price_per_hour.value);
+    payload.append('lesson_mode', form.lesson_mode.value);
+    payload.append('description', form.description.value);
+    payload.append('contact_phone', form.contact_phone.value);
+    if (form.image.files.length > 0) {
+      payload.append('image', form.image.files[0]);
+    }
 
     const response = await window.apiUtils.apiFetch('/api/listings/', {
       method: 'POST',
-      body: JSON.stringify(payload),
+      body: payload,
     });
 
     if (response.ok) {

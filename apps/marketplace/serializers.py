@@ -3,8 +3,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from rest_framework import serializers
 
-from .models import Listing
 from apps.discussions.models import Subject
+
+from .models import Listing
 
 
 User = get_user_model()
@@ -58,6 +59,10 @@ class ListingListSerializer(serializers.ModelSerializer):
     is_vip = serializers.SerializerMethodField()
     author_role = serializers.SerializerMethodField()
     author_role_label = serializers.SerializerMethodField()
+    lesson_mode_label = serializers.CharField(
+        source="get_lesson_mode_display",
+        read_only=True,
+    )
 
     class Meta:
         model = Listing
@@ -65,7 +70,9 @@ class ListingListSerializer(serializers.ModelSerializer):
             "id",
             "subject",
             "price_per_hour",
-            "online_only",
+            "lesson_mode",
+            "lesson_mode_label",
+            "image",
             "description_excerpt",
             "is_vip",
             "vip_until",
@@ -101,6 +108,10 @@ class ListingDetailSerializer(serializers.ModelSerializer):
     is_vip = serializers.SerializerMethodField()
     author_role = serializers.SerializerMethodField()
     author_role_label = serializers.SerializerMethodField()
+    lesson_mode_label = serializers.CharField(
+        source="get_lesson_mode_display",
+        read_only=True,
+    )
 
     class Meta:
         model = Listing
@@ -108,7 +119,9 @@ class ListingDetailSerializer(serializers.ModelSerializer):
             "id",
             "subject",
             "price_per_hour",
-            "online_only",
+            "lesson_mode",
+            "lesson_mode_label",
+            "image",
             "description",
             "is_vip",
             "vip_until",
@@ -148,13 +161,15 @@ class ListingCreateSerializer(serializers.ModelSerializer):
         required=False,
         allow_blank=True,
     )
+    image = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Listing
         fields = [
             "subject",
             "price_per_hour",
-            "online_only",
+            "lesson_mode",
+            "image",
             "description",
             "contact_phone",
             "contact_email",

@@ -25,7 +25,7 @@ class ListingAdminTests(TestCase):
             subject=self.subject,
             owner=self.owner,
             price_per_hour="45.00",
-            online_only=True,
+            lesson_mode=Listing.LessonMode.ONLINE,
             description="Tutor listing",
             contact_email="owner@example.com",
         )
@@ -40,7 +40,7 @@ class ListingAdminTests(TestCase):
                 "subject": self.subject.pk,
                 "owner": self.owner.pk,
                 "price_per_hour": "45.00",
-                "online_only": "on",
+                "lesson_mode": Listing.LessonMode.ONLINE,
                 "description": "Tutor listing",
                 "contact_phone": "",
                 "contact_email": "",
