@@ -1,3 +1,7 @@
+:root {
+  --brand-purple: #6f2cf3;
+}
+
 body {
   font-family: "Manrope", "Segoe UI", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
   background-color: #f8f9fa;
@@ -607,5 +611,4 @@ h6 {
 }
 
 .benefit-title { color: #111; }
-
 
