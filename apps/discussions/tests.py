@@ -16,6 +16,7 @@ from rest_framework.test import APITestCase
 
 from apps.accounts.models import Profile
 from apps.discussions.admin import SubjectAdminForm
+from apps.discussions.context_processors import nav_subjects
 from apps.discussions.models import Comment, Post, Subject
 
 
@@ -52,6 +53,19 @@ class SubjectThemeColorTests(TestCase):
         with self.assertRaises(ValidationError):
             subject.full_clean()
 
+
+class NavSubjectsContextProcessorTests(TestCase):
+    def test_nav_subjects_respects_model_ordering(self):
+        Subject.objects.create(name="Zoologia", sort_order=2)
+        Subject.objects.create(name="Matematika", sort_order=1)
+        Subject.objects.create(name="Angliyski ezik", sort_order=1)
+
+        subjects = list(nav_subjects(request=None)["nav_subjects"])
+
+        self.assertEqual(
+            [subject.name for subject in subjects],
+            ["Angliyski ezik", "Matematika", "Zoologia"],
+        )
 
 class SubjectSerializerColorTests(APITestCase):
     def test_subject_list_returns_gradient_colors_from_theme_color(self):
