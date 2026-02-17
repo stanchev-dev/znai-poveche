@@ -19,10 +19,12 @@ class SubjectSummarySerializer(serializers.ModelSerializer):
 class OwnerSerializer(serializers.ModelSerializer):
     display_name = serializers.SerializerMethodField()
     level = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
+    role_label = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["username", "display_name", "level"]
+        fields = ["username", "display_name", "level", "role", "role_label"]
 
     def get_display_name(self, obj) -> str:
         try:
@@ -36,12 +38,26 @@ class OwnerSerializer(serializers.ModelSerializer):
         except ObjectDoesNotExist:
             return 1
 
+    def get_role(self, obj) -> str:
+        try:
+            return obj.profile.role
+        except ObjectDoesNotExist:
+            return "learner"
+
+    def get_role_label(self, obj) -> str:
+        try:
+            return obj.profile.get_role_display()
+        except ObjectDoesNotExist:
+            return "Учащ"
+
 
 class ListingListSerializer(serializers.ModelSerializer):
     subject = SubjectSummarySerializer(read_only=True)
     owner = OwnerSerializer(read_only=True)
     description_excerpt = serializers.SerializerMethodField()
     is_vip = serializers.SerializerMethodField()
+    author_role = serializers.SerializerMethodField()
+    author_role_label = serializers.SerializerMethodField()
 
     class Meta:
         model = Listing
@@ -55,6 +71,8 @@ class ListingListSerializer(serializers.ModelSerializer):
             "vip_until",
             "created_at",
             "owner",
+            "author_role",
+            "author_role_label",
         ]
 
     def get_description_excerpt(self, obj: Listing) -> str:
@@ -64,11 +82,25 @@ class ListingListSerializer(serializers.ModelSerializer):
         now = timezone.now()
         return bool(obj.vip_until and obj.vip_until > now)
 
+    def get_author_role(self, obj: Listing) -> str:
+        try:
+            return obj.owner.profile.role
+        except ObjectDoesNotExist:
+            return "learner"
+
+    def get_author_role_label(self, obj: Listing) -> str:
+        try:
+            return obj.owner.profile.get_role_display()
+        except ObjectDoesNotExist:
+            return "Учащ"
+
 
 class ListingDetailSerializer(serializers.ModelSerializer):
     subject = SubjectSummarySerializer(read_only=True)
     owner = OwnerSerializer(read_only=True)
     is_vip = serializers.SerializerMethodField()
+    author_role = serializers.SerializerMethodField()
+    author_role_label = serializers.SerializerMethodField()
 
     class Meta:
         model = Listing
@@ -82,11 +114,25 @@ class ListingDetailSerializer(serializers.ModelSerializer):
             "vip_until",
             "created_at",
             "owner",
+            "author_role",
+            "author_role_label",
         ]
 
     def get_is_vip(self, obj: Listing) -> bool:
         now = timezone.now()
         return bool(obj.vip_until and obj.vip_until > now)
+
+    def get_author_role(self, obj: Listing) -> str:
+        try:
+            return obj.owner.profile.role
+        except ObjectDoesNotExist:
+            return "learner"
+
+    def get_author_role_label(self, obj: Listing) -> str:
+        try:
+            return obj.owner.profile.get_role_display()
+        except ObjectDoesNotExist:
+            return "Учащ"
 
 
 class ListingCreateSerializer(serializers.ModelSerializer):

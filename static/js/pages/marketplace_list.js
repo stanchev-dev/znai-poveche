@@ -32,6 +32,12 @@
     `;
   }
 
+
+  function roleBadge(owner) {
+    const roleLabel = owner.role_label || (owner.role === 'teacher' ? 'Учител' : 'Учащ');
+    return `<span class="badge rounded-pill text-bg-light border">${escapeHtml(roleLabel)}</span>`;
+  }
+
   function listingCard(l) {
     const detailsUrl = `/marketplace/${l.id}/`;
     return `
@@ -46,6 +52,7 @@
                 <span class="badge rounded-pill text-bg-light border">${escapeHtml(l.subject.name)}</span>
                 ${l.online_only ? '<span class="badge rounded-pill text-bg-info-subtle border">Онлайн</span>' : ''}
                 ${l.is_vip ? '<span class="badge rounded-pill text-bg-warning border">ВИП</span>' : ''}
+                ${roleBadge(l.owner)}
               </div>
             </div>
             <div class="listing-card-right">

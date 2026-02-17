@@ -1,35 +1,45 @@
 {% extends "base.html" %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Регистрация{% endblock %}
 
 {% block content %}
   <div class="row justify-content-center">
     <div class="col-md-6">
-      <h1 class="mb-4">Register</h1>
+      <h1 class="mb-4">Регистрация</h1>
       <form method="post" class="card card-body">
         {% csrf_token %}
         {{ form.non_field_errors }}
         <div class="mb-3">
-          <label class="form-label" for="{{ form.username.id_for_label }}">Username</label>
+          <label class="form-label" for="{{ form.username.id_for_label }}">Потребителско име</label>
           {{ form.username }}
           {{ form.username.errors }}
         </div>
         <div class="mb-3">
-          <label class="form-label" for="{{ form.display_name.id_for_label }}">Display name</label>
+          <label class="form-label" for="{{ form.display_name.id_for_label }}">Име за показване</label>
           {{ form.display_name }}
           {{ form.display_name.errors }}
         </div>
+        <fieldset class="mb-3">
+          <legend class="form-label mb-2">{{ form.role.label }}</legend>
+          {% for radio in form.role %}
+            <div class="form-check">
+              {{ radio.tag }}
+              <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+            </div>
+          {% endfor %}
+          {{ form.role.errors }}
+        </fieldset>
         <div class="mb-3">
-          <label class="form-label" for="{{ form.password1.id_for_label }}">Password</label>
+          <label class="form-label" for="{{ form.password1.id_for_label }}">Парола</label>
           {{ form.password1 }}
           {{ form.password1.errors }}
         </div>
         <div class="mb-3">
-          <label class="form-label" for="{{ form.password2.id_for_label }}">Password confirmation</label>
+          <label class="form-label" for="{{ form.password2.id_for_label }}">Потвърди парола</label>
           {{ form.password2 }}
           {{ form.password2.errors }}
         </div>
-        <button type="submit" class="btn btn-primary">Register</button>
+        <button type="submit" class="btn btn-primary">Създай профил</button>
       </form>
     </div>
   </div>
