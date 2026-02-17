@@ -11,18 +11,21 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         subjects = [
-            "Математика",
-            "Български език",
-            "История",
-            "Биология",
-            "Химия",
-            "Физика",
+            ("Български език", "#FB923C"),
+            ("Литература", "#BEEA00"),
+            ("Биология", "#10B981"),
+            ("Информационни технологии", "#2563EB"),
+            ("История", "#EF4444"),
+            ("Математика", "#0EA5E9"),
+            ("Физика", "#FF725E"),
+            ("Химия", "#7C3AED"),
+            ("Други", "#64748B"),
         ]
-        for index, name in enumerate(subjects, start=1):
+        for index, (name, theme_color) in enumerate(subjects, start=1):
             desired_slug = slugify(name) or f"subject-{index}"
             Subject.objects.update_or_create(
                 slug=desired_slug,
-                defaults={"name": name},
+                defaults={"name": name, "theme_color": theme_color},
             )
 
         user_model = get_user_model()
