@@ -386,6 +386,15 @@ h6 {
 }
 
 
+@media (min-width: 992px) { /* lg and up */
+  .account-toggle {
+    min-width: 220px;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+    justify-content: center;
+  }
+}
+
 .nav-dd-icon {
   font-size: 1.05rem;
   line-height: 1;
