@@ -705,12 +705,20 @@ h6 {
   object-fit: cover;
 }
 
+.marketplace-detail-page .marketplace-detail-gallery-card {
+  border: 1px solid #e9ecef;
+  border-radius: 1rem;
+  box-shadow: 0 6px 16px rgba(17, 24, 39, 0.08);
+}
+
 .marketplace-detail-page .marketplace-detail-sidebar {
-  top: 1rem;
+  top: 88px;
 }
 
 .marketplace-detail-page .marketplace-detail-sidebar-card {
   border: 1px solid #e9ecef;
+  border-radius: 1rem;
+  box-shadow: 0 6px 16px rgba(17, 24, 39, 0.08);
 }
 
 .marketplace-detail-page .marketplace-detail-price-label {
@@ -733,6 +741,8 @@ h6 {
   color: #ffffff;
   font-weight: 700;
   padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 .marketplace-detail-page .contacts-cta-btn:hover,
@@ -741,6 +751,8 @@ h6 {
   background: #212121;
   border-color: #212121;
   color: #ffffff;
+  box-shadow: 0 8px 18px rgba(17, 17, 17, 0.25);
+  transform: translateY(-1px);
 }
 
 @media (max-width: 991.98px) {
