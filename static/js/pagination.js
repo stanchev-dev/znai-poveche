@@ -26,7 +26,7 @@
     const items = [];
     normalized.forEach((page, index) => {
       if (index > 0 && page - normalized[index - 1] > 1) {
-        items.push('ellipsis');
+        items.push('…');
       }
       items.push(page);
     });
@@ -83,13 +83,13 @@
     if (totalPages > 1 && currentPage > 1) {
       addPageButton({
         page: currentPage - 1,
-        label: '‹',
+        label: '<',
         ariaLabel: 'Предишна страница',
       });
     }
 
     items.forEach((item) => {
-      if (item === 'ellipsis') {
+      if (item === '…') {
         addEllipsis();
         return;
       }
@@ -104,7 +104,7 @@
     if (totalPages > 1 && currentPage < totalPages) {
       addPageButton({
         page: currentPage + 1,
-        label: '›',
+        label: '>',
         ariaLabel: 'Следваща страница',
       });
     }
