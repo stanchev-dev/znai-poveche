@@ -26,12 +26,34 @@
 
   function roleBadge(owner) {
     const roleLabel = owner.role_label || (owner.role === 'teacher' ? 'Учител' : 'Учащ');
-    return `<span class="badge rounded-pill text-bg-light border">${escapeHtml(roleLabel)}</span>`;
+    const roleClass = owner.role === 'teacher' ? 'role-badge--teacher' : 'role-badge--learner';
+    return `<span class="badge rounded-pill listing-pill role-badge ${roleClass}">${escapeHtml(roleLabel)}</span>`;
+  }
+
+  function lessonModeBadgeClass(lessonMode) {
+    if (lessonMode === 'online') return 'lesson-mode-badge--online';
+    if (lessonMode === 'in_person') return 'lesson-mode-badge--in-person';
+    return 'lesson-mode-badge--online-and-in-person';
   }
 
   function lessonModeBadge(listing) {
     if (!listing.lesson_mode_label) return '';
-    return `<span class="badge rounded-pill lesson-mode-badge">${escapeHtml(listing.lesson_mode_label)}</span>`;
+    return `<span class="badge rounded-pill listing-pill lesson-mode-badge ${lessonModeBadgeClass(listing.lesson_mode)}">${escapeHtml(listing.lesson_mode_label)}</span>`;
+  }
+
+  function subjectBadgeClass(slug) {
+    const subjectClasses = {
+      matematika: 'subject-badge--math',
+      fizika: 'subject-badge--physics',
+      himiq: 'subject-badge--chemistry',
+      istoriq: 'subject-badge--history',
+      biologiq: 'subject-badge--biology',
+      'bulgarski-ezik': 'subject-badge--bulgarian',
+      literatura: 'subject-badge--literature',
+      'informacionni-tehnologii': 'subject-badge--it',
+      drugi: 'subject-badge--other',
+    };
+    return subjectClasses[slug] || 'subject-badge--default';
   }
 
   function listingCard(l) {
@@ -45,7 +67,7 @@
               <h2 class="listing-card-title h5 mb-2">Уроци по ${escapeHtml(l.subject.name)}</h2>
               <p class="listing-card-description mb-2">${escapeHtml(l.description_excerpt)}</p>
               <div class="listing-card-badges">
-                <span class="badge rounded-pill text-bg-light border">${escapeHtml(l.subject.name)}</span>
+                <span class="badge rounded-pill listing-pill subject-badge ${subjectBadgeClass(l.subject.slug)}">${escapeHtml(l.subject.name)}</span>
                 ${lessonModeBadge(l)}
                 ${l.is_vip ? '<span class="badge rounded-pill text-bg-warning border">ВИП</span>' : ''}
                 ${roleBadge(l.owner)}
