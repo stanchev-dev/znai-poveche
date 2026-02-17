@@ -2,7 +2,6 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
@@ -11,8 +10,9 @@ from .forms import (
     DisplayNameUpdateForm,
     ProfileUpdateForm,
     RegistrationForm,
+    TeacherVerificationRequestForm,
 )
-from .models import Profile
+from .models import Profile, TeacherVerificationRequest
 from .utils import profile_has_avatar_column
 
 
@@ -84,6 +84,43 @@ def profile_view(request):
             "form": form,
             "delete_form": delete_form,
             "avatar_enabled": avatar_enabled,
+        },
+    )
+
+
+@login_required
+def teacher_verify_view(request):
+    verification_request = (
+        TeacherVerificationRequest.objects.filter(user=request.user)
+        .order_by("-created_at")
+        .first()
+    )
+
+    can_submit = verification_request is None or verification_request.status == TeacherVerificationRequest.Status.REJECTED
+
+    if request.method == "POST":
+        if not can_submit:
+            messages.info(request, "Заявката ти е в процес на разглеждане.")
+            return redirect("teacher-verify")
+
+        form = TeacherVerificationRequestForm(request.POST, request.FILES)
+        if form.is_valid():
+            new_request = form.save(commit=False)
+            new_request.user = request.user
+            new_request.status = TeacherVerificationRequest.Status.PENDING
+            new_request.save()
+            messages.success(request, "Заявката ти е изпратена успешно.")
+            return redirect("teacher-verify")
+    else:
+        form = TeacherVerificationRequestForm()
+
+    return render(
+        request,
+        "accounts/teacher_verify.html",
+        {
+            "form": form,
+            "verification_request": verification_request,
+            "can_submit": can_submit,
         },
     )
 
