@@ -25,6 +25,46 @@
   <div id="subjects-alert"></div>
   <div id="subjects-list" class="row g-3"></div>
 </section>
+
+<section class="home-benefits py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="home-benefits-title fw-bold">Какво е Знай повече?</h2>
+      <p class="lead text-muted mx-auto" style="max-width: 820px;">
+        Платформа за училищна подготовка, която съчетава въпроси по предмети, репутация и обяви за уроци — на едно място.
+      </p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-12 col-md-4">
+        <div class="benefit-card p-4 h-100 text-center">
+          <div class="benefit-icon mb-3"><i class="bi bi-chat-dots"></i></div>
+          <h5 class="benefit-title fw-semibold">Питай по предмет и намери решение</h5>
+          <p class="text-muted mb-3">Публикувай въпрос, добави снимка и получи отговори. Гласуването изкарва най-полезното най-отгоре.</p>
+          <a class="benefit-link" href="{% url 'discussions-page' %}">Разгледай дискусиите →</a>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <div class="benefit-card p-4 h-100 text-center">
+          <div class="benefit-icon mb-3"><i class="bi bi-trophy"></i></div>
+          <h5 class="benefit-title fw-semibold">Репутация, нива и класации</h5>
+          <p class="text-muted mb-3">Точки и нива открояват надеждните помощници. Виж класации глобално и по предмет.</p>
+          <a class="benefit-link" href="{% url 'leaderboard-page' %}">Виж класацията →</a>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <div class="benefit-card p-4 h-100 text-center">
+          <div class="benefit-icon mb-3"><i class="bi bi-mortarboard"></i></div>
+          <h5 class="benefit-title fw-semibold">Уроци и консултации по темата</h5>
+          <p class="text-muted mb-3">Намери преподавател по конкретен предмет. Контактите са зад вход — без спам, само реални запитвания.</p>
+          <a class="benefit-link" href="{% url 'marketplace-page' %}">Отвори маркетплейса →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock %}
 
 {% block extra_js %}
