@@ -604,49 +604,49 @@ h6 {
 }
 
 .subject-badge--math {
-  background: #2563eb;
-  border-color: #1e4fbe;
+  background: #0EA5E9;
+  border-color: #0284C7;
 }
 
 .subject-badge--physics {
-  background: #5b21b6;
-  border-color: #4b1a95;
+  background: #FF725E;
+  border-color: #EA580C;
 }
 
 .subject-badge--chemistry {
-  background: #be185d;
-  border-color: #9e144d;
+  background: #7C3AED;
+  border-color: #6D28D9;
 }
 
 .subject-badge--history {
-  background: #b45309;
-  border-color: #92400e;
+  background: #EF4444;
+  border-color: #DC2626;
 }
 
 .subject-badge--biology {
-  background: #15803d;
-  border-color: #166534;
+  background: #10B981;
+  border-color: #059669;
 }
 
 .subject-badge--bulgarian {
-  background: #1d4ed8;
-  border-color: #1e40af;
+  background: #FB923C;
+  border-color: #F97316;
 }
 
 .subject-badge--literature {
-  background: #7c3aed;
-  border-color: #6d28d9;
+  background: #BEEA00;
+  border-color: #A3C700;
 }
 
 .subject-badge--it {
-  background: #0369a1;
-  border-color: #075985;
+  background: #2563EB;
+  border-color: #1D4ED8;
 }
 
 .subject-badge--other,
 .subject-badge--default {
-  background: #6f2cf3;
-  border-color: #5723c5;
+  background: #64748B;
+  border-color: #475569;
 }
 
 .listing-card-link:hover .subject-badge,
