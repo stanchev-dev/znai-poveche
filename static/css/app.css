@@ -1352,3 +1352,45 @@ h6 {
     margin-inline: 0;
   }
 }
+
+.zp-pagination-wrapper {
+  overflow-x: auto;
+}
+
+.zp-pagination {
+  gap: 0.35rem;
+}
+
+.zp-pagination .page-link {
+  border-radius: 999px;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(111, 44, 243, 0.28);
+  color: var(--brand-purple, #6f2cf3);
+  background: #ffffff;
+  font-weight: 700;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.zp-pagination .page-item.active .page-link {
+  border-color: var(--brand-purple, #6f2cf3);
+  background: rgba(111, 44, 243, 0.12);
+  color: var(--brand-purple-dark, #5b21d1);
+}
+
+.zp-pagination .page-item:not(.active):not(.disabled) .page-link:hover,
+.zp-pagination .page-item:not(.active):not(.disabled) .page-link:focus-visible {
+  border-color: var(--brand-purple, #6f2cf3);
+  background: rgba(111, 44, 243, 0.1);
+  color: var(--brand-purple-dark, #5b21d1);
+  box-shadow: none;
+}
+
+.zp-pagination .page-item.disabled .page-link {
+  border-color: transparent;
+  background: transparent;
+  color: #8d8d97;
+}

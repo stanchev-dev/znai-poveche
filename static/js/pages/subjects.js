@@ -3,8 +3,8 @@
   const slug = meta.dataset.subjectSlug;
   const list = document.getElementById('posts-list');
   const alertBox = document.getElementById('posts-alert');
-  let nextUrl = null;
-  let prevUrl = null;
+  const PAGE_SIZE = 10;
+  let currentUrl = null;
 
   function authorChip(author) {
     return `<span class="badge bg-light text-dark">${author.username} (${author.display_name}, ниво ${author.level})</span>`;
@@ -42,9 +42,15 @@
       return;
     }
     const data = await res.json();
-    nextUrl = data.next;
-    prevUrl = data.previous;
+    currentUrl = url;
     render(data.results || []);
+    window.zpPagination.render({
+      containerId: 'posts-pagination',
+      count: data.count,
+      pageSize: PAGE_SIZE,
+      currentUrl,
+      onPageChange: (page) => load(window.zpPagination.updatePageInUrl(currentUrl, page)),
+    });
   }
 
   function buildUrl() {
@@ -57,8 +63,6 @@
 
   document.getElementById('search-btn').addEventListener('click', () => load(buildUrl()));
   document.getElementById('sort-select').addEventListener('change', () => load(buildUrl()));
-  document.getElementById('prev-btn').addEventListener('click', () => { if (prevUrl) load(prevUrl); });
-  document.getElementById('next-btn').addEventListener('click', () => { if (nextUrl) load(nextUrl); });
 
   load(buildUrl());
 })();

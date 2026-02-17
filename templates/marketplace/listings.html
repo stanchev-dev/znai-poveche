@@ -37,10 +37,7 @@
 </div>
 <div id="listings-alert"></div>
 <div id="listings-list" class="vstack gap-3"></div>
-<div class="d-flex justify-content-between mt-3">
-  <button class="btn btn-outline-secondary" id="prev-btn">Предишна</button>
-  <button class="btn btn-outline-secondary" id="next-btn">Следваща</button>
-</div>
+{% include "partials/pagination.html" with pagination_id="listings-pagination" pagination_label="Страници с обяви" %}
 {% endblock %}
 
 {% block extra_js %}

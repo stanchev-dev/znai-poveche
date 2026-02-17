@@ -5,8 +5,8 @@
   const defaultAvatar = '/static/img/default-avatar.svg';
   const subjectFilterMenu = document.getElementById('subject-filter-menu');
   const subjectFilterLabel = document.getElementById('subject-filter-label');
-  let nextUrl = null;
-  let prevUrl = null;
+  const PAGE_SIZE = 20;
+  let currentUrl = null;
   const initialSubjectFromQuery = new URLSearchParams(window.location.search).get('subject');
 
   function escapeHtml(value) {
@@ -131,21 +131,25 @@
       return;
     }
     const data = await res.json();
-    nextUrl = data.next;
-    prevUrl = data.previous;
+    currentUrl = url;
     if (!data.results.length) {
       list.innerHTML = '<div class="alert alert-info">Няма резултати</div>';
-      return;
+    } else {
+      list.innerHTML = data.results.map((l) => listingCard(l)).join('');
     }
-    list.innerHTML = data.results.map((l) => listingCard(l)).join('');
+    window.zpPagination.render({
+      containerId: 'listings-pagination',
+      count: data.count,
+      pageSize: PAGE_SIZE,
+      currentUrl,
+      onPageChange: (page) => load(window.zpPagination.updatePageInUrl(currentUrl, page)),
+    });
   }
 
   bindSubjectMenuActions();
   updateSubjectFilterUi(subjectFilter.value);
 
   document.getElementById('apply-filters').onclick = () => load(buildUrl());
-  document.getElementById('prev-btn').onclick = () => { if (prevUrl) load(prevUrl); };
-  document.getElementById('next-btn').onclick = () => { if (nextUrl) load(nextUrl); };
 
   await loadSubjects();
 
