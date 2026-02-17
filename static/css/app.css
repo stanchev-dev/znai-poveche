@@ -736,6 +736,11 @@ h6 {
 }
 
 .marketplace-detail-page .contacts-cta-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
   background: #111111;
   border-color: #111111;
   color: #ffffff;
@@ -753,6 +758,31 @@ h6 {
   color: #ffffff;
   box-shadow: 0 8px 18px rgba(17, 17, 17, 0.25);
   transform: translateY(-1px);
+}
+
+.marketplace-detail-page .contacts-btn-label {
+  line-height: 1.15;
+}
+
+.marketplace-detail-page .contacts-btn-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.marketplace-detail-page .contacts-phone-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+}
+
+.marketplace-detail-page .contacts-phone-link:hover,
+.marketplace-detail-page .contacts-phone-link:focus-visible {
+  text-decoration: underline;
 }
 
 @media (max-width: 991.98px) {
