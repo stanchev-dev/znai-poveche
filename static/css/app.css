@@ -599,6 +599,8 @@ h6 {
 
 .subject-badge {
   color: #ffffff;
+  background: var(--subject-badge-bg, #6f2cf3);
+  border-color: var(--subject-badge-border, #5723c5);
 }
 
 .subject-badge--math {

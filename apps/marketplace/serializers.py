@@ -4,6 +4,12 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from apps.discussions.models import Subject
+from apps.common.utils import (
+    FALLBACK_DARK_COLOR,
+    FALLBACK_LIGHT_COLOR,
+    lighten_hex,
+    normalize_hex,
+)
 
 from .models import Listing
 
@@ -12,9 +18,21 @@ User = get_user_model()
 
 
 class SubjectSummarySerializer(serializers.ModelSerializer):
+    theme_color_dark = serializers.SerializerMethodField()
+    theme_color_light = serializers.SerializerMethodField()
+
     class Meta:
         model = Subject
-        fields = ["id", "name", "slug"]
+        fields = ["id", "name", "slug", "theme_color_dark", "theme_color_light"]
+
+    def get_theme_color_dark(self, obj: Subject) -> str:
+        return normalize_hex(obj.theme_color) or FALLBACK_DARK_COLOR
+
+    def get_theme_color_light(self, obj: Subject) -> str:
+        normalized = normalize_hex(obj.theme_color)
+        if not normalized:
+            return FALLBACK_LIGHT_COLOR
+        return lighten_hex(normalized, 0.532)
 
 
 class OwnerSerializer(serializers.ModelSerializer):
