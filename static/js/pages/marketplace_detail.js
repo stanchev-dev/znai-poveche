@@ -8,8 +8,10 @@
   const alertBox = document.getElementById('listing-alert');
   const detail = document.getElementById('listing-detail');
   const gallery = document.getElementById('listing-gallery');
-  const info = document.getElementById('listing-info');
+  const title = document.getElementById('listing-title');
+  const description = document.getElementById('listing-description');
   const price = document.getElementById('listing-price');
+  const owner = document.getElementById('listing-owner');
   const contactsWrap = document.getElementById('contacts-wrap');
   const contactsBtn = document.getElementById('contacts-btn');
   const defaultImage = '/static/img/default-avatar.svg';
@@ -46,19 +48,21 @@
   }
 
   const l = await res.json();
-  gallery.innerHTML = `<div class="card"><div class="card-body p-2 p-md-3">
+  gallery.innerHTML = `<div class="card marketplace-detail-gallery-card"><div class="card-body p-2 p-md-3">
     <img src="${l.image || defaultImage}" alt="Снимка на обява" class="img-fluid rounded marketplace-detail-image" onerror="this.src='${defaultImage}'">
   </div></div>`;
 
-  info.innerHTML = `<div class="card"><div class="card-body">
-    <h1 class="h3 mb-3">${escapeHtml(l.subject.name)} ${l.is_vip ? '<span class="badge text-bg-warning">VIP</span>' : ''}</h1>
-    <div class="listing-card-badges mb-3">
-      <span class="badge rounded-pill listing-pill subject-badge" style="${window.subjectBadgeUtils.getSubjectBadgeStyle(l.subject)}">${escapeHtml(l.subject.name)}</span>
-      ${l.lesson_mode_label ? `<span class="badge rounded-pill listing-pill lesson-mode-badge ${lessonModeBadgeClass(l.lesson_mode)}">${escapeHtml(l.lesson_mode_label)}</span>` : ''}
+  title.innerHTML = `${escapeHtml(l.subject.name)} ${l.is_vip ? '<span class="badge text-bg-warning align-middle">VIP</span>' : ''}`;
+  description.innerHTML = l.description;
+
+  owner.innerHTML = `<div class="card"><div class="card-body">
+    <h2 class="h6 mb-3">Потребител</h2>
+    <div class="listing-card-badges mb-0">
       <span class="badge bg-light text-dark">${escapeHtml(l.owner.username)} (${escapeHtml(l.owner.display_name)}, ниво ${escapeHtml(l.owner.level)})</span>
       <span class="badge rounded-pill listing-pill role-badge ${roleBadgeClass(l.owner.role)}">${escapeHtml(l.owner.role_label || (l.owner.role === 'teacher' ? 'Учител' : 'Учащ'))}</span>
+      <span class="badge rounded-pill listing-pill subject-badge" style="${window.subjectBadgeUtils.getSubjectBadgeStyle(l.subject)}">${escapeHtml(l.subject.name)}</span>
+      ${l.lesson_mode_label ? `<span class="badge rounded-pill listing-pill lesson-mode-badge ${lessonModeBadgeClass(l.lesson_mode)}">${escapeHtml(l.lesson_mode_label)}</span>` : ''}
     </div>
-    <p class="mb-0">${l.description}</p>
   </div></div>`;
 
   price.textContent = `${l.price_per_hour} €/ч`;
