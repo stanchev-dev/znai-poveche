@@ -619,9 +619,14 @@ h6 {
 }
 
 .home-section-title {
-  color: var(--brand-purple, #6f2cf3);
-  font-weight: 700;
   margin-bottom: 0;
+}
+
+.section-title-purple {
+  color: var(--brand-purple, #6f2cf3);
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .benefit-card {
