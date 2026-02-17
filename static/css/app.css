@@ -584,7 +584,11 @@ h6 {
   }
 }
 
-.home-benefits-title { color: var(--brand-purple, #6f2cf3); }
+.home-section-title {
+  color: var(--brand-purple, #6f2cf3);
+  font-weight: 700;
+  margin-bottom: 0;
+}
 
 .benefit-card {
   background: #fff;
