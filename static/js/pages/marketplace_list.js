@@ -31,7 +31,7 @@
 
   function lessonModeBadge(listing) {
     if (!listing.lesson_mode_label) return '';
-    return `<span class="badge rounded-pill text-bg-info-subtle border">${escapeHtml(listing.lesson_mode_label)}</span>`;
+    return `<span class="badge rounded-pill lesson-mode-badge">${escapeHtml(listing.lesson_mode_label)}</span>`;
   }
 
   function listingCard(l) {

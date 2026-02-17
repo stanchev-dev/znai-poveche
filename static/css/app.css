@@ -577,6 +577,22 @@ h6 {
   gap: 0.45rem;
 }
 
+
+.lesson-mode-badge {
+  background: var(--brand-purple, #6f2cf3);
+  border: 1px solid var(--brand-purple-dark, #5723c5);
+  color: #ffffff;
+}
+
+.listing-card-link:hover .lesson-mode-badge,
+.listing-card-link:focus-visible .lesson-mode-badge,
+.lesson-mode-badge:hover,
+.lesson-mode-badge:focus-visible {
+  background: var(--brand-purple-dark, #5723c5);
+  border-color: var(--brand-purple-dark, #5723c5);
+  color: #ffffff;
+}
+
 .listing-card-right {
   text-align: right;
   display: flex;
