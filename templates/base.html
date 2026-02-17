@@ -64,7 +64,12 @@
           </button>
           <ul class="dropdown-menu dropdown-menu-end shadow-sm">
             {% if user.is_authenticated %}
-              <li><a class="dropdown-item" href="{% url 'profile' %}">Твоят профил</a></li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'profile' %}">
+                  <i class="bi bi-person nav-dd-icon"></i>
+                  <span>Твоят профил</span>
+                </a>
+              </li>
             {% else %}
               <li>
                 <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'login' %}">
