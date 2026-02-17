@@ -31,6 +31,21 @@ class WebPageSmokeTests(TestCase):
         response = self.client.get('/marketplace/99999/')
         self.assertEqual(response.status_code, 200)
 
+    def test_legal_and_info_pages_use_accordion_layout(self):
+        for path, title in [
+            ('/privacy/', 'Политика за поверителност'),
+            ('/terms/', 'Общи условия'),
+            ('/mission/', 'Нашата мисия'),
+        ]:
+            with self.subTest(path=path):
+                response = self.client.get(path)
+                self.assertEqual(response.status_code, 200)
+                content = response.content.decode()
+                self.assertIn(f'<h1 class="mb-4">{title}</h1>', content)
+                self.assertIn('class="accordion" id="infoAccordion"', content)
+                self.assertIn('accordion-collapse collapse show', content)
+                self.assertNotIn('Съдържание', content)
+
 
 class SeedCommandTests(TestCase):
     def test_seed_command_runs(self):
