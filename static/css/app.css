@@ -737,7 +737,6 @@ h6 {
 
 .marketplace-detail-page .contacts-cta-btn {
   display: inline-flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.2rem;
@@ -760,29 +759,40 @@ h6 {
   transform: translateY(-1px);
 }
 
-.marketplace-detail-page .contacts-btn-label {
-  line-height: 1.15;
+.marketplace-detail-page .contacts-cta-btn.revealed {
+  gap: 0;
+  font-weight: 800;
 }
 
-.marketplace-detail-page .contacts-btn-phone {
+.marketplace-detail-page .call-cta-content {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  line-height: 1.15;
+  justify-content: center;
+  gap: 0.55rem;
+  line-height: 1;
 }
 
-.marketplace-detail-page .contacts-phone-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  text-decoration: none;
+.marketplace-detail-page .call-cta-content .bi-telephone {
+  font-size: 1rem;
 }
 
-.marketplace-detail-page .contacts-phone-link:hover,
-.marketplace-detail-page .contacts-phone-link:focus-visible {
-  text-decoration: underline;
+.marketplace-detail-page .call-cta-number {
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 575.98px) {
+  .marketplace-detail-page .call-cta-content {
+    gap: 0.5rem;
+  }
+
+  .marketplace-detail-page .call-cta-content .bi-telephone {
+    font-size: 0.95rem;
+  }
+
+  .marketplace-detail-page .call-cta-number {
+    font-size: 1rem;
+  }
 }
 
 @media (max-width: 991.98px) {

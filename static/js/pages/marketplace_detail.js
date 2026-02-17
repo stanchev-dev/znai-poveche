@@ -67,7 +67,8 @@
 
     callBtn.href = `tel:${phoneHref}`;
     callBtn.dataset.revealed = '1';
-    callBtn.innerHTML = `<span class="contacts-btn-label">Обади се</span><span class="contacts-btn-phone"><i class="bi bi-telephone-fill" aria-hidden="true"></i><span>${escapeHtml(phoneLabel)}</span></span>`;
+    callBtn.classList.add('revealed');
+    callBtn.innerHTML = `<span class="call-cta-content"><i class="bi bi-telephone" aria-hidden="true"></i><span class="call-cta-number">${escapeHtml(phoneLabel)}</span></span>`;
     callBtn.setAttribute('aria-label', `Обади се на ${phoneLabel}`);
   }
 
