@@ -569,3 +569,41 @@ h6 {
     margin-top: 0.2rem;
   }
 }
+
+.home-benefits-title { color: var(--brand-purple, #6f2cf3); }
+
+.benefit-card {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, .06);
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .06);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.benefit-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .09);
+}
+
+.benefit-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+  background: var(--brand-purple, #6f2cf3);
+  color: #fff;
+  font-size: 1.65rem;
+}
+
+.benefit-title { color: #111; }
+
+.benefit-link {
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--brand-purple, #6f2cf3);
+}
+
+.benefit-link:hover { text-decoration: underline; }
+
