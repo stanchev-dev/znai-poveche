@@ -369,8 +369,8 @@ h6 {
 .subjects-dropdown-trigger:hover,
 .subjects-dropdown-trigger:focus,
 .subjects-dropdown-trigger:focus-visible {
-  color: #f8f5ff;
-  background-color: rgba(111, 44, 243, 0.72);
+  color: #0f172a;
+  background-color: rgba(238, 242, 247, 0.92);
 }
 
 .subjects-dropdown-trigger.show,
