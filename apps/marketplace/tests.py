@@ -33,7 +33,7 @@ class ListingAPITests(APITestCase):
             subject=self.math,
             owner=self.owner,
             price_per_hour="45.00",
-            online_only=False,
+            lesson_mode=Listing.LessonMode.ONLINE_AND_IN_PERSON,
             description="A" * 250,
             contact_phone="+359000000",
         )
@@ -78,7 +78,7 @@ class ListingAPITests(APITestCase):
         payload = {
             "subject": self.physics.slug,
             "price_per_hour": "60.50",
-            "online_only": True,
+            "lesson_mode": Listing.LessonMode.ONLINE,
             "description": "Experienced tutor",
             "contact_phone": "+359123456",
         }
@@ -103,7 +103,7 @@ class ListingAPITests(APITestCase):
         payload = {
             "subject": self.physics.slug,
             "price_per_hour": "60.50",
-            "online_only": True,
+            "lesson_mode": Listing.LessonMode.ONLINE,
             "description": "Experienced tutor",
             "contact_phone": "+359123456",
         }
@@ -128,7 +128,7 @@ class ListingAPITests(APITestCase):
         payload = {
             "subject": self.math.slug,
             "price_per_hour": "30.00",
-            "online_only": False,
+            "lesson_mode": Listing.LessonMode.ONLINE_AND_IN_PERSON,
             "description": "No contacts provided",
         }
 
@@ -146,7 +146,7 @@ class ListingAPITests(APITestCase):
             subject=self.math,
             owner=self.other_user,
             price_per_hour="50.00",
-            online_only=True,
+            lesson_mode=Listing.LessonMode.ONLINE,
             description="VIP listing",
             contact_phone="+359111111",
             vip_until=timezone.now() + timedelta(days=2),
@@ -163,7 +163,7 @@ class ListingAPITests(APITestCase):
             subject=self.math,
             owner=self.other_user,
             price_per_hour="50.00",
-            online_only=True,
+            lesson_mode=Listing.LessonMode.ONLINE,
             description="VIP listing",
             contact_phone="+359111111",
             vip_until=timezone.now() + timedelta(days=2),
@@ -172,7 +172,7 @@ class ListingAPITests(APITestCase):
             subject=self.math,
             owner=self.other_user,
             price_per_hour="65.00",
-            online_only=False,
+            lesson_mode=Listing.LessonMode.ONLINE_AND_IN_PERSON,
             description="New non-VIP listing",
             contact_phone="+359333333",
         )
@@ -189,7 +189,7 @@ class ListingAPITests(APITestCase):
             subject=self.math,
             owner=self.other_user,
             price_per_hour="55.00",
-            online_only=True,
+            lesson_mode=Listing.LessonMode.ONLINE,
             description="Newer non-VIP",
             contact_phone="+359222222",
             vip_until=timezone.now() - timedelta(days=1),
@@ -206,7 +206,7 @@ class ListingAPITests(APITestCase):
             subject=self.math,
             owner=self.other_user,
             price_per_hour="48.00",
-            online_only=True,
+            lesson_mode=Listing.LessonMode.ONLINE,
             description="Active VIP",
             contact_phone="+359444444",
             vip_until=timezone.now() + timedelta(hours=6),
@@ -215,7 +215,7 @@ class ListingAPITests(APITestCase):
             subject=self.math,
             owner=self.owner,
             price_per_hour="35.00",
-            online_only=False,
+            lesson_mode=Listing.LessonMode.ONLINE_AND_IN_PERSON,
             description="Expired VIP",
             contact_phone="+359555555",
             vip_until=timezone.now() - timedelta(hours=1),
@@ -233,7 +233,7 @@ class ListingAPITests(APITestCase):
             subject=self.physics,
             owner=self.owner,
             price_per_hour="90.00",
-            online_only=True,
+            lesson_mode=Listing.LessonMode.ONLINE,
             description="Physics listing",
             contact_email="physics@example.com",
         )
@@ -305,7 +305,11 @@ class ListingAPITests(APITestCase):
                 subject=self.math,
                 owner=self.owner if index % 2 == 0 else self.other_user,
                 price_per_hour="40.00",
-                online_only=bool(index % 2),
+                lesson_mode=(
+                    Listing.LessonMode.ONLINE
+                    if bool(index % 2)
+                    else Listing.LessonMode.ONLINE_AND_IN_PERSON
+                ),
                 description=f"Listing {index}",
                 contact_phone=f"+359000{index:03d}",
             )

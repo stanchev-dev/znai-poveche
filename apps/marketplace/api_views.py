@@ -80,7 +80,7 @@ class ListingListCreateAPIView(generics.GenericAPIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             if online_only == "1":
-                queryset = queryset.filter(online_only=True)
+                queryset = queryset.filter(lesson_mode=Listing.LessonMode.ONLINE)
 
         price_min = request.query_params.get("price_min")
         if price_min not in (None, ""):
