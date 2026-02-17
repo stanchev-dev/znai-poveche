@@ -25,19 +25,14 @@
     return 'lesson-mode-badge--online-and-in-person';
   }
 
-  function subjectBadgeClass(slug) {
-    const subjectClasses = {
-      matematika: 'subject-badge--math',
-      fizika: 'subject-badge--physics',
-      himiq: 'subject-badge--chemistry',
-      istoriq: 'subject-badge--history',
-      biologiq: 'subject-badge--biology',
-      'bulgarski-ezik': 'subject-badge--bulgarian',
-      literatura: 'subject-badge--literature',
-      'informacionni-tehnologii': 'subject-badge--it',
-      drugi: 'subject-badge--other',
-    };
-    return subjectClasses[slug] || 'subject-badge--default';
+  function subjectBadgeStyle(subject) {
+    const dark = /^#[0-9A-Fa-f]{6}$/.test(subject?.theme_color_dark || '')
+      ? subject.theme_color_dark
+      : '#6F2CF3';
+    const light = /^#[0-9A-Fa-f]{6}$/.test(subject?.theme_color_light || '')
+      ? subject.theme_color_light
+      : '#9465FF';
+    return `--subject-badge-bg: ${escapeHtml(dark)}; --subject-badge-border: ${escapeHtml(light)};`;
   }
 
   function roleBadgeClass(role) {
@@ -59,7 +54,7 @@
     <div class="mb-3"><img src="${l.image || defaultImage}" alt="Снимка на обява" class="img-fluid rounded" style="max-height:260px;object-fit:cover;" onerror="this.src='${defaultImage}'"></div>
     <h1 class="h4">${escapeHtml(l.subject.name)} ${l.is_vip ? '<span class="badge text-bg-warning">VIP</span>' : ''}</h1>
     <div class="listing-card-badges mb-3">
-      <span class="badge rounded-pill listing-pill subject-badge ${subjectBadgeClass(l.subject.slug)}">${escapeHtml(l.subject.name)}</span>
+      <span class="badge rounded-pill listing-pill subject-badge subject-badge--default" style="${subjectBadgeStyle(l.subject)}">${escapeHtml(l.subject.name)}</span>
       ${l.lesson_mode_label ? `<span class="badge rounded-pill listing-pill lesson-mode-badge ${lessonModeBadgeClass(l.lesson_mode)}">${escapeHtml(l.lesson_mode_label)}</span>` : ''}
     </div>
     <p>${l.description}</p>
