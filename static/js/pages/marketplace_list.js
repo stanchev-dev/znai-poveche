@@ -3,6 +3,8 @@
   const alertBox = document.getElementById('listings-alert');
   const subjectFilter = document.getElementById('subject-filter');
   const defaultAvatar = '/static/img/default-avatar.svg';
+  const subjectFilterMenu = document.getElementById('subject-filter-menu');
+  const subjectFilterLabel = document.getElementById('subject-filter-label');
   let nextUrl = null;
   let prevUrl = null;
 
@@ -69,11 +71,40 @@
     `;
   }
 
+  function updateSubjectFilterUi(value) {
+    const selectedOption = Array.from(subjectFilter.options).find((option) => option.value === value);
+    if (selectedOption) {
+      subjectFilterLabel.textContent = selectedOption.textContent;
+    }
+
+    subjectFilterMenu.querySelectorAll('.dropdown-item').forEach((item) => {
+      item.classList.toggle('active', item.dataset.value === value);
+    });
+  }
+
+  function bindSubjectMenuActions() {
+    subjectFilterMenu.addEventListener('click', (event) => {
+      const button = event.target.closest('.dropdown-item[data-value]');
+      if (!button) return;
+      const value = button.dataset.value;
+      if (!value) return;
+      subjectFilter.value = value;
+      updateSubjectFilterUi(value);
+    });
+  }
+
   async function loadSubjects() {
     const res = await window.apiUtils.apiFetch('/api/subjects/');
     if (!res.ok) return;
     const subjects = await res.json();
-    subjectFilter.innerHTML += subjects.map((s) => `<option value="${s.slug}">${s.name}</option>`).join('');
+    const optionsMarkup = subjects.map((s) => `<option value="${s.slug}">${s.name}</option>`).join('');
+    const menuMarkup = subjects
+      .map((s) => `<li><button type="button" class="dropdown-item" data-value="${s.slug}">${s.name}</button></li>`)
+      .join('');
+
+    subjectFilter.innerHTML += optionsMarkup;
+    subjectFilterMenu.innerHTML += menuMarkup;
+    updateSubjectFilterUi(subjectFilter.value);
   }
 
   function buildUrl() {
@@ -108,6 +139,9 @@
     }
     list.innerHTML = data.results.map((l) => listingCard(l)).join('');
   }
+
+  bindSubjectMenuActions();
+  updateSubjectFilterUi(subjectFilter.value);
 
   document.getElementById('apply-filters').onclick = () => load(buildUrl());
   document.getElementById('prev-btn').onclick = () => { if (prevUrl) load(prevUrl); };
