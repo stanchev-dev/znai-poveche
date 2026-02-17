@@ -12,12 +12,9 @@
   const description = document.getElementById('listing-description');
   const price = document.getElementById('listing-price');
   const owner = document.getElementById('listing-owner');
-  const contactsWrap = document.getElementById('contacts-wrap');
-  const contactsBtn = document.getElementById('contacts-btn');
+  const callBtn = document.getElementById('call-btn');
   const defaultImage = '/static/img/default-avatar.svg';
   let contactData = null;
-  let phoneRevealReady = false;
-  let revealedPhoneHref = '';
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -56,31 +53,22 @@
     return `+${digits}`;
   }
 
-  function renderContacts(data) {
-    let html = '<div class="card card-body"><h2 class="h6">Контакти</h2>';
+  function buildLoginRedirectUrl() {
+    const nextUrl = window.location.pathname + window.location.search;
+    const separator = loginUrl.includes('?') ? '&' : '?';
+    return `${loginUrl}${separator}next=${encodeURIComponent(nextUrl)}`;
+  }
 
-    if (data.contact_phone) {
-      const phoneLabel = escapeHtml(data.contact_phone);
-      const phoneHref = normalizePhoneForTel(data.contact_phone);
-      const phoneLink = phoneHref ? `<a href="tel:${phoneHref}" class="contacts-phone-link"><i class="bi bi-telephone-fill" aria-hidden="true"></i><span>${phoneLabel}</span></a>` : `<span>${phoneLabel}</span>`;
-      html += `<p class="mb-2"><span class="fw-semibold">Телефон:</span> ${phoneLink}</p>`;
+  function revealPhone(phoneLabel) {
+    const phoneHref = normalizePhoneForTel(phoneLabel);
+    if (!phoneHref) {
+      return;
     }
 
-    if (data.contact_email) {
-      html += `<p class="mb-2"><span class="fw-semibold">Имейл:</span> ${escapeHtml(data.contact_email)}</p>`;
-    }
-
-    if (data.contact_url) {
-      const safeUrl = escapeHtml(data.contact_url);
-      html += `<p class="mb-0"><span class="fw-semibold">Линк:</span> <a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a></p>`;
-    }
-
-    if (!data.contact_phone && !data.contact_email && !data.contact_url) {
-      html += '<p class="mb-0">Няма резултати</p>';
-    }
-
-    html += '</div>';
-    contactsWrap.innerHTML = html;
+    callBtn.href = `tel:${phoneHref}`;
+    callBtn.dataset.revealed = '1';
+    callBtn.innerHTML = `<span class="contacts-btn-label">Обади се</span><span class="contacts-btn-phone"><i class="bi bi-telephone-fill" aria-hidden="true"></i><span>${escapeHtml(phoneLabel)}</span></span>`;
+    callBtn.setAttribute('aria-label', `Обади се на ${phoneLabel}`);
   }
 
   const res = await window.apiUtils.apiFetch(`/api/listings/${listingId}/`);
@@ -115,34 +103,32 @@
 
   price.textContent = `${l.price_per_hour} €/ч`;
 
-  contactsBtn.onclick = async () => {
-    if (phoneRevealReady && revealedPhoneHref) {
-      window.location.href = `tel:${revealedPhoneHref}`;
+  callBtn.addEventListener('click', async (event) => {
+    if (!isAuthenticated) {
+      event.preventDefault();
+      window.location.href = buildLoginRedirectUrl();
       return;
     }
 
-    if (!isAuthenticated) {
-      contactsWrap.innerHTML = `<div class="alert alert-warning">Трябва да сте логнати. <a href="${loginUrl}">Вход</a></div>`;
+    if (callBtn.dataset.revealed === '1') {
       return;
     }
+
+    event.preventDefault();
 
     if (!contactData) {
       const contactRes = await window.apiUtils.apiFetch(`/api/listings/${listingId}/contact/`);
       if (contactRes.status === 401 || contactRes.status === 403) {
-        contactsWrap.innerHTML = `<div class="alert alert-warning">Трябва да сте логнати. <a href="${loginUrl}">Вход</a></div>`;
+        window.location.href = buildLoginRedirectUrl();
         return;
       }
       contactData = await contactRes.json();
     }
 
-    revealedPhoneHref = normalizePhoneForTel(contactData.contact_phone);
-    phoneRevealReady = Boolean(contactData.contact_phone && revealedPhoneHref);
-
-    if (phoneRevealReady) {
-      contactsBtn.innerHTML = `<span class="contacts-btn-label">Обади се</span><span class="contacts-btn-phone"><i class="bi bi-telephone-fill" aria-hidden="true"></i><span>${escapeHtml(contactData.contact_phone)}</span></span>`;
-      contactsBtn.setAttribute('aria-label', `Обади се на ${contactData.contact_phone}`);
+    if (!contactData.contact_phone) {
+      return;
     }
 
-    renderContacts(contactData);
-  };
+    revealPhone(contactData.contact_phone);
+  });
 })();
