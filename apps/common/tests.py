@@ -1,8 +1,10 @@
 from io import StringIO
+from types import SimpleNamespace
 
 from django.core.management import call_command
 from django.test import TestCase
 
+from apps.common.utils.pagination import build_olx_page_items
 from apps.discussions.models import Subject
 
 
@@ -54,3 +56,26 @@ class SeedCommandTests(TestCase):
         output = out.getvalue()
         self.assertIn('Seed completed.', output)
         self.assertTrue(Subject.objects.exists())
+
+
+class PaginationUtilsTests(TestCase):
+    def test_single_page_returns_only_one(self):
+        paginator = SimpleNamespace(num_pages=1)
+        page_obj = SimpleNamespace(number=1)
+
+        self.assertEqual(build_olx_page_items(paginator, page_obj), [1])
+
+    def test_small_page_count_returns_all_pages(self):
+        paginator = SimpleNamespace(num_pages=5)
+        page_obj = SimpleNamespace(number=3)
+
+        self.assertEqual(build_olx_page_items(paginator, page_obj), [1, 2, 3, 4, 5])
+
+    def test_large_page_count_returns_olx_like_middle_window(self):
+        paginator = SimpleNamespace(num_pages=25)
+        page_obj = SimpleNamespace(number=10)
+
+        self.assertEqual(
+            build_olx_page_items(paginator, page_obj),
+            [1, '…', 9, 10, 11, '…', 25],
+        )

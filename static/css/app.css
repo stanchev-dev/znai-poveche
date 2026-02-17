@@ -1353,44 +1353,60 @@ h6 {
   }
 }
 
-.zp-pagination-wrapper {
+.zp-pagination-olx {
   overflow-x: auto;
 }
 
-.zp-pagination {
-  gap: 0.35rem;
+.zp-pagination-olx .pagination {
+  gap: 0.2rem;
 }
 
-.zp-pagination .page-link {
-  border-radius: 999px;
-  min-width: 2.25rem;
-  height: 2.25rem;
+.zp-pagination-olx .page-item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.zp-pagination-olx .page-link {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #111;
+  font-weight: 600;
+  padding: 0.4rem 0.55rem;
+  min-width: auto;
+  height: auto;
+  line-height: 1;
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(111, 44, 243, 0.28);
-  color: var(--brand-purple, #6f2cf3);
-  background: #ffffff;
-  font-weight: 700;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-}
-
-.zp-pagination .page-item.active .page-link {
-  border-color: var(--brand-purple, #6f2cf3);
-  background: rgba(111, 44, 243, 0.12);
-  color: var(--brand-purple-dark, #5b21d1);
-}
-
-.zp-pagination .page-item:not(.active):not(.disabled) .page-link:hover,
-.zp-pagination .page-item:not(.active):not(.disabled) .page-link:focus-visible {
-  border-color: var(--brand-purple, #6f2cf3);
-  background: rgba(111, 44, 243, 0.1);
-  color: var(--brand-purple-dark, #5b21d1);
   box-shadow: none;
+  transition: opacity 0.15s ease;
 }
 
-.zp-pagination .page-item.disabled .page-link {
-  border-color: transparent;
+.zp-pagination-olx .page-item.active .page-link {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 2px solid #111;
+  border-radius: 50%;
+  color: #111;
   background: transparent;
-  color: #8d8d97;
+}
+
+.zp-pagination-olx .page-item:not(.active):not(.disabled) .page-link:hover,
+.zp-pagination-olx .page-item:not(.active):not(.disabled) .page-link:focus-visible {
+  color: #111;
+  background: transparent;
+  opacity: 0.75;
+  box-shadow: none;
+  text-decoration: none;
+}
+
+.zp-pagination-olx .page-item.disabled .page-link {
+  border: 0;
+  background: transparent;
+  color: #111;
+  opacity: 1;
+  padding-inline: 0.45rem;
 }
