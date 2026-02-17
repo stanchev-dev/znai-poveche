@@ -2,6 +2,8 @@
   --brand-purple: #6f2cf3;
   --brand-purple-dark: #5b21d1;
   --brand-purple-light: #8b5cf6;
+  --brand-purple-cta: #7c45f5;
+  --brand-purple-cta-dark: #6730df;
   --footer-purple: #2a0f4d;
 }
 
@@ -100,6 +102,32 @@ h6 {
 .btn-brand-primary:focus-visible {
   outline: none;
   box-shadow: 0 0 0 0.22rem rgba(111, 44, 243, 0.25), 0 10px 22px rgba(17, 24, 39, 0.16);
+}
+
+
+.btn-brand-purple {
+  background: var(--brand-purple-cta, #7c45f5);
+  border-color: var(--brand-purple-cta-dark, #6730df);
+  color: #ffffff;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.btn-brand-purple:hover {
+  transform: scale(1.04);
+  box-shadow: 0 10px 22px rgba(17, 24, 39, 0.18);
+  background: var(--brand-purple-cta-dark, #6730df);
+  border-color: var(--brand-purple-cta-dark, #6730df);
+  color: #ffffff;
+}
+
+.btn-brand-purple:active {
+  transform: scale(0.99);
+  box-shadow: 0 6px 14px rgba(17, 24, 39, 0.14);
+}
+
+.btn-brand-purple:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.22rem rgba(124, 69, 245, 0.25), 0 10px 22px rgba(17, 24, 39, 0.16);
 }
 
 
@@ -1041,11 +1069,6 @@ h6 {
   font-weight: 800;
   color: #111827;
   white-space: nowrap;
-}
-
-.listing-card-details {
-  font-weight: 600;
-  color: inherit;
 }
 
 @media (max-width: 767.98px) {
