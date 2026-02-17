@@ -1,0 +1,38 @@
+{% load static %}
+<footer class="site-footer mt-auto" role="contentinfo">
+  <div class="container py-5">
+    <div class="row gy-4">
+      <div class="col-12 col-md-6 col-lg-4">
+        <a class="site-footer-brand" href="{% url 'home' %}" aria-label="Знай повече - начало">
+          <img src="{% static 'img/logo-mark.png' %}" alt="Лого на Знай повече" class="site-footer-logo">
+          <span class="site-footer-title">Знай повече</span>
+        </a>
+        <p class="site-footer-tagline mb-0">Учиш умно, развиваш се уверено.</p>
+      </div>
+
+      <div class="col-6 col-md-3 col-lg-4">
+        <h2 class="site-footer-heading h6">Навигация</h2>
+        <ul class="site-footer-list list-unstyled mb-0">
+          <li><a href="{% url 'discussions-page' %}">Предмети</a></li>
+          <li><a href="{% url 'marketplace-page' %}">Маркетплейс</a></li>
+          <li><a href="{% url 'leaderboard-page' %}">Класация</a></li>
+        </ul>
+      </div>
+
+      <div class="col-6 col-md-3 col-lg-4">
+        <h2 class="site-footer-heading h6">Правни</h2>
+        <ul class="site-footer-list list-unstyled mb-0">
+          <li><a href="#" aria-label="Общи условия">Общи условия</a></li>
+          <li><a href="#" aria-label="Политика за поверителност">Политика за поверителност</a></li>
+          <li><a href="#" aria-label="Политика за бисквитки">Политика за бисквитки</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="site-footer-bottom">
+    <div class="container text-center py-3">
+      <small>© {% now "Y" %} Знай повече. Всички права запазени.</small>
+    </div>
+  </div>
+</footer>
