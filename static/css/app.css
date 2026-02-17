@@ -800,15 +800,15 @@ h6 {
 
 
 .home-headline-section-subjects {
-  margin-top: clamp(2.5rem, 6vw, 4.5rem);
+  margin-top: clamp(3.3rem, 7.9vw, 6rem);
 }
 
 .home-headline-wrap {
-  margin-bottom: clamp(2rem, 4.5vw, 3.2rem);
+  margin-bottom: clamp(2.65rem, 5.9vw, 4.2rem);
 }
 
 .home-headline-wrap-benefits {
-  margin-top: clamp(2.4rem, 5vw, 4rem);
+  margin-top: clamp(3.2rem, 6.6vw, 5.3rem);
 }
 .home-section-title {
   margin-bottom: 0;
