@@ -64,7 +64,6 @@
             </div>
             <div class="listing-card-right">
               <div class="listing-card-price">${escapeHtml(l.price_per_hour)} €/ч</div>
-              <div class="listing-card-details link-brand">Детайли <span aria-hidden="true">→</span></div>
             </div>
           </div>
         </article>
