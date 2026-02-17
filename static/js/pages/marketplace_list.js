@@ -7,6 +7,7 @@
   const subjectFilterLabel = document.getElementById('subject-filter-label');
   let nextUrl = null;
   let prevUrl = null;
+  const initialSubjectFromQuery = new URLSearchParams(window.location.search).get('subject');
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -148,5 +149,11 @@
   document.getElementById('next-btn').onclick = () => { if (nextUrl) load(nextUrl); };
 
   await loadSubjects();
+
+  if (initialSubjectFromQuery && Array.from(subjectFilter.options).some((option) => option.value === initialSubjectFromQuery)) {
+    subjectFilter.value = initialSubjectFromQuery;
+    updateSubjectFilterUi(initialSubjectFromQuery);
+  }
+
   await load(buildUrl());
 })();
