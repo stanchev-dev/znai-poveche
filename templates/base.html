@@ -62,7 +62,7 @@
             </span>
             <span class="account-menu-label">{% user_nav_label user %}</span>
           </button>
-          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm account-menu">
             {% if user.is_authenticated %}
               <li>
                 <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'profile' %}">
