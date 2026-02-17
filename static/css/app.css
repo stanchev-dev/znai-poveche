@@ -1,5 +1,7 @@
 :root {
   --brand-purple: #6f2cf3;
+  --brand-purple-dark: #5b21d1;
+  --brand-purple-light: #8b5cf6;
   --footer-purple: #2a0f4d;
 }
 
@@ -635,12 +637,14 @@ h6 {
   vertical-align: middle;
 }
 
-.subject-accent {
+.subject-accent,
+.brand-underline {
   position: relative;
   display: inline-block;
 }
 
-.subject-accent::after {
+.subject-accent::after,
+.brand-underline::after {
   content: "";
   position: absolute;
   left: 0.08em;
@@ -682,7 +686,7 @@ h6 {
   display: grid;
   place-items: center;
   margin: 0 auto;
-  background: var(--brand-purple, #6f2cf3);
+  background: linear-gradient(90deg, var(--brand-purple-dark), var(--brand-purple-light));
   color: #fff;
   font-size: 1.65rem;
 }
