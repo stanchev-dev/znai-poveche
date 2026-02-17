@@ -577,19 +577,130 @@ h6 {
   gap: 0.45rem;
 }
 
+.listing-pill {
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  padding: 0.43rem 0.72rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.listing-pill:hover,
+.listing-pill:focus-visible,
+.listing-card-link:hover .listing-pill,
+.listing-card-link:focus-visible .listing-pill {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(15, 23, 42, 0.12);
+}
+
+.subject-badge {
+  color: #ffffff;
+}
+
+.subject-badge--math {
+  background: #2563eb;
+  border-color: #1e4fbe;
+}
+
+.subject-badge--physics {
+  background: #5b21b6;
+  border-color: #4b1a95;
+}
+
+.subject-badge--chemistry {
+  background: #be185d;
+  border-color: #9e144d;
+}
+
+.subject-badge--history {
+  background: #b45309;
+  border-color: #92400e;
+}
+
+.subject-badge--biology {
+  background: #15803d;
+  border-color: #166534;
+}
+
+.subject-badge--bulgarian {
+  background: #1d4ed8;
+  border-color: #1e40af;
+}
+
+.subject-badge--literature {
+  background: #7c3aed;
+  border-color: #6d28d9;
+}
+
+.subject-badge--it {
+  background: #0369a1;
+  border-color: #075985;
+}
+
+.subject-badge--other,
+.subject-badge--default {
+  background: #6f2cf3;
+  border-color: #5723c5;
+}
+
+.listing-card-link:hover .subject-badge,
+.listing-card-link:focus-visible .subject-badge,
+.subject-badge:hover,
+.subject-badge:focus-visible {
+  filter: brightness(0.94);
+  color: #ffffff;
+}
 
 .lesson-mode-badge {
-  background: var(--brand-purple, #6f2cf3);
-  border: 1px solid var(--brand-purple-dark, #5723c5);
   color: #ffffff;
+}
+
+.lesson-mode-badge--online-and-in-person {
+  background: var(--brand-purple, #6f2cf3);
+  border-color: var(--brand-purple-dark, #5723c5);
+}
+
+.lesson-mode-badge--online {
+  background: #9465ff;
+  border-color: #7f56d9;
+}
+
+.lesson-mode-badge--in-person {
+  background: #5320b4;
+  border-color: #451b95;
 }
 
 .listing-card-link:hover .lesson-mode-badge,
 .listing-card-link:focus-visible .lesson-mode-badge,
 .lesson-mode-badge:hover,
 .lesson-mode-badge:focus-visible {
-  background: var(--brand-purple-dark, #5723c5);
-  border-color: var(--brand-purple-dark, #5723c5);
+  filter: brightness(0.92);
+  color: #ffffff;
+}
+
+.role-badge {
+  color: #ffffff;
+}
+
+.role-badge--learner {
+  background: #4caf78;
+  border-color: #3f9465;
+}
+
+.role-badge--teacher {
+  background: #2e7d58;
+  border-color: #245f43;
+}
+
+.listing-card-link:hover .role-badge,
+.listing-card-link:focus-visible .role-badge,
+.role-badge:hover,
+.role-badge:focus-visible {
+  filter: brightness(0.93);
   color: #ffffff;
 }
 
