@@ -386,12 +386,13 @@ h6 {
 }
 
 
-@media (min-width: 992px) { /* lg and up */
-  .account-toggle {
-    min-width: 220px;
-    padding-left: 18px !important;
-    padding-right: 18px !important;
-    justify-content: center;
+.navbar .dropdown-menu.account-menu {
+  min-width: 280px;
+}
+
+@media (min-width: 992px) {
+  .navbar .dropdown-menu.account-menu {
+    min-width: 320px;
   }
 }
 
