@@ -85,6 +85,13 @@
   }
 
   const l = await res.json();
+  const ownerDisplayName = l.owner.display_name || l.owner.username;
+  const ownerSecondaryText = l.owner.display_name && l.owner.display_name !== l.owner.username
+    ? `@${l.owner.username}`
+    : '';
+  const ownerLevel = Number.isFinite(Number(l.owner.level)) ? Number(l.owner.level) : null;
+  const ownerAvatar = l.owner.avatar || l.owner.avatar_url || defaultImage;
+
   gallery.innerHTML = `<div class="card marketplace-detail-gallery-card"><div class="card-body p-2 p-md-3">
     <img src="${l.image || defaultImage}" alt="Снимка на обява" class="img-fluid rounded marketplace-detail-image" onerror="this.src='${defaultImage}'">
   </div></div>`;
@@ -94,8 +101,17 @@
 
   owner.innerHTML = `<div class="card"><div class="card-body">
     <h2 class="h6 mb-3">Потребител</h2>
-    <div class="listing-card-badges mb-0">
-      <span class="badge bg-light text-dark">${escapeHtml(l.owner.username)} (${escapeHtml(l.owner.display_name)}, ниво ${escapeHtml(l.owner.level)})</span>
+    <div class="seller-card-header">
+      <div class="seller-avatar">
+        <img src="${escapeHtml(ownerAvatar)}" alt="Профилна снимка на ${escapeHtml(ownerDisplayName)}" class="rounded-circle" onerror="this.src='${defaultImage}'">
+        ${ownerLevel !== null ? `<span class="seller-level-badge" title="Ниво ${ownerLevel}" aria-label="Ниво ${ownerLevel}">${ownerLevel}</span>` : ''}
+      </div>
+      <div class="seller-meta">
+        <p class="seller-name">${escapeHtml(ownerDisplayName)}</p>
+        ${ownerSecondaryText ? `<p class="seller-subline mb-0">${escapeHtml(ownerSecondaryText)}</p>` : ''}
+      </div>
+    </div>
+    <div class="seller-pills mb-0">
       <span class="badge rounded-pill listing-pill role-badge ${roleBadgeClass(l.owner.role)}">${escapeHtml(l.owner.role_label || (l.owner.role === 'teacher' ? 'Учител' : 'Учащ'))}</span>
       <span class="badge rounded-pill listing-pill subject-badge" style="${window.subjectBadgeUtils.getSubjectBadgeStyle(l.subject)}">${escapeHtml(l.subject.name)}</span>
       ${l.lesson_mode_label ? `<span class="badge rounded-pill listing-pill lesson-mode-badge ${lessonModeBadgeClass(l.lesson_mode)}">${escapeHtml(l.lesson_mode_label)}</span>` : ''}
