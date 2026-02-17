@@ -698,6 +698,57 @@ h6 {
   border-color: #475569;
 }
 
+
+.marketplace-detail-page .marketplace-detail-image {
+  width: 100%;
+  max-height: 460px;
+  object-fit: cover;
+}
+
+.marketplace-detail-page .marketplace-detail-sidebar {
+  top: 1rem;
+}
+
+.marketplace-detail-page .marketplace-detail-sidebar-card {
+  border: 1px solid #e9ecef;
+}
+
+.marketplace-detail-page .marketplace-detail-price-label {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+
+.marketplace-detail-page .marketplace-detail-price {
+  font-size: clamp(1.7rem, 3vw, 2.15rem);
+  line-height: 1.1;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.marketplace-detail-page .contacts-cta-btn {
+  background: #111111;
+  border-color: #111111;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 0.75rem 1rem;
+}
+
+.marketplace-detail-page .contacts-cta-btn:hover,
+.marketplace-detail-page .contacts-cta-btn:focus-visible,
+.marketplace-detail-page .contacts-cta-btn:active {
+  background: #212121;
+  border-color: #212121;
+  color: #ffffff;
+}
+
+@media (max-width: 991.98px) {
+  .marketplace-detail-page .marketplace-detail-sidebar {
+    position: static !important;
+  }
+}
+
 .listing-card-link:hover .subject-badge,
 .listing-card-link:focus-visible .subject-badge,
 .subject-badge:hover,
