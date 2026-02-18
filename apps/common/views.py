@@ -176,8 +176,6 @@ def leaderboard(request):
     if scope == "subject":
         if subject_slug:
             selected_subject = get_object_or_404(Subject, slug=subject_slug)
-        else:
-            scope = "global"
 
     if scope == "subject" and selected_subject is not None:
         post_score_subquery = (
@@ -221,8 +219,6 @@ def leaderboard(request):
             .order_by("-subject_score", "user_id")
         )
     else:
-        scope = "global"
-        selected_subject = None
         queryset = Profile.objects.select_related("user").order_by(
             "-reputation_points",
             "user_id",
