@@ -1,8 +1,12 @@
 from django.core.paginator import Paginator
+from django.db.models import ExpressionWrapper, F, IntegerField, OuterRef, Subquery, Sum
+from django.db.models.functions import Coalesce
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from apps.accounts.models import Profile
+from apps.discussions.models import Comment, Post, Subject
 
 
 INFO_PAGES = {
@@ -163,13 +167,68 @@ def home(request):
 @ensure_csrf_cookie
 def leaderboard(request):
     scope = request.GET.get("scope", "global")
-    if scope != "global":
+    if scope not in {"global", "subject"}:
         scope = "global"
 
-    queryset = Profile.objects.select_related("user").order_by(
-        "-reputation_points",
-        "user_id",
-    )
+    subject_slug = request.GET.get("subject", "")
+    selected_subject = None
+
+    if scope == "subject":
+        if subject_slug:
+            selected_subject = get_object_or_404(Subject, slug=subject_slug)
+        else:
+            scope = "global"
+
+    if scope == "subject" and selected_subject is not None:
+        post_score_subquery = (
+            Post.objects.filter(
+                author_id=OuterRef("user_id"),
+                subject=selected_subject,
+            )
+            .values("author_id")
+            .annotate(total_score=Sum("score"))
+            .values("total_score")
+        )
+        comment_score_subquery = (
+            Comment.objects.filter(
+                author_id=OuterRef("user_id"),
+                post__subject=selected_subject,
+            )
+            .values("author_id")
+            .annotate(total_score=Sum("score"))
+            .values("total_score")
+        )
+
+        queryset = (
+            Profile.objects.select_related("user")
+            .annotate(
+                post_score=Coalesce(
+                    Subquery(post_score_subquery, output_field=IntegerField()),
+                    0,
+                ),
+                comment_score=Coalesce(
+                    Subquery(comment_score_subquery, output_field=IntegerField()),
+                    0,
+                ),
+            )
+            .annotate(
+                subject_score=ExpressionWrapper(
+                    F("post_score") + F("comment_score"),
+                    output_field=IntegerField(),
+                )
+            )
+            .filter(subject_score__gt=0)
+            .order_by("-subject_score", "user_id")
+        )
+    else:
+        scope = "global"
+        selected_subject = None
+        queryset = Profile.objects.select_related("user").order_by(
+            "-reputation_points",
+            "user_id",
+        )
+
+    subjects = Subject.objects.all()
 
     top_profiles = list(queryset[:3])
 
@@ -184,7 +243,11 @@ def leaderboard(request):
             "user_id": profile.user_id,
             "username": username,
             "level": profile.level,
-            "points": profile.reputation_points,
+            "points": (
+                int(profile.subject_score)
+                if scope == "subject" and selected_subject is not None
+                else profile.reputation_points
+            ),
             "avatar_url": avatar_url,
             "initial": (username[:1] or "?").upper(),
         }
@@ -203,6 +266,8 @@ def leaderboard(request):
         "common/leaderboard.html",
         {
             "scope": scope,
+            "subjects": subjects,
+            "selected_subject": selected_subject,
             "top_three": top_three,
             "leaderboard_rows": leaderboard_rows,
             "page_obj": page_obj,
