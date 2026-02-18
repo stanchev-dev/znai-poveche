@@ -3,9 +3,12 @@ from types import SimpleNamespace
 
 from django.core.management import call_command
 from django.test import TestCase
+from django.contrib.auth import get_user_model
+from django.urls import reverse
 
+from apps.accounts.models import Profile
 from apps.common.utils.pagination import build_olx_page_items
-from apps.discussions.models import Subject
+from apps.discussions.models import Comment, Post, Subject
 
 
 class WebPageSmokeTests(TestCase):
@@ -79,3 +82,57 @@ class PaginationUtilsTests(TestCase):
             build_olx_page_items(paginator, page_obj),
             [1, '…', 9, 10, 11, '…', 25],
         )
+
+
+class LeaderboardPageScopeTests(TestCase):
+    def setUp(self):
+        self.user_model = get_user_model()
+        self.user_one = self.user_model.objects.create_user(username="ivan")
+        self.user_two = self.user_model.objects.create_user(username="maria")
+
+        Profile.objects.create(user=self.user_one, reputation_points=40)
+        Profile.objects.create(user=self.user_two, reputation_points=30)
+
+        self.subject_math = Subject.objects.create(name="Математика")
+        self.subject_history = Subject.objects.create(name="История")
+
+        post = Post.objects.create(
+            subject=self.subject_math,
+            author=self.user_two,
+            title="Тест",
+            body="Тяло",
+            score=18,
+        )
+        Comment.objects.create(
+            post=post,
+            author=self.user_two,
+            body="Коментар",
+            score=7,
+        )
+
+    def test_global_scope_selected_by_default(self):
+        response = self.client.get(reverse("leaderboard-page"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["scope"], "global")
+
+    def test_subject_scope_filters_by_selected_subject(self):
+        response = self.client.get(
+            reverse("leaderboard-page"),
+            {"scope": "subject", "subject": self.subject_math.slug},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["scope"], "subject")
+        self.assertEqual(response.context["selected_subject"], self.subject_math)
+        rows = response.context["leaderboard_rows"]
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["username"], "maria")
+        self.assertEqual(rows[0]["points"], 25)
+
+    def test_subject_scope_without_subject_falls_back_to_global(self):
+        response = self.client.get(reverse("leaderboard-page"), {"scope": "subject"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["scope"], "global")
+        self.assertIsNone(response.context["selected_subject"])
