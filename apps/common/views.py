@@ -1,5 +1,8 @@
+from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.views.decorators.csrf import ensure_csrf_cookie
+
+from apps.accounts.models import Profile
 
 
 INFO_PAGES = {
@@ -159,7 +162,54 @@ def home(request):
 
 @ensure_csrf_cookie
 def leaderboard(request):
-    return render(request, "common/leaderboard.html")
+    scope = request.GET.get("scope", "global")
+    if scope != "global":
+        scope = "global"
+
+    queryset = Profile.objects.select_related("user").order_by(
+        "-reputation_points",
+        "user_id",
+    )
+
+    top_profiles = list(queryset[:3])
+
+    paginator = Paginator(queryset, 20)
+    page_obj = paginator.get_page(request.GET.get("page", 1))
+
+    def serialize_row(profile, rank):
+        username = profile.user.get_username()
+        avatar_url = profile.avatar.url if profile.avatar else None
+        return {
+            "rank": rank,
+            "user_id": profile.user_id,
+            "username": username,
+            "level": profile.level,
+            "points": profile.reputation_points,
+            "avatar_url": avatar_url,
+            "initial": (username[:1] or "?").upper(),
+        }
+
+    leaderboard_rows = [
+        serialize_row(profile, page_obj.start_index() + index)
+        for index, profile in enumerate(page_obj.object_list)
+    ]
+    top_three = [
+        serialize_row(profile, index + 1)
+        for index, profile in enumerate(top_profiles)
+    ]
+
+    return render(
+        request,
+        "common/leaderboard.html",
+        {
+            "scope": scope,
+            "top_three": top_three,
+            "leaderboard_rows": leaderboard_rows,
+            "page_obj": page_obj,
+            "is_paginated": page_obj.has_other_pages(),
+            "current_user_id": request.user.id if request.user.is_authenticated else None,
+        },
+    )
 
 
 def info_page(request, page_key):
