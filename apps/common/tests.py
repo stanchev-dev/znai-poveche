@@ -130,6 +130,18 @@ class LeaderboardPageScopeTests(TestCase):
         self.assertEqual(rows[0]["username"], "maria")
         self.assertEqual(rows[0]["points"], 25)
 
+
+    def test_subject_scope_with_no_participants_hides_podium_and_shows_empty_state(self):
+        response = self.client.get(
+            reverse("leaderboard-page"),
+            {"scope": "subject", "subject": self.subject_history.slug},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["top_three"], [])
+        self.assertContains(response, "Все още няма участници в класацията.")
+        self.assertNotContains(response, 'class="lb-hero rounded-4 p-3 p-md-4"')
+
     def test_subject_scope_without_subject_falls_back_to_global(self):
         response = self.client.get(reverse("leaderboard-page"), {"scope": "subject"})
 
