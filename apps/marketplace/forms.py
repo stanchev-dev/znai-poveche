@@ -105,8 +105,6 @@ class ListingEditForm(forms.ModelForm):
             "description",
             "contact_name",
             "contact_phone",
-            "contact_email",
-            "contact_url",
         ]
         widgets = {
             "subject": forms.Select(attrs={"class": "form-select"}),
@@ -115,6 +113,4 @@ class ListingEditForm(forms.ModelForm):
             "description": forms.Textarea(attrs={"class": "form-control", "rows": 5}),
             "contact_name": forms.TextInput(attrs={"class": "form-control"}),
             "contact_phone": forms.TextInput(attrs={"class": "form-control"}),
-            "contact_email": forms.EmailInput(attrs={"class": "form-control"}),
-            "contact_url": forms.URLInput(attrs={"class": "form-control"}),
         }
