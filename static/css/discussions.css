@@ -18,22 +18,36 @@
   border-color: #dee2e6;
 }
 
-.discussions-page .discussions-sort-select {
-  color: #111827;
-  background-color: #ffffff;
-  border-color: #dee2e6;
+/* --- Discussions: sort dropdown brand styling (CSS-only) --- */
+.discussions-filters-card #sort-select,
+.discussions-filters-card .discussions-sort-select {
+  background-color: #fff !important;
+  color: #111 !important;
+  border: 1px solid #d9d9e3 !important;
+  border-radius: 10px;
+  padding: 0.6rem 2.2rem 0.6rem 0.9rem;
+  box-shadow: none !important;
+  outline: none !important;
+  appearance: auto;
 }
 
-.discussions-page .discussions-sort-select:hover {
-  background-color: #ffffff;
-  border-color: #dee2e6;
+/* remove bootstrap blue focus + add purple */
+.discussions-filters-card #sort-select:focus,
+.discussions-filters-card .discussions-sort-select:focus {
+  border-color: #6f42ff !important;
+  box-shadow: 0 0 0 0.25rem rgba(111, 66, 255, 0.25) !important;
 }
 
-.discussions-page .discussions-sort-select:focus,
-.discussions-page .discussions-sort-select:focus-visible {
-  background-color: #ffffff;
-  border-color: var(--brand-purple-cta, #7c45f5);
-  box-shadow: 0 0 0 0.24rem rgba(124, 69, 245, 0.22);
+/* keep white on hover, subtle border */
+.discussions-filters-card #sort-select:hover,
+.discussions-filters-card .discussions-sort-select:hover {
+  border-color: rgba(111, 66, 255, 0.55) !important;
+}
+
+/* optional: if using Bootstrap form-select */
+.discussions-filters-card .form-select:focus {
+  border-color: #6f42ff !important;
+  box-shadow: 0 0 0 0.25rem rgba(111, 66, 255, 0.25) !important;
 }
 
 .discussions-page .form-select:focus,
