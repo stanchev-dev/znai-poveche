@@ -29,21 +29,27 @@
     {
       field: 'description',
       message: 'Попълни описание.',
-      isInvalid: () => (form.description.value || '').trim().length < 40,
+      isInvalid: () => (form.description.value || '').trim().length < 20,
     },
     {
       field: 'contact_name',
       message: 'Попълни лице за контакт.',
-      isInvalid: () => !(form.contact_name.value || '').trim(),
+      isInvalid: () => {
+        const raw = (form.contact_name.value || '').trim();
+        if (!raw) return true;
+        const normalized = raw.replace(/[\s-]+/g, '');
+        return /^\d+$/.test(normalized);
+      },
     },
     {
       field: 'contact_phone',
       message: 'Въведи валиден телефон.',
       isInvalid: () => {
         const raw = (form.contact_phone.value || '').trim();
-        const collapsed = raw.replace(/\s+/g, '');
+        const collapsed = raw.replace(/[\s-]+/g, '');
         if (!collapsed) return true;
-        if (collapsed.length < 9 || collapsed.length > 13) return true;
+        const digitsOnly = collapsed.startsWith('+') ? collapsed.slice(1) : collapsed;
+        if (!digitsOnly || digitsOnly.length < 9 || digitsOnly.length > 13) return true;
         if (!(collapsed.startsWith('0') || collapsed.startsWith('+359'))) return true;
         return !/^\+?\d+$/.test(collapsed);
       },
