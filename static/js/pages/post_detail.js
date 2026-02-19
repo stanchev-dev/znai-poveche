@@ -9,33 +9,100 @@
   const postContainer = document.getElementById('post-container');
   const commentsList = document.getElementById('comments-list');
 
-  function chip(author) { return `<span class="badge bg-light text-dark">${author.username} (${author.display_name}, ниво ${author.level})</span>`; }
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+
+  function formatRelativeTime(isoDate) {
+    const date = new Date(isoDate);
+    if (Number.isNaN(date.getTime())) return 'Публикувана наскоро';
+
+    const diffMs = Date.now() - date.getTime();
+    const minute = 60 * 1000;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+
+    if (diffMs < minute) return 'Публикувана преди по-малко от минута';
+
+    if (diffMs < hour) {
+      const minutes = Math.floor(diffMs / minute);
+      return `Публикувана преди ${minutes} ${minutes === 1 ? 'минута' : 'минути'}`;
+    }
+
+    if (diffMs < day) {
+      const hours = Math.floor(diffMs / hour);
+      return `Публикувана преди ${hours} ${hours === 1 ? 'час' : 'часа'}`;
+    }
+
+    const days = Math.floor(diffMs / day);
+    return `Публикувана преди ${days} ${days === 1 ? 'ден' : 'дни'}`;
+  }
+
+  function authorCard(author, subject) {
+    const displayName = author.display_name || author.username;
+    const secondary = author.display_name && author.display_name !== author.username ? `@${author.username}` : '';
+    const level = Number.isFinite(Number(author.level)) ? Number(author.level) : null;
+    const roleClass = author.role === 'teacher' ? 'role-badge--teacher' : 'role-badge--learner';
+    const roleLabel = author.role_label || (author.role === 'teacher' ? 'Учител' : 'Учащ');
+    const avatar = author.avatar || '/static/img/default-avatar.svg';
+
+    return `
+      <div class="card discussion-author-card">
+        <div class="card-body">
+          <div class="discussion-seller-card-header">
+            <div class="discussion-seller-avatar">
+              <img src="${avatar}" alt="Профилна снимка" class="rounded-circle">
+              ${level !== null ? `<span class="discussion-seller-level-badge">${level}</span>` : ''}
+            </div>
+            <div class="discussion-seller-meta">
+              <p class="discussion-seller-name">${escapeHtml(displayName)}</p>
+              ${secondary ? `<p class="discussion-seller-subline mb-0">${escapeHtml(secondary)}</p>` : ''}
+            </div>
+          </div>
+          <div class="discussion-seller-pills mb-0">
+            <span class="badge rounded-pill listing-pill role-badge ${roleClass}">${escapeHtml(roleLabel)}</span>
+            <span class="badge rounded-pill listing-pill subject-badge" style="${window.subjectBadgeUtils.getSubjectBadgeStyle(subject)}">${escapeHtml(subject.name)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   function imgIf(url) {
     return url
-      ? `<div class="discussion-image-frame marketplace-detail-image-frame rounded mt-2"><img src="${url}" class="discussion-image marketplace-detail-image" alt="image"></div>`
+      ? `<div class="discussion-image-frame marketplace-detail-image-frame rounded mt-3"><img src="${escapeHtml(url)}" class="discussion-image marketplace-detail-image" alt="Илюстрация към дискусия"></div>`
       : '';
   }
-  function alertHtml(text, type='warning') { return `<div class="alert alert-${type}">${text}</div>`; }
+
+  function alertHtml(text, type = 'warning') { return `<div class="alert alert-${type}">${text}</div>`; }
   function loginAlert() { return `${alertHtml(`Трябва да сте логнати. <a href="${loginUrl}">Вход</a>`, 'warning')}`; }
 
-  async function vote(url, scoreEl) {
-    const res = await window.apiUtils.apiFetch(url, { method: 'POST', body: JSON.stringify({ value: 1 }) });
-    if (res.status === 401 || res.status === 403) {
-      postAlert.innerHTML = loginAlert();
-      return;
+  async function castVote(url, scoreEl, targetType, voteValue, voteWrap) {
+    if (targetType === 'post' && voteValue === -1) {
+      const currentScore = Number(scoreEl.textContent || 0);
+      if (currentScore <= 0) return;
     }
-    const data = await res.json();
-    if (data.score !== undefined) scoreEl.textContent = data.score;
-  }
 
-  async function voteDown(url, scoreEl) {
-    const res = await window.apiUtils.apiFetch(url, { method: 'POST', body: JSON.stringify({ value: -1 }) });
+    const res = await window.apiUtils.apiFetch(url, { method: 'POST', body: JSON.stringify({ value: voteValue }) });
     if (res.status === 401 || res.status === 403) {
       postAlert.innerHTML = loginAlert();
       return;
     }
+
     const data = await res.json();
-    if (data.score !== undefined) scoreEl.textContent = data.score;
+    const nextScore = data.score ?? data.new_score;
+    if (nextScore !== undefined) scoreEl.textContent = nextScore;
+
+    const voteState = Number(data.vote_value || voteValue);
+    if (voteWrap) {
+      voteWrap.querySelector('.vote-btn--up')?.classList.toggle('is-active', voteState === 1);
+      voteWrap.querySelector('.vote-btn--down')?.classList.toggle('is-active', voteState === -1);
+    }
   }
 
   async function submitReport(targetType, targetId, reason, message) {
@@ -78,22 +145,40 @@
       return;
     }
     const post = await res.json();
-    postContainer.innerHTML = `<div class="card"><div class="card-body">
-      <h1 class="h4">${post.title}</h1>
-      <p>${post.body}</p>
+
+    postContainer.innerHTML = `<article class="card discussion-post-card"><div class="card-body">
+      <header class="discussion-post-header mb-3">
+        <h1 class="h3 mb-2">${escapeHtml(post.title)}</h1>
+        <div class="discussion-post-meta-row">
+          <span><strong>${escapeHtml(post.author.display_name || post.author.username)}</strong></span>
+          <span class="discussion-post-meta-separator">•</span>
+          <span>${formatRelativeTime(post.created_at)}</span>
+          <span class="discussion-post-meta-separator">•</span>
+          <span class="badge rounded-pill listing-pill subject-badge" style="${window.subjectBadgeUtils.getSubjectBadgeStyle(post.subject)}">${escapeHtml(post.subject.name)}</span>
+        </div>
+      </header>
+
+      <p class="discussion-post-description mb-0">${escapeHtml(post.body)}</p>
       ${imgIf(post.image)}
-      <p>Точки: <strong id="post-score">${post.score}</strong></p>
-      ${chip(post.author)}
-      <div class="mt-2">
-        <button class="btn btn-sm btn-success" id="post-up">▲</button>
-        <button class="btn btn-sm btn-danger" id="post-down">▼</button>
+
+      <div class="discussion-post-voting mt-3" data-type="post">
+        <button class="vote-btn vote-btn--up" id="post-up" aria-label="Положителен вот">▲</button>
+        <strong id="post-score" class="vote-score">${post.score}</strong>
+        <button class="vote-btn vote-btn--down" id="post-down" aria-label="Отрицателен вот">▼</button>
       </div>
+
+      <section class="mt-3">
+        <h2 class="h6 text-muted mb-2">Автор</h2>
+        ${authorCard(post.author, post.subject)}
+      </section>
+
       ${reportFormHtml('post', post.id)}
-    </div></div>`;
+    </div></article>`;
 
     const scoreEl = document.getElementById('post-score');
-    document.getElementById('post-up').onclick = () => vote(`/api/posts/${postId}/vote/`, scoreEl);
-    document.getElementById('post-down').onclick = () => voteDown(`/api/posts/${postId}/vote/`, scoreEl);
+    const voteWrap = postContainer.querySelector('.discussion-post-voting');
+    document.getElementById('post-up').onclick = () => castVote(`/api/posts/${postId}/vote/`, scoreEl, 'post', 1, voteWrap);
+    document.getElementById('post-down').onclick = () => castVote(`/api/posts/${postId}/vote/`, scoreEl, 'post', -1, voteWrap);
   }
 
   async function loadComments() {
@@ -108,21 +193,20 @@
       return;
     }
     commentsList.innerHTML = items.map((c) => `<div class="card"><div class="card-body">
-      <p>${c.body}</p>${imgIf(c.image)}
-      <p>Точки: <strong id="comment-score-${c.id}">${c.score}</strong></p>
-      ${chip(c.author)}
-      <div class="mt-2">
-        <button class="btn btn-sm btn-success comment-up" data-id="${c.id}">▲</button>
-        <button class="btn btn-sm btn-danger comment-down" data-id="${c.id}">▼</button>
+      <p>${escapeHtml(c.body)}</p>${imgIf(c.image)}
+      <div class="discussion-post-voting mt-3" data-type="comment" id="comment-vote-${c.id}">
+        <button class="vote-btn vote-btn--up comment-up" data-id="${c.id}" aria-label="Положителен вот">▲</button>
+        <strong id="comment-score-${c.id}" class="vote-score">${c.score}</strong>
+        <button class="vote-btn vote-btn--down comment-down" data-id="${c.id}" aria-label="Отрицателен вот">▼</button>
       </div>
       ${reportFormHtml('comment', c.id)}
     </div></div>`).join('');
 
     commentsList.querySelectorAll('.comment-up').forEach((btn) => {
-      btn.onclick = () => vote(`/api/comments/${btn.dataset.id}/vote/`, document.getElementById(`comment-score-${btn.dataset.id}`));
+      btn.onclick = () => castVote(`/api/comments/${btn.dataset.id}/vote/`, document.getElementById(`comment-score-${btn.dataset.id}`), 'comment', 1, document.getElementById(`comment-vote-${btn.dataset.id}`));
     });
     commentsList.querySelectorAll('.comment-down').forEach((btn) => {
-      btn.onclick = () => voteDown(`/api/comments/${btn.dataset.id}/vote/`, document.getElementById(`comment-score-${btn.dataset.id}`));
+      btn.onclick = () => castVote(`/api/comments/${btn.dataset.id}/vote/`, document.getElementById(`comment-score-${btn.dataset.id}`), 'comment', -1, document.getElementById(`comment-vote-${btn.dataset.id}`));
     });
   }
 

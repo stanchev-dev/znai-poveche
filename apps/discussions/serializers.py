@@ -51,10 +51,11 @@ class AuthorSerializer(serializers.ModelSerializer):
     level = serializers.SerializerMethodField()
     role = serializers.SerializerMethodField()
     role_label = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["username", "display_name", "level", "role", "role_label"]
+        fields = ["username", "display_name", "level", "role", "role_label", "avatar"]
 
     def get_display_name(self, obj) -> str:
         try:
@@ -79,6 +80,13 @@ class AuthorSerializer(serializers.ModelSerializer):
             return obj.profile.get_role_display()
         except ObjectDoesNotExist:
             return "Учащ"
+
+    def get_avatar(self, obj) -> str | None:
+        try:
+            avatar = obj.profile.avatar
+            return avatar.url if avatar else None
+        except ObjectDoesNotExist:
+            return None
 
 
 class SubjectSummarySerializer(serializers.ModelSerializer):

@@ -243,6 +243,9 @@ class BaseVoteAPIView(APIView):
     vote_model = None
     target_field = ""
 
+    def allow_negative_score(self) -> bool:
+        return True
+
     def post(self, request, pk):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -279,6 +282,14 @@ class BaseVoteAPIView(APIView):
                 existing_value,
                 vote_value,
             )
+
+            if (
+                score_delta < 0
+                and not self.allow_negative_score()
+                and target.score + score_delta < 0
+            ):
+                score_delta = 0
+                reputation_delta = 0
 
             if score_delta == 0 and reputation_delta == 0:
                 author_profile = Profile.objects.get(user=target.author)
@@ -329,6 +340,9 @@ class PostVoteAPIView(BaseVoteAPIView):
     target_model = Post
     vote_model = PostVote
     target_field = "post"
+
+    def allow_negative_score(self) -> bool:
+        return False
 
 
 class CommentVoteAPIView(BaseVoteAPIView):
