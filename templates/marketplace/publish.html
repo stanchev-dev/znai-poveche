@@ -1,64 +1,117 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Публикувай обява{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-lg-8">
-    <h1 class="h3 mb-3">Публикувай обява</h1>
+<div class="row justify-content-center marketplace-publish-page">
+  <div class="col-xl-9 col-lg-10">
+    <div class="d-flex flex-column flex-sm-row align-items-sm-end justify-content-between gap-2 mb-4">
+      <div>
+        <h1 class="h3 mb-1">Публикувай обява</h1>
+        <p class="text-muted mb-0">Създай ясна и привлекателна обява за уроци.</p>
+      </div>
+    </div>
+
     <div id="publish-errors"></div>
 
-    <form id="listing-publish-form" class="card card-body" enctype="multipart/form-data">
-      <div class="mb-3">
-        <label for="subject" class="form-label">Предмет</label>
-        <select id="subject" name="subject" class="form-select" required>
-          <option value="">Зареждане...</option>
-        </select>
-      </div>
+    <form id="listing-publish-form" class="d-grid gap-3" enctype="multipart/form-data" novalidate>
+      <section class="card shadow-sm border-0 rounded-4 p-4 publish-section-card">
+        <h2 class="h5 mb-3">Какво предлагаш?</h2>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="subject" class="form-label">Предмет</label>
+            <select id="subject" name="subject" class="form-select publish-input" required>
+              <option value="">Зареждане...</option>
+            </select>
+          </div>
 
-      <div class="mb-3">
-        <label for="price_per_hour" class="form-label">Цена на час</label>
-        <input id="price_per_hour" name="price_per_hour" type="number" step="0.01" min="0" class="form-control" required>
-      </div>
+          <div class="col-md-6">
+            <label for="price_per_hour" class="form-label">Цена на час</label>
+            <input id="price_per_hour" name="price_per_hour" type="number" step="0.01" min="0" class="form-control publish-input" required>
+          </div>
 
-      <fieldset class="mb-3">
-        <legend class="col-form-label pt-0">Режим на обучение</legend>
-        <div class="form-check">
-          <input id="lesson_mode_online" name="lesson_mode" type="radio" class="form-check-input" value="online" required>
-          <label for="lesson_mode_online" class="form-check-label">Онлайн</label>
-        </div>
-        <div class="form-check">
-          <input id="lesson_mode_in_person" name="lesson_mode" type="radio" class="form-check-input" value="in_person" required>
-          <label for="lesson_mode_in_person" class="form-check-label">Присъствено</label>
-        </div>
-        <div class="form-check">
-          <input id="lesson_mode_online_and_in_person" name="lesson_mode" type="radio" class="form-check-input" value="online_and_in_person" checked required>
-          <label for="lesson_mode_online_and_in_person" class="form-check-label">Онлайн + присъствено</label>
-        </div>
-      </fieldset>
+          <div class="col-12">
+            <fieldset>
+              <legend class="col-form-label pt-0 mb-2">Режим на обучение</legend>
+              <div class="btn-group lesson-mode-group w-100 flex-wrap" role="group" aria-label="Режим на обучение">
+                <input id="lesson_mode_online" name="lesson_mode" type="radio" class="btn-check" value="online" required>
+                <label for="lesson_mode_online" class="btn lesson-mode-btn">Онлайн</label>
 
-      <div class="mb-3">
+                <input id="lesson_mode_in_person" name="lesson_mode" type="radio" class="btn-check" value="in_person" required>
+                <label for="lesson_mode_in_person" class="btn lesson-mode-btn">Присъствено</label>
+
+                <input id="lesson_mode_online_and_in_person" name="lesson_mode" type="radio" class="btn-check" value="online_and_in_person" checked required>
+                <label for="lesson_mode_online_and_in_person" class="btn lesson-mode-btn">Онлайн + присъствено</label>
+              </div>
+            </fieldset>
+          </div>
+        </div>
+      </section>
+
+      <section class="card shadow-sm border-0 rounded-4 p-4 publish-section-card">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <h2 class="h5 mb-0">Снимка</h2>
+          <span
+            class="image-info-icon"
+            tabindex="0"
+            data-bs-toggle="tooltip"
+            data-bs-placement="right"
+            data-bs-custom-class="olx-dark-tooltip"
+            title="Приемаме файлове до 5MB: .jpg, .jpeg, .png. Използвай ясни и реални снимки за по-добър резултат."
+            aria-label="Информация за позволените файлове"
+          >
+            <i class="bi bi-info-circle"></i>
+          </span>
+        </div>
         <label for="image" class="form-label">Снимка (по желание)</label>
-        <input id="image" name="image" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
-      </div>
+        <input id="image" name="image" type="file" class="d-none" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
 
-      <div class="mb-3">
+        <button type="button" id="listing-image-tile" class="listing-image-tile" aria-label="Добави снимка">
+          <span class="listing-image-placeholder" id="listing-image-placeholder">
+            <i class="bi bi-camera"></i>
+            <span>Добави снимка</span>
+          </span>
+          <img id="listing-image-preview" class="listing-image-preview d-none" alt="Преглед на избрана снимка">
+          <span id="listing-image-cover-badge" class="badge text-bg-dark listing-cover-badge d-none">КОРИЦА</span>
+          <span id="listing-image-remove" class="listing-remove-btn d-none" aria-label="Премахни снимката">&times;</span>
+        </button>
+        <div id="image-inline-error" class="text-danger small mt-2 d-none" aria-live="polite"></div>
+      </section>
+
+      <section class="card shadow-sm border-0 rounded-4 p-4 publish-section-card">
+        <h2 class="h5 mb-3">Описание</h2>
         <label for="description" class="form-label">Описание</label>
-        <textarea id="description" name="description" class="form-control" rows="5" required></textarea>
-      </div>
+        <textarea
+          id="description"
+          name="description"
+          class="form-control publish-input publish-description"
+          rows="6"
+          required
+          placeholder="Напиши това, което ти се иска да прочетеш, ако ти гледаш тази обява."
+        ></textarea>
+      </section>
 
-      <div class="mb-3">
-        <label for="contact_phone" class="form-label">Телефон</label>
-        <input id="contact_phone" name="contact_phone" type="text" class="form-control">
-      </div>
+      <section class="card shadow-sm border-0 rounded-4 p-4 publish-section-card">
+        <h2 class="h5 mb-3">Контакти</h2>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="contact_phone" class="form-label">Телефон</label>
+            <input id="contact_phone" name="contact_phone" type="text" class="form-control publish-input">
+          </div>
+        </div>
+      </section>
 
-      <button type="submit" class="btn btn-primary">Публикувай</button>
+      <div class="d-flex justify-content-end mt-1">
+        <button type="submit" class="btn btn-brand-purple publish-submit-btn px-4">Публикувай</button>
+      </div>
     </form>
   </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/pages/listing_image_tile.js' %}"></script>
 <script>
 (function () {
   const form = document.getElementById('listing-publish-form');
@@ -86,7 +139,7 @@
     }
 
     errorsBox.innerHTML = `
-      <div class="alert alert-danger">
+      <div class="alert alert-danger rounded-4 shadow-sm">
         <ul class="mb-0">${items.map((item) => `<li>${item}</li>`).join('')}</ul>
       </div>
     `;
@@ -136,6 +189,11 @@
     }
 
     renderErrors('Сървърна грешка. Опитай отново.');
+  });
+
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+    new bootstrap.Tooltip(tooltipTriggerEl);
   });
 
   loadSubjects();
