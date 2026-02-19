@@ -9,7 +9,7 @@
       <h1 id="register-title" class="auth-title mb-2">Регистрация</h1>
       <p class="auth-subtitle text-muted mb-4">Създай профил за достъп до дискусии и маркетплейс.</p>
 
-      <form method="post" novalidate>
+      <form method="post" novalidate id="register-form">
         {% csrf_token %}
 
         {% if form.non_field_errors %}
@@ -95,7 +95,7 @@
           {% endfor %}
         </div>
 
-        <button type="submit" class="btn btn-brand-primary w-100 auth-submit-btn mt-2">
+        <button type="submit" class="btn btn-brand-primary w-100 auth-submit-btn mt-2" id="register-submit">
           <i class="bi bi-person-plus-fill me-2"></i>Създай профил
         </button>
 
@@ -110,6 +110,15 @@
 
 {% block extra_js %}
 <script>
+
+  const registerForm = document.getElementById('register-form');
+  const registerSubmit = document.getElementById('register-submit');
+  if (registerForm && registerSubmit) {
+    registerForm.addEventListener('submit', () => {
+      registerSubmit.disabled = true;
+      registerSubmit.setAttribute('aria-disabled', 'true');
+    });
+  }
   document.querySelectorAll('.password-toggle').forEach((toggle) => {
     toggle.addEventListener('click', () => {
       const input = document.getElementById(toggle.dataset.target);
