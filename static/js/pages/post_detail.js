@@ -88,20 +88,30 @@
       if (currentScore <= 0) return;
     }
 
-    const res = await window.apiUtils.apiFetch(url, { method: 'POST', body: JSON.stringify({ value: voteValue }) });
-    if (res.status === 401 || res.status === 403) {
-      postAlert.innerHTML = loginAlert();
-      return;
-    }
+    try {
+      const res = await window.apiUtils.apiFetch(url, { method: 'POST', body: JSON.stringify({ value: voteValue }) });
+      if (res.status === 401 || res.status === 403) {
+        postAlert.innerHTML = loginAlert();
+        return;
+      }
 
-    const data = await res.json();
-    const nextScore = data.score ?? data.new_score;
-    if (nextScore !== undefined) scoreEl.textContent = nextScore;
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg = data.detail || data.non_field_errors?.[0] || 'Грешка при гласуване';
+        postAlert.innerHTML = alertHtml(msg, 'danger');
+        return;
+      }
 
-    const voteState = Number(data.vote_value || voteValue);
-    if (voteWrap) {
-      voteWrap.querySelector('.vote-btn--up')?.classList.toggle('is-active', voteState === 1);
-      voteWrap.querySelector('.vote-btn--down')?.classList.toggle('is-active', voteState === -1);
+      const nextScore = data.score ?? data.new_score;
+      if (nextScore !== undefined) scoreEl.textContent = nextScore;
+
+      const voteState = Number(data.vote_value ?? voteValue);
+      if (voteWrap) {
+        voteWrap.querySelector('.vote-btn--up')?.classList.toggle('is-active', voteState === 1);
+        voteWrap.querySelector('.vote-btn--down')?.classList.toggle('is-active', voteState === -1);
+      }
+    } catch (error) {
+      postAlert.innerHTML = alertHtml('Грешка при гласуване', 'danger');
     }
   }
 
@@ -124,13 +134,39 @@
   }
 
   function reportFormHtml(type, id) {
-    return `<div class="mt-2">
-      <select class="form-select form-select-sm report-reason mb-1" data-target-type="${type}" data-target-id="${id}">
-        <option value="spam">spam</option><option value="abuse">abuse</option><option value="off_topic">off_topic</option><option value="other">other</option>
-      </select>
-      <textarea class="form-control form-control-sm report-message mb-1" placeholder="Съобщение (по желание)"></textarea>
-      <button class="btn btn-sm btn-outline-danger report-submit">Докладвай</button>
-    </div>`;
+    const collapseId = `report-collapse-${type}-${id}`;
+    return `
+      <div class="discussion-post-actions mt-3">
+        <div class="discussion-post-voting" data-type="${type}" id="${type}-vote-${id}"></div>
+        <button
+          class="btn btn-sm btn-outline-danger discussion-report-toggle"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#${collapseId}"
+          aria-expanded="false"
+          aria-controls="${collapseId}"
+        >Докладвай</button>
+      </div>
+      <div class="collapse mt-2" id="${collapseId}">
+        <div class="discussion-report-box">
+          <select class="form-select form-select-sm report-reason mb-2" data-target-type="${type}" data-target-id="${id}">
+            <option value="spam">spam</option><option value="abuse">abuse</option><option value="off_topic">off_topic</option><option value="other">other</option>
+          </select>
+          <textarea class="form-control form-control-sm report-message mb-2" placeholder="Съобщение (по желание)"></textarea>
+          <div class="d-flex gap-2 justify-content-end">
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}">Отказ</button>
+            <button class="btn btn-sm btn-outline-danger report-submit" type="button">Изпрати доклад</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function votingHtml(type, id, score) {
+    return `
+      <button class="vote-btn vote-btn--up" id="${type}-up-${id}" type="button" aria-label="Положителен вот">▲</button>
+      <strong id="${type}-score-${id}" class="vote-score">${score}</strong>
+      <button class="vote-btn vote-btn--down" id="${type}-down-${id}" type="button" aria-label="Отрицателен вот">▼</button>
+    `;
   }
 
   async function loadPost() {
@@ -150,8 +186,6 @@
       <header class="discussion-post-header mb-3">
         <h1 class="h3 mb-2">${escapeHtml(post.title)}</h1>
         <div class="discussion-post-meta-row">
-          <span><strong>${escapeHtml(post.author.display_name || post.author.username)}</strong></span>
-          <span class="discussion-post-meta-separator">•</span>
           <span>${formatRelativeTime(post.created_at)}</span>
           <span class="discussion-post-meta-separator">•</span>
           <span class="badge rounded-pill listing-pill subject-badge" style="${window.subjectBadgeUtils.getSubjectBadgeStyle(post.subject)}">${escapeHtml(post.subject.name)}</span>
@@ -161,24 +195,19 @@
       <p class="discussion-post-description mb-0">${escapeHtml(post.body)}</p>
       ${imgIf(post.image)}
 
-      <div class="discussion-post-voting mt-3" data-type="post">
-        <button class="vote-btn vote-btn--up" id="post-up" aria-label="Положителен вот">▲</button>
-        <strong id="post-score" class="vote-score">${post.score}</strong>
-        <button class="vote-btn vote-btn--down" id="post-down" aria-label="Отрицателен вот">▼</button>
-      </div>
+      ${reportFormHtml('post', post.id)}
 
       <section class="mt-3">
         <h2 class="h6 text-muted mb-2">Автор</h2>
         ${authorCard(post.author, post.subject)}
       </section>
-
-      ${reportFormHtml('post', post.id)}
     </div></article>`;
 
-    const scoreEl = document.getElementById('post-score');
-    const voteWrap = postContainer.querySelector('.discussion-post-voting');
-    document.getElementById('post-up').onclick = () => castVote(`/api/posts/${postId}/vote/`, scoreEl, 'post', 1, voteWrap);
-    document.getElementById('post-down').onclick = () => castVote(`/api/posts/${postId}/vote/`, scoreEl, 'post', -1, voteWrap);
+    const voteWrap = document.getElementById(`post-vote-${post.id}`);
+    voteWrap.innerHTML = votingHtml('post', post.id, post.score);
+    const scoreEl = document.getElementById(`post-score-${post.id}`);
+    document.getElementById(`post-up-${post.id}`).onclick = () => castVote(`/api/posts/${postId}/vote/`, scoreEl, 'post', 1, voteWrap);
+    document.getElementById(`post-down-${post.id}`).onclick = () => castVote(`/api/posts/${postId}/vote/`, scoreEl, 'post', -1, voteWrap);
   }
 
   async function loadComments() {
@@ -194,25 +223,28 @@
     }
     commentsList.innerHTML = items.map((c) => `<div class="card"><div class="card-body">
       <p>${escapeHtml(c.body)}</p>${imgIf(c.image)}
-      <div class="discussion-post-voting mt-3" data-type="comment" id="comment-vote-${c.id}">
-        <button class="vote-btn vote-btn--up comment-up" data-id="${c.id}" aria-label="Положителен вот">▲</button>
-        <strong id="comment-score-${c.id}" class="vote-score">${c.score}</strong>
-        <button class="vote-btn vote-btn--down comment-down" data-id="${c.id}" aria-label="Отрицателен вот">▼</button>
-      </div>
       ${reportFormHtml('comment', c.id)}
     </div></div>`).join('');
 
-    commentsList.querySelectorAll('.comment-up').forEach((btn) => {
-      btn.onclick = () => castVote(`/api/comments/${btn.dataset.id}/vote/`, document.getElementById(`comment-score-${btn.dataset.id}`), 'comment', 1, document.getElementById(`comment-vote-${btn.dataset.id}`));
+    items.forEach((c) => {
+      const voteWrap = document.getElementById(`comment-vote-${c.id}`);
+      if (voteWrap) voteWrap.innerHTML = votingHtml('comment', c.id, c.score);
     });
-    commentsList.querySelectorAll('.comment-down').forEach((btn) => {
-      btn.onclick = () => castVote(`/api/comments/${btn.dataset.id}/vote/`, document.getElementById(`comment-score-${btn.dataset.id}`), 'comment', -1, document.getElementById(`comment-vote-${btn.dataset.id}`));
+
+    commentsList.querySelectorAll('[id^="comment-up-"]').forEach((btn) => {
+      const id = btn.id.replace('comment-up-', '');
+      btn.onclick = () => castVote(`/api/comments/${id}/vote/`, document.getElementById(`comment-score-${id}`), 'comment', 1, document.getElementById(`comment-vote-${id}`));
+    });
+    commentsList.querySelectorAll('[id^="comment-down-"]').forEach((btn) => {
+      const id = btn.id.replace('comment-down-', '');
+      btn.onclick = () => castVote(`/api/comments/${id}/vote/`, document.getElementById(`comment-score-${id}`), 'comment', -1, document.getElementById(`comment-vote-${id}`));
     });
   }
 
   document.addEventListener('click', (event) => {
     if (!event.target.classList.contains('report-submit')) return;
-    const wrap = event.target.closest('div');
+    const wrap = event.target.closest('.discussion-report-box');
+    if (!wrap) return;
     const reasonEl = wrap.querySelector('.report-reason');
     const msgEl = wrap.querySelector('.report-message');
     submitReport(reasonEl.dataset.targetType, Number(reasonEl.dataset.targetId), reasonEl.value, msgEl.value);
