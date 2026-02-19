@@ -18,36 +18,36 @@
   border-color: #dee2e6;
 }
 
-/* --- Discussions: sort dropdown brand styling (CSS-only) --- */
+/* Discussions sort dropdown mirrors marketplace subject select styling. */
+.discussions-filters select[name="sort"],
 .discussions-filters-card #sort-select,
 .discussions-filters-card .discussions-sort-select {
   background-color: #fff !important;
   color: #111 !important;
-  border: 1px solid #d9d9e3 !important;
-  border-radius: 10px;
-  padding: 0.6rem 2.2rem 0.6rem 0.9rem;
-  box-shadow: none !important;
-  outline: none !important;
-  appearance: auto;
 }
 
-/* remove bootstrap blue focus + add purple */
+/* keep white when focused/opened */
+.discussions-filters select[name="sort"]:focus,
 .discussions-filters-card #sort-select:focus,
 .discussions-filters-card .discussions-sort-select:focus {
-  border-color: #6f42ff !important;
-  box-shadow: 0 0 0 0.25rem rgba(111, 66, 255, 0.25) !important;
+  background-color: #fff !important;
+  color: #111 !important;
 }
 
-/* keep white on hover, subtle border */
-.discussions-filters-card #sort-select:hover,
-.discussions-filters-card .discussions-sort-select:hover {
-  border-color: rgba(111, 66, 255, 0.55) !important;
-}
-
-/* optional: if using Bootstrap form-select */
+/* marketplace-matching purple focus ring */
+.discussions-filters select[name="sort"].form-select:focus,
 .discussions-filters-card .form-select:focus {
   border-color: #6f42ff !important;
   box-shadow: 0 0 0 0.25rem rgba(111, 66, 255, 0.25) !important;
+}
+
+/* remove any extra wrapper chevrons to avoid duplicate arrows */
+.discussions-filters .select-wrapper::after,
+.discussions-filters .custom-select::after,
+.discussions-filters-card .select-wrapper::after,
+.discussions-filters-card .custom-select::after {
+  content: none !important;
+  display: none !important;
 }
 
 .discussions-page .form-select:focus,
