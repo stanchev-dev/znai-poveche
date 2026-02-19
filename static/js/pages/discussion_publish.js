@@ -3,8 +3,13 @@
     const form = document.getElementById('post-publish-form');
     const errorsBox = document.getElementById('publish-errors');
     const subjectSelect = document.getElementById('subject');
+    const subjectTrigger = document.getElementById('subject-trigger');
+    const subjectMenu = form?.querySelector('#subject-trigger + .publish-select-menu');
+    const gradeSelect = document.getElementById('grade');
+    const gradeTrigger = document.getElementById('grade-trigger');
+    const gradeMenu = form?.querySelector('#grade-trigger + .publish-select-menu');
     const prefillSubject = JSON.parse(document.getElementById('prefill-subject').textContent || '""');
-    if (!form || !errorsBox || !subjectSelect) return;
+    if (!form || !errorsBox || !subjectSelect || !subjectTrigger || !subjectMenu) return;
 
     const touchedFields = new Set();
     const FIELD_RULES = {
@@ -33,6 +38,16 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    function fieldControl(fieldName) {
+      const field = form[fieldName];
+      if (!field) return null;
+      const proxySelector = field.getAttribute('data-validation-proxy');
+      if (proxySelector) {
+        return form.querySelector(proxySelector) || field;
+      }
+      return field;
+    }
+
     function toggleFieldUi(fieldName, isValid) {
       const wrap = form.querySelector(`[data-validation-field="${fieldName}"]`);
       const feedback = document.getElementById(`${fieldName}-feedback`);
@@ -52,10 +67,10 @@
 
     function validateField(fieldName) {
       const rule = FIELD_RULES[fieldName];
-      if (!rule || !form[fieldName]) return true;
+      const field = fieldControl(fieldName);
+      if (!rule || !field) return true;
 
       const isValid = rule.isValid();
-      const field = form[fieldName];
 
       field.classList.remove('is-valid', 'is-invalid');
       if (!shouldApply(fieldName)) {
@@ -92,22 +107,41 @@
       });
     }
 
+    function bindCustomSelect(selectEl, triggerEl, menuEl) {
+      if (!selectEl || !triggerEl || !menuEl) return;
+      menuEl.addEventListener('click', (event) => {
+        const option = event.target.closest('.dropdown-item[data-value]');
+        if (!option) return;
+        event.preventDefault();
+        selectEl.value = option.dataset.value;
+        triggerEl.textContent = option.textContent.trim();
+        selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+    }
+
     async function loadSubjects() {
       const response = await window.apiUtils.apiFetch('/api/subjects/');
       if (!response.ok) {
-        subjectSelect.innerHTML = '<option value="">Неуспешно зареждане</option>';
+        subjectTrigger.textContent = 'Неуспешно зареждане';
+        subjectMenu.innerHTML = '<li><span class="dropdown-item disabled">Неуспешно зареждане</span></li>';
         return;
       }
 
       const subjects = await response.json();
-      subjectSelect.innerHTML = '<option value="">Избери предмет</option>' + subjects
-        .map((subject) => `<option value="${subject.slug}">${subject.name}</option>`)
+      subjectMenu.innerHTML = '<li><button type="button" class="dropdown-item" data-value="">Избери предмет</button></li>' + subjects
+        .map((subject) => `<li><button type="button" class="dropdown-item" data-value="${subject.slug}">${subject.name}</button></li>`)
         .join('');
+      subjectTrigger.textContent = 'Избери предмет';
 
       if (prefillSubject && subjects.some((subject) => subject.slug === prefillSubject)) {
+        const prefill = subjects.find((subject) => subject.slug === prefillSubject);
         subjectSelect.value = prefillSubject;
+        subjectTrigger.textContent = prefill.name;
       }
     }
+
+    bindCustomSelect(subjectSelect, subjectTrigger, subjectMenu);
+    bindCustomSelect(gradeSelect, gradeTrigger, gradeMenu);
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();

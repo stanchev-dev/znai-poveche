@@ -19,13 +19,57 @@
         <div class="mb-3">
           <label for="subject" class="form-label">Предмет</label>
           <div class="publish-field-wrap" data-validation-field="subject">
-            <select id="subject" name="subject" class="form-select publish-input publish-subject-select" required aria-describedby="subject-feedback">
-              <option value="">Зареждане...</option>
-            </select>
+            <div class="dropdown publish-select-dropdown">
+              <input id="subject" name="subject" type="hidden" class="publish-input" required aria-describedby="subject-feedback" data-validation-proxy="#subject-trigger">
+              <button
+                id="subject-trigger"
+                type="button"
+                class="form-select publish-input publish-subject-trigger text-start"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Зареждане...
+              </button>
+              <ul class="dropdown-menu subjects-themed-menu publish-select-menu" aria-labelledby="subject-trigger"></ul>
+            </div>
             <span class="publish-valid-icon d-none" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
             <span class="invalid-feedback-icon d-none" aria-hidden="true"><i class="bi bi-exclamation-circle-fill"></i></span>
           </div>
           <div id="subject-feedback" class="invalid-feedback d-none">Избери предмет.</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="grade" class="form-label">Клас (по желание)</label>
+          <div class="publish-field-wrap" data-validation-field="grade">
+            <div class="dropdown publish-select-dropdown">
+              <input id="grade" name="grade" type="hidden" class="publish-input" value="" data-validation-proxy="#grade-trigger" aria-describedby="grade-help">
+              <button
+                id="grade-trigger"
+                type="button"
+                class="form-select publish-input publish-subject-trigger text-start"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Не е посочено
+              </button>
+              <ul class="dropdown-menu subjects-themed-menu publish-select-menu" aria-labelledby="grade-trigger">
+                <li><button type="button" class="dropdown-item" data-value="">Не е посочено</button></li>
+                <li><button type="button" class="dropdown-item" data-value="1">1. клас</button></li>
+                <li><button type="button" class="dropdown-item" data-value="2">2. клас</button></li>
+                <li><button type="button" class="dropdown-item" data-value="3">3. клас</button></li>
+                <li><button type="button" class="dropdown-item" data-value="4">4. клас</button></li>
+                <li><button type="button" class="dropdown-item" data-value="5">5. клас</button></li>
+                <li><button type="button" class="dropdown-item" data-value="6">6. клас</button></li>
+                <li><button type="button" class="dropdown-item" data-value="7">7. клас</button></li>
+                <li><button type="button" class="dropdown-item" data-value="8">8. клас</button></li>
+                <li><button type="button" class="dropdown-item" data-value="9">9. клас</button></li>
+                <li><button type="button" class="dropdown-item" data-value="10">10. клас</button></li>
+                <li><button type="button" class="dropdown-item" data-value="11">11. клас</button></li>
+                <li><button type="button" class="dropdown-item" data-value="12">12. клас</button></li>
+              </ul>
+            </div>
+          </div>
+          <div id="grade-help" class="form-text">По желание можеш да добавиш за кой клас е темата.</div>
         </div>
 
         <div class="mb-3">
@@ -39,27 +83,6 @@
         </div>
 
 
-        <div class="mb-3">
-          <label for="grade" class="form-label">Клас (по желание)</label>
-          <div class="publish-field-wrap" data-validation-field="grade">
-            <select id="grade" name="grade" class="form-select publish-input publish-subject-select" aria-describedby="grade-help">
-              <option value="">Не е посочено</option>
-              <option value="1">1. клас</option>
-              <option value="2">2. клас</option>
-              <option value="3">3. клас</option>
-              <option value="4">4. клас</option>
-              <option value="5">5. клас</option>
-              <option value="6">6. клас</option>
-              <option value="7">7. клас</option>
-              <option value="8">8. клас</option>
-              <option value="9">9. клас</option>
-              <option value="10">10. клас</option>
-              <option value="11">11. клас</option>
-              <option value="12">12. клас</option>
-            </select>
-          </div>
-          <div id="grade-help" class="form-text">По желание можеш да добавиш за кой клас е темата.</div>
-        </div>
         <div>
           <label for="body" class="form-label">Описание</label>
           <div class="publish-field-wrap" data-validation-field="body">
