@@ -233,7 +233,7 @@ class CommentCreateAPIView(PostCommentListView):
 
 
 def calculate_level(points: int) -> int:
-    return (points // 25) + 1
+    return max(1, (points // 25) + 1)
 
 
 def apply_reputation_delta(profile: Profile, reputation_delta: int) -> None:
