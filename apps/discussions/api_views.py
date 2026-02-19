@@ -12,7 +12,7 @@ from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.generics import ListCreateAPIView, ListAPIView, RetrieveAPIView
+from rest_framework.generics import ListCreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -24,6 +24,7 @@ from .models import Comment, CommentVote, Post, PostVote, Subject
 from .serializers import (
     CommentCreateSerializer,
     CommentSerializer,
+    PostBodyUpdateSerializer,
     PostCreateSerializer,
     PostDetailSerializer,
     PostListSerializer,
@@ -447,3 +448,20 @@ class LeaderboardAPIView(APIView):
                 }
             )
         return results
+
+
+class MyPostBodyUpdateAPIView(UpdateAPIView):
+    serializer_class = PostBodyUpdateSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Post.objects.select_related("author")
+
+    def get_queryset(self):
+        return self.queryset.filter(author=self.request.user)
+
+
+class MyPostDeleteAPIView(DestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Post.objects.select_related("author")
+
+    def get_queryset(self):
+        return self.queryset.filter(author=self.request.user)

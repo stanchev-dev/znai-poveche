@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Редакция на дискусия{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4 p-md-5">
+        <h1 class="h3 mb-4">Редакция на дискусия</h1>
+
+        <div class="mb-3">
+          <label class="form-label">Заглавие</label>
+          <input class="form-control" value="{{ post.title }}" disabled>
+        </div>
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.body.id_for_label }}">{{ form.body.label }}</label>
+            {{ form.body }}
+            {% for error in form.body.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="d-flex gap-2 justify-content-end pt-2">
+            <a class="btn btn-outline-secondary rounded-pill" href="{% url 'my-discussions-page' %}">Отказ</a>
+            <button type="submit" class="btn btn-brand-purple rounded-pill">Запази</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

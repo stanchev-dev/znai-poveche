@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Твоите дискусии{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/discussions.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="discussions-page my-discussions-page">
+  <section class="discussions-header-card d-flex justify-content-between align-items-start align-items-md-center flex-column flex-md-row gap-3 mb-3">
+    <div>
+      <h1 class="h3 mb-2">Твоите дискусии</h1>
+      <p class="text-muted mb-0">Управлявай своите дискусии - редактирай описанието или изтрий публикацията.</p>
+    </div>
+    <a class="btn btn-brand-purple discussions-cta-btn" href="{% url 'discussions-publish-page' %}">+ Публикувай</a>
+  </section>
+
+  {% if posts %}
+    <div class="vstack gap-3">
+      {% for post in posts %}
+        <article class="discussion-card my-discussion-card">
+          <a href="{% url 'post-detail-page' post_id=post.id %}" class="discussion-card-link text-reset text-decoration-none" aria-label="Отвори дискусията {{ post.title }}">
+            <div class="discussion-card__top d-flex align-items-start w-100 gap-3">
+              <div class="discussion-main discussion-card__main">
+                <h2 class="discussion-title mb-2">{{ post.title }}</h2>
+                <p class="discussion-snippet mb-2">{{ post.body|truncatechars:180 }}</p>
+                <div class="discussion-author-row d-flex align-items-center gap-2 flex-wrap">
+                  <span
+                    class="badge rounded-pill listing-pill subject-badge"
+                    data-subject-name="{{ post.subject.name }}"
+                    data-subject-slug="{{ post.subject.slug|default:'' }}"
+                  >{{ post.subject.name }}</span>
+                  {% if post.grade %}
+                    <span class="zp-grade-badge">{{ post.grade }}. клас</span>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="discussion-side discussion-card__points ms-auto flex-shrink-0">
+                <span class="discussion-points-pill">{{ post.score }} точки</span>
+              </div>
+            </div>
+          </a>
+          <div class="listing-card-actions d-flex justify-content-end gap-2 px-3 pb-3 pt-1">
+            <a href="{% url 'my-discussions-edit-page' post_id=post.id %}" class="btn btn-brand-outline my-listings-action-btn">
+              <i class="bi bi-pencil" aria-hidden="true"></i>
+              <span>Редактирай</span>
+            </a>
+            <a href="{% url 'my-discussions-delete-page' post_id=post.id %}" class="btn btn-outline-danger my-listings-action-btn my-listings-action-btn--danger">
+              <i class="bi bi-trash" aria-hidden="true"></i>
+              <span>Изтрий</span>
+            </a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 my-listings-empty-state">
+      <h2 class="h4 mb-2">Нямаш публикувани дискусии.</h2>
+      <p class="text-muted mb-3">Започни нова дискусия и попитай общността.</p>
+      <div>
+        <a class="btn btn-brand-purple" href="{% url 'discussions-publish-page' %}">+ Публикувай</a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/subject_badges.js' %}"></script>
+<script src="{% static 'js/pages/discussions_my_discussions.js' %}"></script>
+{% endblock %}

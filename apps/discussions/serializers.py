@@ -187,6 +187,19 @@ class PostCreateSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
+
+
+class PostBodyUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = ["body"]
+
+    def validate_body(self, value: str) -> str:
+        if not value.strip():
+            raise serializers.ValidationError("Body cannot be empty.")
+        return value
+
+
 class CommentCreateSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     image = serializers.ImageField(required=False, allow_null=True)
