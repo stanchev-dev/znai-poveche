@@ -2,7 +2,20 @@
   const form = document.getElementById('listing-publish-form');
   const errorsBox = document.getElementById('publish-errors');
   const subjectSelect = document.getElementById('subject');
+  const imageInlineError = document.getElementById('image-inline-error');
   if (!form || !errorsBox || !subjectSelect) return;
+
+  function clearInlineImageError() {
+    if (!imageInlineError) return;
+    imageInlineError.textContent = '';
+    imageInlineError.classList.add('d-none');
+  }
+
+  function setInlineImageError(message) {
+    if (!imageInlineError) return;
+    imageInlineError.textContent = message;
+    imageInlineError.classList.remove('d-none');
+  }
 
   function renderErrors(errorData) {
     const items = [];
@@ -45,6 +58,7 @@
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     errorsBox.innerHTML = '';
+    clearInlineImageError();
 
     const payload = new FormData();
     payload.append('subject', form.subject.value);
@@ -53,7 +67,6 @@
     payload.append('description', form.description.value);
     payload.append('contact_name', form.contact_name.value);
     payload.append('contact_phone', form.contact_phone.value);
-    payload.append('contact_email', form.contact_email.value);
 
     const files = (window.marketplaceImages && window.marketplaceImages.files) || [];
     files.forEach((file) => payload.append('images', file));
@@ -69,7 +82,11 @@
     }
 
     if (response.status === 400) {
-      renderErrors(await response.json());
+      const errorData = await response.json();
+      if (errorData && errorData.images && errorData.images.length) {
+        setInlineImageError(String(errorData.images[0]));
+      }
+      renderErrors(errorData);
       return;
     }
 

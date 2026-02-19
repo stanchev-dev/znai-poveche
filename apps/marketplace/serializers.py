@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
@@ -15,6 +17,10 @@ from .models import Listing, ListingImage
 
 
 User = get_user_model()
+
+MAX_LISTING_IMAGES = 4
+MAX_LISTING_IMAGE_SIZE_BYTES = 2 * 1024 * 1024
+ALLOWED_LISTING_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png"}
 
 
 class SubjectSummarySerializer(serializers.ModelSerializer):
@@ -68,8 +74,6 @@ class OwnerSerializer(serializers.ModelSerializer):
             return obj.profile.get_role_display()
         except ObjectDoesNotExist:
             return "Учащ"
-
-
 
 
 class ListingImageSerializer(serializers.ModelSerializer):
@@ -219,6 +223,25 @@ class ListingCreateSerializer(serializers.ModelSerializer):
             "contact_url",
         ]
 
+    def validate_images(self, value):
+        if len(value) > MAX_LISTING_IMAGES:
+            raise serializers.ValidationError(
+                f"Можеш да качиш до {MAX_LISTING_IMAGES} снимки."
+            )
+
+        for image in value:
+            extension = Path(image.name or "").suffix.lower()
+            if extension not in ALLOWED_LISTING_IMAGE_EXTENSIONS:
+                raise serializers.ValidationError(
+                    "Невалиден файл. Приемаме само jpg, jpeg, png до 2MB."
+                )
+            if image.size > MAX_LISTING_IMAGE_SIZE_BYTES:
+                raise serializers.ValidationError(
+                    "Невалиден файл. Приемаме само jpg, jpeg, png до 2MB."
+                )
+
+        return value
+
     def validate(self, attrs):
         contact_name = attrs.get("contact_name", "")
         contact_phone = attrs.get("contact_phone", "")
@@ -239,9 +262,20 @@ class ListingCreateSerializer(serializers.ModelSerializer):
         attrs["contact_email"] = contact_email
         attrs["contact_url"] = contact_url
 
+        image_files = []
+        legacy_image = attrs.get("image")
+        if legacy_image is not None:
+            image_files.append(legacy_image)
+        image_files.extend(attrs.get("images", []))
+
+        if len(image_files) > MAX_LISTING_IMAGES:
+            raise serializers.ValidationError(
+                {"images": [f"Можеш да качиш до {MAX_LISTING_IMAGES} снимки."]}
+            )
+
         if not (contact_phone or contact_email or contact_url):
             raise serializers.ValidationError(
-                "Моля, добавете поне един контакт: телефон, имейл или линк."
+                "Моля, добавете поне един контакт: телефон или линк."
             )
 
         return attrs
