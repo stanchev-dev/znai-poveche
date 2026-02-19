@@ -119,6 +119,18 @@
       update();
     }
 
+    function onLightboxPrev(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      prev();
+    }
+
+    function onLightboxNext(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      next();
+    }
+
     gallery.innerHTML = `
       <div class="card marketplace-detail-gallery-card">
         <div class="card-body p-2 p-md-3">
@@ -155,13 +167,19 @@
 
       gallery.querySelector('.carousel-prev').addEventListener('click', prev);
       gallery.querySelector('.carousel-next').addEventListener('click', next);
-      lightboxPrev.addEventListener('click', prev);
-      lightboxNext.addEventListener('click', next);
+      lightboxPrev.addEventListener('click', onLightboxPrev);
+      lightboxNext.addEventListener('click', onLightboxNext);
     }
 
     lightboxClose.addEventListener('click', closeModal);
+    lightboxDialog.addEventListener('click', (event) => {
+      event.stopPropagation();
+    });
+    lightboxImage.addEventListener('click', (event) => {
+      event.stopPropagation();
+    });
     lightbox.addEventListener('click', (event) => {
-      if (event.target === lightbox || !lightboxDialog.contains(event.target)) {
+      if (event.target === lightbox) {
         closeModal();
       }
     });
@@ -171,6 +189,10 @@
     window.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && lightbox.classList.contains('is-open')) {
         closeModal();
+        return;
+      }
+
+      if (!lightbox.classList.contains('is-open')) {
         return;
       }
 
