@@ -93,3 +93,28 @@ class ListingPublishForm(forms.Form):
             raise forms.ValidationError("Въведи валиден телефон.")
 
         return raw_value
+
+
+class ListingEditForm(forms.ModelForm):
+    class Meta:
+        model = Listing
+        fields = [
+            "subject",
+            "price_per_hour",
+            "lesson_mode",
+            "description",
+            "contact_name",
+            "contact_phone",
+            "contact_email",
+            "contact_url",
+        ]
+        widgets = {
+            "subject": forms.Select(attrs={"class": "form-select"}),
+            "price_per_hour": forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "min": "0"}),
+            "lesson_mode": forms.Select(attrs={"class": "form-select"}),
+            "description": forms.Textarea(attrs={"class": "form-control", "rows": 5}),
+            "contact_name": forms.TextInput(attrs={"class": "form-control"}),
+            "contact_phone": forms.TextInput(attrs={"class": "form-control"}),
+            "contact_email": forms.EmailInput(attrs={"class": "form-control"}),
+            "contact_url": forms.URLInput(attrs={"class": "form-control"}),
+        }

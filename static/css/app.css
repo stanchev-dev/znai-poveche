@@ -1123,6 +1123,14 @@ h6 {
   white-space: nowrap;
 }
 
+.listing-card-actions {
+  border-top: 1px solid #eef1f4;
+}
+
+.my-listings-empty-state {
+  border: 1px solid rgba(111, 44, 243, 0.16);
+}
+
 @media (max-width: 767.98px) {
   .listing-card-body {
     grid-template-columns: 88px minmax(0, 1fr);

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Редакция на обява{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4 p-md-5">
+        <h1 class="h3 mb-4">Редакция на обява</h1>
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% for field in form %}
+            <div class="mb-3">
+              <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+              {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+            </div>
+          {% endfor %}
+          <div class="d-flex gap-2 justify-content-end pt-2">
+            <a class="btn btn-outline-secondary rounded-pill" href="{% url 'marketplace-my-listings-page' %}">Отказ</a>
+            <button type="submit" class="btn btn-brand-purple rounded-pill">Запази</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

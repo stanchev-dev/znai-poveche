@@ -4,6 +4,7 @@ import os
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 from PIL import Image
@@ -550,3 +551,47 @@ class ListingAPITests(APITestCase):
         )
         self.assertEqual(detail_response.status_code, status.HTTP_200_OK)
         self.assertEqual(detail_response.data["description"], self.listing.description)
+
+
+class MyListingsPageTests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(username="owner", password="testpass123")
+        self.other = User.objects.create_user(username="other", password="testpass123")
+        self.subject = Subject.objects.create(name="Math")
+        self.listing = Listing.objects.create(
+            subject=self.subject,
+            owner=self.owner,
+            price_per_hour="45.00",
+            lesson_mode=Listing.LessonMode.ONLINE,
+            description="A" * 120,
+            contact_name="Owner",
+            contact_phone="+359888777666",
+        )
+
+    def test_my_listings_requires_login(self):
+        response = self.client.get(reverse("marketplace-my-listings-page"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_my_listings_shows_only_owners_listings(self):
+        Listing.objects.create(
+            subject=self.subject,
+            owner=self.other,
+            price_per_hour="50.00",
+            lesson_mode=Listing.LessonMode.ONLINE,
+            description="B" * 120,
+            contact_name="Other",
+            contact_phone="+359999777666",
+        )
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("marketplace-my-listings-page"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Уроци по Math")
+        self.assertContains(response, "Редактирай")
+        self.assertContains(response, "Изтрий")
+
+    def test_owner_checks_for_edit_and_delete(self):
+        self.client.force_login(self.other)
+        edit_response = self.client.get(reverse("marketplace-edit-page", kwargs={"listing_id": self.listing.id}))
+        delete_response = self.client.get(reverse("marketplace-delete-page", kwargs={"listing_id": self.listing.id}))
+        self.assertEqual(edit_response.status_code, 403)
+        self.assertEqual(delete_response.status_code, 403)
