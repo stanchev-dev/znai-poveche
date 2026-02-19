@@ -254,21 +254,6 @@ def rep_value_post(vote: int) -> int:
     return 1 if vote == 1 else 0
 
 
-def rep_value_comment(vote: int) -> int:
-    return vote
-
-
-def compute_reputation_delta(
-    prev_vote: int,
-    next_vote: int,
-    *,
-    is_comment_vote: bool,
-) -> int:
-    if is_comment_vote:
-        return rep_value_comment(next_vote) - rep_value_comment(prev_vote)
-    return rep_value_post(next_vote) - rep_value_post(prev_vote)
-
-
 class BaseVoteAPIView(APIView):
     permission_classes = [IsAuthenticated]
     throttle_classes = [VoteThrottle]
@@ -279,6 +264,9 @@ class BaseVoteAPIView(APIView):
 
     def allow_negative_score(self) -> bool:
         return True
+
+    def compute_reputation_delta(self, prev_vote: int, next_vote: int) -> int:
+        return next_vote - prev_vote
 
     def post(self, request, pk):
         serializer = self.serializer_class(data=request.data)
@@ -331,10 +319,9 @@ class BaseVoteAPIView(APIView):
                 )
 
             score_delta = compute_score_delta(prev_vote, next_vote)
-            reputation_delta = compute_reputation_delta(
+            reputation_delta = self.compute_reputation_delta(
                 prev_vote,
                 next_vote,
-                is_comment_vote=self.target_model is Comment,
             )
 
             if (
@@ -389,6 +376,9 @@ class PostVoteAPIView(BaseVoteAPIView):
 
     def allow_negative_score(self) -> bool:
         return False
+
+    def compute_reputation_delta(self, prev_vote: int, next_vote: int) -> int:
+        return rep_value_post(next_vote) - rep_value_post(prev_vote)
 
 
 class CommentVoteAPIView(BaseVoteAPIView):
