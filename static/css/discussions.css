@@ -4,21 +4,12 @@
   --grade-blue-rgb: 13, 110, 253;
 }
 
-.discussions-header-card,
 .discussions-filters-card {
   background: #ffffff;
   border-radius: 18px;
   border: 1px solid var(--discussions-soft-purple-border);
   box-shadow: 0 12px 30px rgba(17, 24, 39, 0.06);
   padding: 1.1rem 1.2rem;
-}
-
-.discussions-header-card h1 {
-  font-weight: 800;
-}
-
-.discussions-cta-btn {
-  white-space: nowrap;
 }
 
 .discussions-page .form-select,
