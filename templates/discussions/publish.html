@@ -1,32 +1,74 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Публикувай публикация{% endblock %}
+{% block title %}Създай дискусия{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/discussion_publish.css' %}" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-lg-8">
-    <h1 class="h3 mb-3">Публикувай публикация</h1>
+<div class="discussion-publish-page row justify-content-center">
+  <div class="col-xl-10 col-lg-11">
     <div id="publish-errors"></div>
 
-    <form id="post-publish-form" class="card card-body">
-      <div class="mb-3">
-        <label for="subject" class="form-label">Предмет</label>
-        <select id="subject" name="subject" class="form-select" required>
-          <option value="">Зареждане...</option>
-        </select>
-      </div>
+    <form id="post-publish-form" class="discussion-publish-card d-grid gap-4" enctype="multipart/form-data" novalidate>
+      <section class="card shadow-sm border-0 rounded-4 p-4">
+        <h1 class="h3 mb-4">Създай дискусия</h1>
 
-      <div class="mb-3">
-        <label for="title" class="form-label">Заглавие</label>
-        <input id="title" name="title" type="text" class="form-control" required>
-      </div>
+        <div class="mb-3">
+          <label for="subject" class="form-label">Предмет</label>
+          <div class="publish-field-wrap" data-validation-field="subject">
+            <select id="subject" name="subject" class="form-select publish-input publish-subject-select" required aria-describedby="subject-feedback">
+              <option value="">Зареждане...</option>
+            </select>
+            <span class="publish-valid-icon d-none" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+            <span class="invalid-feedback-icon d-none" aria-hidden="true"><i class="bi bi-exclamation-circle-fill"></i></span>
+          </div>
+          <div id="subject-feedback" class="invalid-feedback d-none">Избери предмет.</div>
+        </div>
 
-      <div class="mb-3">
-        <label for="body" class="form-label">Съдържание</label>
-        <textarea id="body" name="body" rows="7" class="form-control" required></textarea>
-      </div>
+        <div class="mb-3">
+          <label for="title" class="form-label">Заглавие</label>
+          <div class="publish-field-wrap" data-validation-field="title">
+            <input id="title" name="title" type="text" class="form-control publish-input" required aria-describedby="title-feedback">
+            <span class="publish-valid-icon d-none" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+            <span class="invalid-feedback-icon d-none" aria-hidden="true"><i class="bi bi-exclamation-circle-fill"></i></span>
+          </div>
+          <div id="title-feedback" class="invalid-feedback d-none">Добави заглавие.</div>
+        </div>
 
-      <button type="submit" class="btn btn-primary">Публикувай</button>
+        <div>
+          <label for="body" class="form-label">Описание</label>
+          <div class="publish-field-wrap" data-validation-field="body">
+            <textarea id="body" name="body" rows="7" class="form-control publish-input publish-description" required aria-describedby="body-feedback body-help"></textarea>
+            <span class="publish-valid-icon d-none" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+            <span class="invalid-feedback-icon d-none" aria-hidden="true"><i class="bi bi-exclamation-circle-fill"></i></span>
+          </div>
+          <div id="body-feedback" class="invalid-feedback d-none">Описанието трябва да е поне 20 символа.</div>
+          <div id="body-help" class="form-text">Въведи поне 20 символа.</div>
+        </div>
+      </section>
+
+      <section class="card shadow-sm border-0 rounded-4 p-4">
+        <h2 class="h5 mb-3">Снимки (по желание)</h2>
+        <div class="row g-3 align-items-start">
+          <div class="col-lg-8">
+            <input id="images" name="images" type="file" class="d-none" accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple>
+            <div id="listing-images-grid" class="listing-images-grid" aria-live="polite"></div>
+            <div id="image-inline-error" class="text-danger small mt-2 d-none" aria-live="polite"></div>
+          </div>
+          <div class="col-lg-4">
+            <aside class="publish-image-tip" aria-label="Съвет за снимките">
+              <strong class="d-block mb-2">Съвет</strong>
+              <p class="mb-2">Качи ясна снимка (лице/материал) — вдъхва доверие.</p>
+              <p class="mb-0">До 4 снимки • до 2MB • jpg/jpeg/png</p>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <button type="submit" class="btn btn-brand-purple w-100 py-2 discussion-submit-btn">Публикувай</button>
     </form>
   </div>
 </div>
@@ -35,92 +77,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-(function () {
-  const form = document.getElementById('post-publish-form');
-  const errorsBox = document.getElementById('publish-errors');
-  const subjectSelect = document.getElementById('subject');
-  const prefillSubject = JSON.parse(document.getElementById('prefill-subject').textContent || '""');
-
-  function renderErrors(errorData) {
-    const items = [];
-
-    if (typeof errorData === 'string') {
-      items.push(errorData);
-    } else if (Array.isArray(errorData)) {
-      errorData.forEach((entry) => items.push(String(entry)));
-    } else if (errorData && typeof errorData === 'object') {
-      Object.entries(errorData).forEach(([field, messages]) => {
-        if (Array.isArray(messages)) {
-          messages.forEach((msg) => items.push(`${field}: ${msg}`));
-        } else {
-          items.push(`${field}: ${messages}`);
-        }
-      });
-    }
-
-    if (!items.length) {
-      items.push('Възникна грешка при публикуване.');
-    }
-
-    errorsBox.innerHTML = `
-      <div class="alert alert-danger">
-        <ul class="mb-0">${items.map((item) => `<li>${item}</li>`).join('')}</ul>
-      </div>
-    `;
-  }
-
-  async function loadSubjects() {
-    const response = await window.apiUtils.apiFetch('/api/subjects/');
-    if (!response.ok) {
-      subjectSelect.innerHTML = '<option value="">Неуспешно зареждане</option>';
-      return;
-    }
-
-    const subjects = await response.json();
-    subjectSelect.innerHTML = '<option value="">Избери предмет</option>' + subjects
-      .map((subject) => `<option value="${subject.slug}">${subject.name}</option>`)
-      .join('');
-
-    if (prefillSubject) {
-      const exists = subjects.some((subject) => subject.slug === prefillSubject);
-      if (exists) {
-        subjectSelect.value = prefillSubject;
-      }
-    }
-  }
-
-  form.addEventListener('submit', async function (event) {
-    event.preventDefault();
-    errorsBox.innerHTML = '';
-
-    const payload = {
-      subject: form.subject.value,
-      title: form.title.value,
-      body: form.body.value,
-    };
-
-    const response = await window.apiUtils.apiFetch('/api/posts/', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-
-    if (response.ok) {
-      const redirectTo = `/subjects/${encodeURIComponent(form.subject.value)}/`;
-      window.location.assign(redirectTo);
-      return;
-    }
-
-    if (response.status === 400) {
-      const data = await response.json();
-      renderErrors(data);
-      return;
-    }
-
-    renderErrors('Сървърна грешка. Опитай отново.');
-  });
-
-  loadSubjects();
-})();
-</script>
+<script src="{% static 'js/pages/marketplace_images.js' %}"></script>
+<script src="{% static 'js/pages/discussion_publish.js' %}"></script>
 {% endblock %}
