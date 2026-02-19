@@ -125,6 +125,9 @@
       payload.append('subject', form.subject.value);
       payload.append('title', form.title.value.trim());
       payload.append('body', form.body.value.trim());
+      if (form.grade && form.grade.value) {
+        payload.append('grade', form.grade.value);
+      }
 
       const files = (window.marketplaceImages && window.marketplaceImages.files) || [];
       if (files.length) {

@@ -85,6 +85,8 @@ class Subject(models.Model):
 
 
 class Post(models.Model):
+    GRADE_CHOICES = [(grade, f"{grade}. клас") for grade in range(1, 13)]
+
     subject = models.ForeignKey(
         "Subject",
         on_delete=models.PROTECT,
@@ -97,6 +99,12 @@ class Post(models.Model):
     )
     title = models.CharField(max_length=120)
     body = models.TextField()
+    grade = models.SmallIntegerField(
+        "Клас",
+        choices=GRADE_CHOICES,
+        null=True,
+        blank=True,
+    )
     image = models.ImageField(
         upload_to=post_image_upload_to,
         blank=True,
