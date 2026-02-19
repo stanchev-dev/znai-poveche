@@ -63,6 +63,11 @@
   padding-right: 4.7rem;
 }
 
+.discussion-publish-page .publish-field-wrap:not(:has(.publish-subject-select)):not(:has(.publish-description)) .publish-valid-icon,
+.discussion-publish-page .publish-field-wrap:not(:has(.publish-subject-select)):not(:has(.publish-description)) .invalid-feedback-icon {
+  right: 0.9rem;
+}
+
 .discussion-publish-page .publish-field-wrap:has(.publish-subject-select) .publish-valid-icon,
 .discussion-publish-page .publish-field-wrap:has(.publish-subject-select) .invalid-feedback-icon {
   right: 2.45rem;
