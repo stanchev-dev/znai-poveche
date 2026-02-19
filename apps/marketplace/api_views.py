@@ -26,7 +26,7 @@ class ListingListCreateAPIView(generics.GenericAPIView):
         "subject",
         "owner",
         "owner__profile",
-    )
+    ).prefetch_related("images")
     pagination_class = ListingPagination
     serializer_class = ListingListSerializer
 
@@ -111,7 +111,7 @@ class ListingListCreateAPIView(generics.GenericAPIView):
             "subject",
             "owner",
             "owner__profile",
-        ).get(pk=listing.pk)
+        ).prefetch_related("images").get(pk=listing.pk)
         output_serializer = ListingDetailSerializer(listing)
         return Response(output_serializer.data, status=status.HTTP_201_CREATED)
 
@@ -141,7 +141,7 @@ class ListingDetailAPIView(generics.RetrieveAPIView):
         "subject",
         "owner",
         "owner__profile",
-    )
+    ).prefetch_related("images")
 
 
 class ListingContactAPIView(generics.RetrieveAPIView):

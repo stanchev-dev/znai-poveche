@@ -38,18 +38,12 @@
   function normalizePhoneForTel(rawPhone) {
     const value = String(rawPhone || '').trim();
     if (!value) return '';
-
-    if (value.startsWith('+')) {
-      const clean = `+${value.slice(1).replace(/\D/g, '')}`;
-      return clean.length > 1 ? clean : '';
-    }
-
+    if (value.startsWith('+')) return `+${value.slice(1).replace(/\D/g, '')}`;
     const digits = value.replace(/\D/g, '');
     if (!digits) return '';
     if (digits.startsWith('00359')) return `+359${digits.slice(5)}`;
     if (digits.startsWith('359')) return `+${digits}`;
     if (digits.startsWith('0')) return `+359${digits.slice(1)}`;
-
     return `+${digits}`;
   }
 
@@ -61,15 +55,79 @@
 
   function revealPhone(phoneLabel) {
     const phoneHref = normalizePhoneForTel(phoneLabel);
-    if (!phoneHref) {
-      return;
-    }
-
+    if (!phoneHref) return;
     callBtn.href = `tel:${phoneHref}`;
     callBtn.dataset.revealed = '1';
     callBtn.classList.add('revealed');
     callBtn.innerHTML = `<span class="call-cta-content"><i class="bi bi-telephone" aria-hidden="true"></i><span class="call-cta-number">${escapeHtml(phoneLabel)}</span></span>`;
     callBtn.setAttribute('aria-label', `Обади се на ${phoneLabel}`);
+  }
+
+  function renderGallery(images) {
+    if (!images.length) {
+      gallery.innerHTML = `<div class="card marketplace-detail-gallery-card"><div class="card-body p-2 p-md-3"><img src="${defaultImage}" alt="Снимка на обява" class="img-fluid rounded marketplace-detail-image"></div></div>`;
+      return;
+    }
+
+    let current = 0;
+    gallery.innerHTML = `
+      <div class="card marketplace-detail-gallery-card">
+        <div class="card-body p-2 p-md-3">
+          <div class="marketplace-carousel" data-count="${images.length}">
+            <button type="button" class="carousel-nav carousel-prev ${images.length === 1 ? 'd-none' : ''}" aria-label="Предишна снимка">&#10094;</button>
+            <img class="img-fluid rounded marketplace-detail-image" id="carousel-main-image" alt="Снимка на обява">
+            <button type="button" class="carousel-nav carousel-next ${images.length === 1 ? 'd-none' : ''}" aria-label="Следваща снимка">&#10095;</button>
+          </div>
+          <div class="carousel-thumbs ${images.length <= 1 ? 'd-none' : ''}" id="carousel-thumbs"></div>
+        </div>
+      </div>`;
+
+    const mainImage = document.getElementById('carousel-main-image');
+    const thumbs = document.getElementById('carousel-thumbs');
+
+    function update() {
+      const currentImage = images[current] || images[0];
+      mainImage.src = currentImage || defaultImage;
+      thumbs.querySelectorAll('button').forEach((btn, index) => {
+        btn.classList.toggle('active', index === current);
+      });
+    }
+
+    if (images.length > 1) {
+      images.forEach((src, index) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `carousel-thumb ${index === 0 ? 'active' : ''}`;
+        btn.innerHTML = `<img src="${src}" alt="Миниатюра ${index + 1}">`;
+        btn.addEventListener('click', () => {
+          current = index;
+          update();
+        });
+        thumbs.appendChild(btn);
+      });
+
+      gallery.querySelector('.carousel-prev').addEventListener('click', () => {
+        current = (current - 1 + images.length) % images.length;
+        update();
+      });
+      gallery.querySelector('.carousel-next').addEventListener('click', () => {
+        current = (current + 1) % images.length;
+        update();
+      });
+
+      window.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowLeft') {
+          current = (current - 1 + images.length) % images.length;
+          update();
+        }
+        if (event.key === 'ArrowRight') {
+          current = (current + 1) % images.length;
+          update();
+        }
+      });
+    }
+
+    update();
   }
 
   const res = await window.apiUtils.apiFetch(`/api/listings/${listingId}/`);
@@ -78,46 +136,20 @@
     detail.style.display = 'none';
     return;
   }
-  if (res.status === 400) {
-    alertBox.innerHTML = '<div class="alert alert-warning">Невалидна заявка</div>';
-    detail.style.display = 'none';
-    return;
-  }
 
   const l = await res.json();
   const ownerDisplayName = l.owner.display_name || l.owner.username;
-  const ownerSecondaryText = l.owner.display_name && l.owner.display_name !== l.owner.username
-    ? `@${l.owner.username}`
-    : '';
+  const ownerSecondaryText = l.owner.display_name && l.owner.display_name !== l.owner.username ? `@${l.owner.username}` : '';
   const ownerLevel = Number.isFinite(Number(l.owner.level)) ? Number(l.owner.level) : null;
   const ownerAvatar = l.owner.avatar || l.owner.avatar_url || defaultImage;
 
-  gallery.innerHTML = `<div class="card marketplace-detail-gallery-card"><div class="card-body p-2 p-md-3">
-    <img src="${l.image || defaultImage}" alt="Снимка на обява" class="img-fluid rounded marketplace-detail-image" onerror="this.src='${defaultImage}'">
-  </div></div>`;
+  const imageUrls = (l.images || []).map((entry) => entry.image);
+  if (!imageUrls.length && l.image) imageUrls.push(l.image);
+  renderGallery(imageUrls);
 
   title.innerHTML = `${escapeHtml(l.subject.name)} ${l.is_vip ? '<span class="badge text-bg-warning align-middle">VIP</span>' : ''}`;
   description.innerHTML = l.description;
-
-  owner.innerHTML = `<div class="card"><div class="card-body">
-    <h2 class="h6 mb-3">Потребител</h2>
-    <div class="seller-card-header">
-      <div class="seller-avatar">
-        <img src="${escapeHtml(ownerAvatar)}" alt="Профилна снимка на ${escapeHtml(ownerDisplayName)}" class="rounded-circle" onerror="this.src='${defaultImage}'">
-        ${ownerLevel !== null ? `<span class="seller-level-badge" title="Ниво ${ownerLevel}" aria-label="Ниво ${ownerLevel}">${ownerLevel}</span>` : ''}
-      </div>
-      <div class="seller-meta">
-        <p class="seller-name">${escapeHtml(ownerDisplayName)}</p>
-        ${ownerSecondaryText ? `<p class="seller-subline mb-0">${escapeHtml(ownerSecondaryText)}</p>` : ''}
-      </div>
-    </div>
-    <div class="seller-pills mb-0">
-      <span class="badge rounded-pill listing-pill role-badge ${roleBadgeClass(l.owner.role)}">${escapeHtml(l.owner.role_label || (l.owner.role === 'teacher' ? 'Учител' : 'Учащ'))}</span>
-      <span class="badge rounded-pill listing-pill subject-badge" style="${window.subjectBadgeUtils.getSubjectBadgeStyle(l.subject)}">${escapeHtml(l.subject.name)}</span>
-      ${l.lesson_mode_label ? `<span class="badge rounded-pill listing-pill lesson-mode-badge ${lessonModeBadgeClass(l.lesson_mode)}">${escapeHtml(l.lesson_mode_label)}</span>` : ''}
-    </div>
-  </div></div>`;
-
+  owner.innerHTML = `<div class="card"><div class="card-body"><h2 class="h6 mb-3">Потребител</h2><div class="seller-card-header"><div class="seller-avatar"><img src="${escapeHtml(ownerAvatar)}" alt="Профилна снимка" class="rounded-circle">${ownerLevel !== null ? `<span class="seller-level-badge">${ownerLevel}</span>` : ''}</div><div class="seller-meta"><p class="seller-name">${escapeHtml(ownerDisplayName)}</p>${ownerSecondaryText ? `<p class="seller-subline mb-0">${escapeHtml(ownerSecondaryText)}</p>` : ''}</div></div><div class="seller-pills mb-0"><span class="badge rounded-pill listing-pill role-badge ${roleBadgeClass(l.owner.role)}">${escapeHtml(l.owner.role_label || (l.owner.role === 'teacher' ? 'Учител' : 'Учащ'))}</span>${l.lesson_mode_label ? `<span class="badge rounded-pill listing-pill lesson-mode-badge ${lessonModeBadgeClass(l.lesson_mode)}">${escapeHtml(l.lesson_mode_label)}</span>` : ''}</div></div></div>`;
   price.textContent = `${l.price_per_hour} €/ч`;
 
   callBtn.addEventListener('click', async (event) => {
@@ -126,13 +158,8 @@
       window.location.href = buildLoginRedirectUrl();
       return;
     }
-
-    if (callBtn.dataset.revealed === '1') {
-      return;
-    }
-
+    if (callBtn.dataset.revealed === '1') return;
     event.preventDefault();
-
     if (!contactData) {
       const contactRes = await window.apiUtils.apiFetch(`/api/listings/${listingId}/contact/`);
       if (contactRes.status === 401 || contactRes.status === 403) {
@@ -141,11 +168,7 @@
       }
       contactData = await contactRes.json();
     }
-
-    if (!contactData.contact_phone) {
-      return;
-    }
-
+    if (!contactData.contact_phone) return;
     revealPhone(contactData.contact_phone);
   });
 })();

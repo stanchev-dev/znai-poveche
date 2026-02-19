@@ -11,7 +11,7 @@ from apps.common.utils import (
     normalize_hex,
 )
 
-from .models import Listing
+from .models import Listing, ListingImage
 
 
 User = get_user_model()
@@ -70,6 +70,19 @@ class OwnerSerializer(serializers.ModelSerializer):
             return "Учащ"
 
 
+
+
+class ListingImageSerializer(serializers.ModelSerializer):
+    is_cover = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ListingImage
+        fields = ["id", "image", "position", "is_cover"]
+
+    def get_is_cover(self, obj: ListingImage) -> bool:
+        return obj.position == 0
+
+
 class ListingListSerializer(serializers.ModelSerializer):
     subject = SubjectSummarySerializer(read_only=True)
     owner = OwnerSerializer(read_only=True)
@@ -81,6 +94,7 @@ class ListingListSerializer(serializers.ModelSerializer):
         source="get_lesson_mode_display",
         read_only=True,
     )
+    images = ListingImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Listing
@@ -91,6 +105,7 @@ class ListingListSerializer(serializers.ModelSerializer):
             "lesson_mode",
             "lesson_mode_label",
             "image",
+            "images",
             "description_excerpt",
             "is_vip",
             "vip_until",
@@ -130,6 +145,7 @@ class ListingDetailSerializer(serializers.ModelSerializer):
         source="get_lesson_mode_display",
         read_only=True,
     )
+    images = ListingImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Listing
@@ -140,6 +156,7 @@ class ListingDetailSerializer(serializers.ModelSerializer):
             "lesson_mode",
             "lesson_mode_label",
             "image",
+            "images",
             "description",
             "is_vip",
             "vip_until",
@@ -180,6 +197,12 @@ class ListingCreateSerializer(serializers.ModelSerializer):
         allow_blank=True,
     )
     image = serializers.ImageField(required=False, allow_null=True)
+    images = serializers.ListField(
+        child=serializers.ImageField(),
+        required=False,
+        allow_empty=True,
+        write_only=True,
+    )
 
     class Meta:
         model = Listing
@@ -188,24 +211,30 @@ class ListingCreateSerializer(serializers.ModelSerializer):
             "price_per_hour",
             "lesson_mode",
             "image",
+            "images",
             "description",
+            "contact_name",
             "contact_phone",
             "contact_email",
             "contact_url",
         ]
 
     def validate(self, attrs):
+        contact_name = attrs.get("contact_name", "")
         contact_phone = attrs.get("contact_phone", "")
         contact_email = attrs.get("contact_email", "")
         contact_url = attrs.get("contact_url", "")
 
+        attrs.setdefault("contact_name", "")
         attrs.setdefault("contact_email", "")
         attrs.setdefault("contact_url", "")
 
+        contact_name = (contact_name or "").strip()
         contact_phone = (contact_phone or "").strip()
         contact_email = (contact_email or "").strip()
         contact_url = (contact_url or "").strip()
 
+        attrs["contact_name"] = contact_name
         attrs["contact_phone"] = contact_phone
         attrs["contact_email"] = contact_email
         attrs["contact_url"] = contact_url
@@ -219,18 +248,41 @@ class ListingCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         request = self.context.get("request")
+        uploaded_images = validated_data.pop("images", [])
+        legacy_image = validated_data.pop("image", None)
+
+        validated_data.setdefault("contact_name", "")
         validated_data.setdefault("contact_email", "")
         validated_data.setdefault("contact_url", "")
-        return Listing.objects.create(
+
+        listing = Listing.objects.create(
             owner=request.user,
             **validated_data,
         )
+
+        image_files = []
+        if legacy_image is not None:
+            image_files.append(legacy_image)
+        image_files.extend(uploaded_images)
+
+        for position, image in enumerate(image_files):
+            ListingImage.objects.create(
+                listing=listing,
+                image=image,
+                position=position,
+            )
+
+        if image_files:
+            listing.image = listing.images.order_by("position", "id").first().image
+            listing.save(update_fields=["image", "updated_at"])
+
+        return listing
 
 
 class ListingContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Listing
-        fields = ["contact_phone", "contact_email", "contact_url"]
+        fields = ["contact_name", "contact_phone", "contact_email", "contact_url"]
 
 
 class ListingVipUpgradeSerializer(serializers.ModelSerializer):

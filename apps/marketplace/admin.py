@@ -1,10 +1,18 @@
 from django.contrib import admin
 
-from .models import Listing
+from .models import Listing, ListingImage
+
+
+class ListingImageInline(admin.TabularInline):
+    model = ListingImage
+    extra = 0
+    fields = ("image", "position")
+    ordering = ("position", "id")
 
 
 @admin.register(Listing)
 class ListingAdmin(admin.ModelAdmin):
+    inlines = [ListingImageInline]
     list_display = (
         "id",
         "subject",

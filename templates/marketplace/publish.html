@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="row justify-content-center marketplace-publish-page">
-  <div class="col-xl-9 col-lg-10">
+  <div class="col-xl-10 col-lg-11">
     <div class="d-flex flex-column flex-sm-row align-items-sm-end justify-content-between gap-2 mb-4">
       <div>
         <h1 class="h3 mb-1">Публикувай обява</h1>
@@ -15,13 +15,13 @@
 
     <div id="publish-errors"></div>
 
-    <form id="listing-publish-form" class="d-grid gap-3" enctype="multipart/form-data" novalidate>
+    <form id="listing-publish-form" class="publish-main-card d-grid gap-4" enctype="multipart/form-data" novalidate>
       <section class="card shadow-sm border-0 rounded-4 p-4 publish-section-card">
         <h2 class="h5 mb-3">Какво предлагаш?</h2>
         <div class="row g-3">
           <div class="col-md-6">
             <label for="subject" class="form-label">Предмет</label>
-            <select id="subject" name="subject" class="form-select publish-input" required>
+            <select id="subject" name="subject" class="form-select publish-input publish-subject-select" required>
               <option value="">Зареждане...</option>
             </select>
           </div>
@@ -50,38 +50,24 @@
       </section>
 
       <section class="card shadow-sm border-0 rounded-4 p-4 publish-section-card">
-        <div class="d-flex align-items-center gap-2 mb-3">
-          <h2 class="h5 mb-0">Снимка</h2>
-          <span
-            class="image-info-icon"
-            tabindex="0"
-            data-bs-toggle="tooltip"
-            data-bs-placement="right"
-            data-bs-custom-class="olx-dark-tooltip"
-            title="Приемаме файлове до 5MB: .jpg, .jpeg, .png. Използвай ясни и реални снимки за по-добър резултат."
-            aria-label="Информация за позволените файлове"
-          >
-            <i class="bi bi-info-circle"></i>
-          </span>
+        <h2 class="h5 mb-3">Снимки</h2>
+        <div class="row g-3 align-items-start">
+          <div class="col-lg-8">
+            <input id="images" name="images" type="file" class="d-none" accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple>
+            <div id="listing-images-grid" class="listing-images-grid" aria-live="polite"></div>
+            <div id="image-inline-error" class="text-danger small mt-2 d-none" aria-live="polite"></div>
+          </div>
+          <div class="col-lg-4">
+            <div class="publish-image-tip">
+              <strong class="d-block mb-2">Съвет</strong>
+              Качването на реални снимки вместо каталожни прави обявата по-достоверна. Приемаме файлове до 5MB: jpg, jpeg, png.
+            </div>
+          </div>
         </div>
-        <label for="image" class="form-label">Снимка (по желание)</label>
-        <input id="image" name="image" type="file" class="d-none" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
-
-        <button type="button" id="listing-image-tile" class="listing-image-tile" aria-label="Добави снимка">
-          <span class="listing-image-placeholder" id="listing-image-placeholder">
-            <i class="bi bi-camera"></i>
-            <span>Добави снимка</span>
-          </span>
-          <img id="listing-image-preview" class="listing-image-preview d-none" alt="Преглед на избрана снимка">
-          <span id="listing-image-cover-badge" class="badge text-bg-dark listing-cover-badge d-none">КОРИЦА</span>
-          <span id="listing-image-remove" class="listing-remove-btn d-none" aria-label="Премахни снимката">&times;</span>
-        </button>
-        <div id="image-inline-error" class="text-danger small mt-2 d-none" aria-live="polite"></div>
       </section>
 
       <section class="card shadow-sm border-0 rounded-4 p-4 publish-section-card">
         <h2 class="h5 mb-3">Описание</h2>
-        <label for="description" class="form-label">Описание</label>
         <textarea
           id="description"
           name="description"
@@ -96,8 +82,16 @@
         <h2 class="h5 mb-3">Контакти</h2>
         <div class="row g-3">
           <div class="col-md-6">
-            <label for="contact_phone" class="form-label">Телефон</label>
+            <label for="contact_name" class="form-label">Лице за контакт</label>
+            <input id="contact_name" name="contact_name" type="text" class="form-control publish-input">
+          </div>
+          <div class="col-md-6">
+            <label for="contact_phone" class="form-label">Телефонен номер</label>
             <input id="contact_phone" name="contact_phone" type="text" class="form-control publish-input">
+          </div>
+          <div class="col-md-6">
+            <label for="contact_email" class="form-label">Имейл адрес</label>
+            <input id="contact_email" name="contact_email" type="email" class="form-control publish-input" autocomplete="off">
           </div>
         </div>
       </section>
@@ -111,92 +105,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/pages/listing_image_tile.js' %}"></script>
-<script>
-(function () {
-  const form = document.getElementById('listing-publish-form');
-  const errorsBox = document.getElementById('publish-errors');
-  const subjectSelect = document.getElementById('subject');
-
-  function renderErrors(errorData) {
-    const items = [];
-    if (typeof errorData === 'string') {
-      items.push(errorData);
-    } else if (Array.isArray(errorData)) {
-      errorData.forEach((entry) => items.push(String(entry)));
-    } else if (errorData && typeof errorData === 'object') {
-      Object.entries(errorData).forEach(([field, messages]) => {
-        if (Array.isArray(messages)) {
-          messages.forEach((msg) => items.push(`${field}: ${msg}`));
-        } else {
-          items.push(`${field}: ${messages}`);
-        }
-      });
-    }
-
-    if (!items.length) {
-      items.push('Възникна грешка при публикуване.');
-    }
-
-    errorsBox.innerHTML = `
-      <div class="alert alert-danger rounded-4 shadow-sm">
-        <ul class="mb-0">${items.map((item) => `<li>${item}</li>`).join('')}</ul>
-      </div>
-    `;
-  }
-
-  async function loadSubjects() {
-    const response = await window.apiUtils.apiFetch('/api/subjects/');
-    if (!response.ok) {
-      subjectSelect.innerHTML = '<option value="">Неуспешно зареждане</option>';
-      return;
-    }
-
-    const subjects = await response.json();
-    subjectSelect.innerHTML = '<option value="">Избери предмет</option>' + subjects
-      .map((subject) => `<option value="${subject.slug}">${subject.name}</option>`)
-      .join('');
-  }
-
-  form.addEventListener('submit', async function (event) {
-    event.preventDefault();
-    errorsBox.innerHTML = '';
-
-    const payload = new FormData();
-    payload.append('subject', form.subject.value);
-    payload.append('price_per_hour', form.price_per_hour.value);
-    payload.append('lesson_mode', form.lesson_mode.value);
-    payload.append('description', form.description.value);
-    payload.append('contact_phone', form.contact_phone.value);
-    if (form.image.files.length > 0) {
-      payload.append('image', form.image.files[0]);
-    }
-
-    const response = await window.apiUtils.apiFetch('/api/listings/', {
-      method: 'POST',
-      body: payload,
-    });
-
-    if (response.ok) {
-      window.location.assign('/marketplace/');
-      return;
-    }
-
-    if (response.status === 400) {
-      const data = await response.json();
-      renderErrors(data);
-      return;
-    }
-
-    renderErrors('Сървърна грешка. Опитай отново.');
-  });
-
-  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-  tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-    new bootstrap.Tooltip(tooltipTriggerEl);
-  });
-
-  loadSubjects();
-})();
-</script>
+<script src="{% static 'js/pages/marketplace_images.js' %}"></script>
+<script src="{% static 'js/pages/marketplace_publish.js' %}"></script>
 {% endblock %}
