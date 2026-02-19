@@ -1127,6 +1127,41 @@ h6 {
   border-top: 1px solid #eef1f4;
 }
 
+.my-listings-action-btn {
+  min-height: 44px;
+  padding: 0.56rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.my-listings-action-btn i {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.my-listings-action-btn.btn-brand-outline:hover,
+.my-listings-action-btn.btn-brand-outline:focus,
+.my-listings-action-btn.btn-brand-outline:focus-visible,
+.my-listings-action-btn.btn-brand-outline:active {
+  color: #ffffff;
+}
+
+.my-listings-action-btn:focus,
+.my-listings-action-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.22rem rgba(111, 44, 243, 0.25);
+}
+
+.my-listings-action-btn--danger:focus,
+.my-listings-action-btn--danger:focus-visible {
+  border-color: #dc3545;
+}
+
 .my-listings-empty-state {
   border: 1px solid rgba(111, 44, 243, 0.16);
 }

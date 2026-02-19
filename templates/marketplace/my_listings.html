@@ -28,7 +28,11 @@
               <h2 class="listing-card-title h5 mb-2">Уроци по {{ listing.subject.name }}</h2>
               <p class="listing-card-description mb-2">{{ listing.description|truncatechars:140 }}</p>
               <div class="listing-card-badges">
-                <span class="badge rounded-pill listing-pill subject-badge">{{ listing.subject.name }}</span>
+                <span
+                  class="badge rounded-pill listing-pill subject-badge"
+                  data-subject-name="{{ listing.subject.name }}"
+                  data-subject-slug="{{ listing.subject.slug|default:'' }}"
+                >{{ listing.subject.name }}</span>
                 <span class="badge rounded-pill listing-pill lesson-mode-badge {% if listing.lesson_mode == 'online' %}lesson-mode-badge--online{% elif listing.lesson_mode == 'in_person' %}lesson-mode-badge--in-person{% else %}lesson-mode-badge--online-and-in-person{% endif %}">{{ listing.get_lesson_mode_display }}</span>
               </div>
             </div>
@@ -38,8 +42,14 @@
           </div>
         </a>
         <div class="listing-card-actions d-flex justify-content-end gap-2 px-3 pb-3">
-          <a href="{% url 'marketplace-edit-page' listing_id=listing.id %}" class="btn btn-sm btn-brand-outline rounded-pill">Редактирай</a>
-          <a href="{% url 'marketplace-delete-page' listing_id=listing.id %}" class="btn btn-sm btn-outline-danger rounded-pill">Изтрий</a>
+          <a href="{% url 'marketplace-edit-page' listing_id=listing.id %}" class="btn btn-brand-outline my-listings-action-btn">
+            <i class="bi bi-pencil" aria-hidden="true"></i>
+            <span>Редактирай</span>
+          </a>
+          <a href="{% url 'marketplace-delete-page' listing_id=listing.id %}" class="btn btn-outline-danger my-listings-action-btn my-listings-action-btn--danger">
+            <i class="bi bi-trash" aria-hidden="true"></i>
+            <span>Изтрий</span>
+          </a>
         </div>
       </article>
     {% endfor %}
@@ -53,4 +63,9 @@
     </div>
   </div>
 {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/subject_badges.js' %}"></script>
+<script src="{% static 'js/pages/marketplace_my_listings.js' %}"></script>
 {% endblock %}
