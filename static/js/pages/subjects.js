@@ -6,8 +6,17 @@
   const PAGE_SIZE = 10;
   let currentUrl = null;
 
-  function authorChip(author) {
-    return `<span class="badge bg-light text-dark">${author.username} (${author.display_name}, ниво ${author.level})</span>`;
+  function getAuthorInitial(author) {
+    const label = author.display_name || author.username || '?';
+    return label.charAt(0).toUpperCase();
+  }
+
+  function authorMeta(author) {
+    return `
+      <div class="discussion-author-meta">
+        <span class="discussion-author-avatar" aria-hidden="true">${getAuthorInitial(author)}</span>
+        <span class="discussion-author-text">${author.username} • Ниво ${author.level}</span>
+      </div>`;
   }
 
   function showAlert(text, type = 'warning') {
@@ -19,14 +28,20 @@
       list.innerHTML = '<div class="alert alert-info">Няма резултати</div>';
       return;
     }
+
     list.innerHTML = posts.map((post) => `
-      <div class="card"><div class="card-body">
-        <h2 class="h5">${post.title}</h2>
-        <p>${post.excerpt}</p>
-        <p class="mb-1">Точки: <strong>${post.score}</strong></p>
-        ${authorChip(post.author)}
-        <div class="mt-2"><a href="/posts/${post.id}/" class="btn btn-sm btn-primary">Прочети</a></div>
-      </div></div>`).join('');
+      <article class="discussion-card">
+        <span class="discussion-accent" aria-hidden="true"></span>
+        <div class="discussion-main">
+          <h2 class="discussion-title mb-2">${post.title}</h2>
+          <p class="discussion-snippet mb-2">${post.excerpt}</p>
+          ${authorMeta(post.author)}
+        </div>
+        <div class="discussion-side">
+          <span class="discussion-points-pill">${post.score} точки</span>
+          <a href="/posts/${post.id}/" class="btn btn-sm btn-brand-outline">Прочети →</a>
+        </div>
+      </article>`).join('');
   }
 
   async function load(url) {
