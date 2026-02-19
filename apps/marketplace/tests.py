@@ -632,6 +632,25 @@ class MyListingsPageTests(TestCase):
         self.assertEqual(self.listing.contact_email, "owner@example.com")
         self.assertEqual(self.listing.contact_url, "https://example.com/profile")
 
+    def test_edit_page_shows_prefilled_images_section_before_form_fields(self):
+        self.client.force_login(self.owner)
+        image = ListingImage.objects.create(
+            listing=self.listing,
+            image=self._image_file(name="prefilled.jpg"),
+            position=0,
+        )
+
+        response = self.client.get(reverse("marketplace-edit-page", kwargs={"listing_id": self.listing.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="listing-images-grid"')
+        self.assertContains(response, 'id="existing-images-data"')
+        self.assertContains(response, f'"id": {image.id}')
+        self.assertContains(response, 'for="id_subject"', html=False)
+
+        content = response.content.decode("utf-8")
+        self.assertLess(content.index('id="listing-images-grid"'), content.index('for="id_subject"'))
+
 
 class ListingImageEditPageTests(TestCase):
     def setUp(self):

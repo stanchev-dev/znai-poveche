@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load static %}
+
 {% block title %}Редакция на обява{% endblock %}
 
 {% block content %}
@@ -11,8 +13,12 @@
           <h1 class="h3 mb-0">Редакция на обява</h1>
           <a class="btn btn-brand-outline" href="{% url 'marketplace-edit-images-page' listing_id=listing.id %}">Редакция на снимки</a>
         </div>
-        <form method="post" novalidate>
+
+        <form method="post" enctype="multipart/form-data" class="d-grid gap-4" novalidate>
           {% csrf_token %}
+
+          {% include "marketplace/partials/images_uploader.html" with show_image_tip=False %}
+
           {% for field in form %}
             <div class="mb-3">
               <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
@@ -30,4 +36,8 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/marketplace_images.js' %}"></script>
 {% endblock %}
