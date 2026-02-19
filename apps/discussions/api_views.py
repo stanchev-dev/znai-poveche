@@ -237,35 +237,21 @@ def calculate_level(points: int) -> int:
 
 
 def apply_reputation_delta(profile: Profile, reputation_delta: int) -> None:
-    current_level = calculate_level(profile.reputation_points)
-    if profile.max_level_reached < current_level:
-        profile.max_level_reached = current_level
-
-    profile.reputation_points += reputation_delta
-
+    profile.reputation_points = max(
+        0,
+        profile.reputation_points + reputation_delta,
+    )
     new_level = calculate_level(profile.reputation_points)
     if new_level > profile.max_level_reached:
         profile.max_level_reached = new_level
-
-    if reputation_delta < 0:
-        floor_points = (profile.max_level_reached - 1) * 25
-        profile.reputation_points = max(profile.reputation_points, floor_points)
 
 
 def compute_vote_deltas(
     existing_value: int | None, new_value: int
 ) -> tuple[int, int]:
-    if existing_value is None:
-        if new_value == 1:
-            return 1, 2
-        if new_value == -1:
-            return -1, -1
-        return 0, 0
-    if existing_value == new_value:
-        return 0, 0
-    if existing_value == 1 and new_value == -1:
-        return -2, -2
-    return 2, 2
+    prev_value = existing_value or 0
+    delta = new_value - prev_value
+    return delta, delta
 
 
 class BaseVoteAPIView(APIView):
@@ -285,7 +271,10 @@ class BaseVoteAPIView(APIView):
         vote_value = int(serializer.validated_data["value"])
 
         with transaction.atomic():
-            target = get_object_or_404(self.target_model, pk=pk)
+            target = get_object_or_404(
+                self.target_model.objects.select_for_update(),
+                pk=pk,
+            )
 
             if target.author_id == request.user.id:
                 return Response(
@@ -297,88 +286,50 @@ class BaseVoteAPIView(APIView):
                 "voter": request.user,
                 self.target_field: target,
             }
-            vote = self.vote_model.objects.select_for_update().filter(
-                **vote_lookup
-            ).first()
-            created = vote is None
+            vote = (
+                self.vote_model.objects.select_for_update()
+                .filter(**vote_lookup)
+                .first()
+            )
+            prev_vote = vote.value if vote else 0
+            next_vote = 0 if prev_vote == vote_value else vote_value
 
-            existing_value = None if created else vote.value
             score_delta, reputation_delta = compute_vote_deltas(
-                existing_value,
-                vote_value,
+                prev_vote,
+                next_vote,
             )
 
-            final_vote_value = vote_value
-            if existing_value == vote_value:
-                score_delta, reputation_delta = compute_vote_deltas(
-                    existing_value,
-                    0,
-                )
-                final_vote_value = 0
-
-            if (
-                score_delta < 0
-                and not self.allow_negative_score()
-                and target.score + score_delta < 0
-            ):
-                score_delta = 0
-                reputation_delta = 0
-
-            if score_delta == 0 and reputation_delta == 0:
-                if final_vote_value == 0:
-                    if vote:
-                        vote.delete()
-                elif vote and vote.value != final_vote_value:
-                    vote.value = final_vote_value
-                    vote.save(update_fields=["value"])
-
-                author_profile = Profile.objects.get(user=target.author)
-                return Response(
-                    {
-                        "target_id": target.id,
-                        "new_score": target.score,
-                        "author_reputation_points": (
-                            author_profile.reputation_points
-                        ),
-                        "author_level": author_profile.level,
-                        "vote_value": final_vote_value,
-                    },
-                    status=status.HTTP_200_OK,
-                )
-
             if score_delta != 0:
-                self.target_model.objects.filter(pk=target.pk).update(
-                    score=F("score") + score_delta
-                )
-                target.refresh_from_db(fields=["score"])
+                if not self.allow_negative_score():
+                    target.score = max(0, target.score + score_delta)
+                else:
+                    target.score += score_delta
+                target.save(update_fields=["score"])
 
             author_profile = Profile.objects.select_for_update().get(
                 user=target.author
             )
-            apply_reputation_delta(author_profile, reputation_delta)
-            author_profile.save(
-                update_fields=["reputation_points", "max_level_reached"]
-            )
+            if request.user.id != target.author_id and reputation_delta != 0:
+                apply_reputation_delta(author_profile, reputation_delta)
+                author_profile.save(
+                    update_fields=["reputation_points", "max_level_reached"]
+                )
 
-            if final_vote_value == 0:
+            if next_vote == 0:
                 if vote:
                     vote.delete()
-            elif created:
-                self.vote_model.objects.create(
-                    **vote_lookup,
-                    value=final_vote_value,
-                )
+            elif vote is None:
+                self.vote_model.objects.create(**vote_lookup, value=next_vote)
             else:
-                vote.value = final_vote_value
+                vote.value = next_vote
                 vote.save(update_fields=["value"])
 
             return Response(
                 {
-                    "target_id": target.id,
-                    "new_score": target.score,
-                    "author_reputation_points": author_profile.reputation_points,
+                    "score": target.score,
+                    "user_vote": next_vote,
+                    "author_points": author_profile.reputation_points,
                     "author_level": author_profile.level,
-                    "vote_value": final_vote_value,
                 },
                 status=status.HTTP_200_OK,
             )
