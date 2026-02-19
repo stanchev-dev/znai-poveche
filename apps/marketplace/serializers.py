@@ -13,6 +13,7 @@ from apps.common.utils import (
     normalize_hex,
 )
 
+from .forms import ListingPublishForm
 from .models import Listing, ListingImage
 
 
@@ -243,24 +244,31 @@ class ListingCreateSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
-        contact_name = attrs.get("contact_name", "")
-        contact_phone = attrs.get("contact_phone", "")
-        contact_email = attrs.get("contact_email", "")
-        contact_url = attrs.get("contact_url", "")
-
-        attrs.setdefault("contact_name", "")
         attrs.setdefault("contact_email", "")
         attrs.setdefault("contact_url", "")
 
-        contact_name = (contact_name or "").strip()
-        contact_phone = (contact_phone or "").strip()
-        contact_email = (contact_email or "").strip()
-        contact_url = (contact_url or "").strip()
+        form = ListingPublishForm(
+            data={
+                "subject": self.initial_data.get("subject", ""),
+                "price_per_hour": attrs.get("price_per_hour"),
+                "lesson_mode": attrs.get("lesson_mode"),
+                "description": attrs.get("description"),
+                "contact_name": attrs.get("contact_name"),
+                "contact_phone": attrs.get("contact_phone"),
+                "contact_email": attrs.get("contact_email"),
+            }
+        )
+        if not form.is_valid():
+            raise serializers.ValidationError(form.errors)
 
-        attrs["contact_name"] = contact_name
-        attrs["contact_phone"] = contact_phone
-        attrs["contact_email"] = contact_email
-        attrs["contact_url"] = contact_url
+        cleaned_data = form.cleaned_data
+        attrs["price_per_hour"] = cleaned_data["price_per_hour"]
+        attrs["lesson_mode"] = cleaned_data["lesson_mode"]
+        attrs["description"] = cleaned_data["description"]
+        attrs["contact_name"] = cleaned_data["contact_name"]
+        attrs["contact_phone"] = cleaned_data["contact_phone"]
+        attrs["contact_email"] = (cleaned_data.get("contact_email") or "").strip()
+        attrs["contact_url"] = (attrs.get("contact_url") or "").strip()
 
         image_files = []
         legacy_image = attrs.get("image")
@@ -271,11 +279,6 @@ class ListingCreateSerializer(serializers.ModelSerializer):
         if len(image_files) > MAX_LISTING_IMAGES:
             raise serializers.ValidationError(
                 {"images": [f"Можеш да качиш до {MAX_LISTING_IMAGES} снимки."]}
-            )
-
-        if not (contact_phone or contact_email or contact_url):
-            raise serializers.ValidationError(
-                "Моля, добавете поне един контакт: телефон или линк."
             )
 
         return attrs
