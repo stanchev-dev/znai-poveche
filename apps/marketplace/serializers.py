@@ -203,6 +203,7 @@ class ListingCreateSerializer(serializers.ModelSerializer):
         allow_blank=True,
     )
     image = serializers.ImageField(required=False, allow_null=True)
+    price_per_hour = serializers.CharField()
     images = serializers.ListField(
         child=serializers.ImageField(),
         required=False,

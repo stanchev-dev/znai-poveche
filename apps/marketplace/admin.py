@@ -30,3 +30,8 @@ class ListingAdmin(admin.ModelAdmin):
         "description",
     )
     ordering = ("-created_at",)
+
+    def get_inline_instances(self, request, obj=None):
+        if request.method == "POST" and "images-TOTAL_FORMS" not in request.POST:
+            return []
+        return super().get_inline_instances(request, obj)
