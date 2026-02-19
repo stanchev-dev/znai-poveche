@@ -451,6 +451,22 @@ h6 {
   gap: 0.35rem;
 }
 
+.navbar {
+  position: relative;
+  z-index: 1035;
+  overflow: visible;
+}
+
+.navbar .container,
+.navbar .navbar-collapse,
+.navbar .dropdown {
+  overflow: visible;
+}
+
+.navbar .dropdown-menu {
+  z-index: 1040;
+}
+
 .nav-action-link {
   font-size: 1.1rem;
   font-weight: 600;
