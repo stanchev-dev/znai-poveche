@@ -14,13 +14,12 @@ class ProfileSignalTests(TestCase):
 
 
 class RegistrationRoleTests(TestCase):
-    def test_registration_saves_teacher_role_on_profile(self):
+    def test_registration_saves_email_and_defaults(self):
         response = self.client.post(
             reverse("register"),
             data={
                 "username": "newteacher",
-                "display_name": "Нов Учител",
-                "role": Profile.Role.TEACHER,
+                "email": "newteacher@example.com",
                 "password1": "StrongPass123",
                 "password2": "StrongPass123",
             },
@@ -28,8 +27,29 @@ class RegistrationRoleTests(TestCase):
 
         self.assertEqual(response.status_code, 302)
         user = get_user_model().objects.get(username="newteacher")
-        self.assertEqual(user.profile.role, Profile.Role.TEACHER)
-        self.assertEqual(user.profile.display_name, "Нов Учител")
+        self.assertEqual(user.email, "newteacher@example.com")
+        self.assertEqual(user.profile.role, Profile.Role.LEARNER)
+
+    def test_registration_requires_unique_email(self):
+        User = get_user_model()
+        User.objects.create_user(
+            username="existinguser",
+            email="existing@example.com",
+            password="testpass123",
+        )
+
+        response = self.client.post(
+            reverse("register"),
+            data={
+                "username": "anotheruser",
+                "email": "existing@example.com",
+                "password1": "StrongPass123",
+                "password2": "StrongPass123",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Потребител с този имейл вече съществува.")
 
     def test_registration_defaults_to_learner_role(self):
         user = get_user_model().objects.create_user(

@@ -1,26 +1,86 @@
 {% extends "base.html" %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Вход{% endblock %}
 
 {% block content %}
-  <div class="row justify-content-center">
-    <div class="col-md-6">
-      <h1 class="mb-4">Login</h1>
-      <form method="post" class="card card-body">
+<div class="auth-page-wrap d-flex justify-content-center">
+  <section class="auth-card card border-0 shadow-sm w-100" aria-labelledby="login-title">
+    <div class="card-body p-4 p-sm-5">
+      <h1 id="login-title" class="auth-title mb-2">Вход</h1>
+      <p class="auth-subtitle text-muted mb-4">Влез в профила си, за да публикуваш и участваш в дискусии.</p>
+
+      <form method="post" novalidate>
         {% csrf_token %}
-        {{ form.non_field_errors }}
+
+        {% if form.non_field_errors %}
+          <div class="auth-errors mb-3">
+            {% for error in form.non_field_errors %}
+              <p class="field-error mb-1">{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+
         <div class="mb-3">
-          <label class="form-label" for="{{ form.username.id_for_label }}">Username</label>
-          {{ form.username }}
-          {{ form.username.errors }}
+          <label class="form-label" for="{{ form.username.id_for_label }}">Потребителско име</label>
+          <input
+            type="text"
+            name="{{ form.username.name }}"
+            id="{{ form.username.id_for_label }}"
+            value="{{ form.username.value|default:'' }}"
+            autocomplete="username"
+            class="form-control auth-input{% if form.username.errors %} is-invalid{% endif %}"
+            required
+          >
+          {% for error in form.username.errors %}
+            <p class="field-error mt-1 mb-0">{{ error }}</p>
+          {% endfor %}
         </div>
+
         <div class="mb-3">
-          <label class="form-label" for="{{ form.password.id_for_label }}">Password</label>
-          {{ form.password }}
-          {{ form.password.errors }}
+          <label class="form-label" for="{{ form.password.id_for_label }}">Парола</label>
+          <div class="input-icon-wrap">
+            <input
+              type="password"
+              name="{{ form.password.name }}"
+              id="{{ form.password.id_for_label }}"
+              autocomplete="current-password"
+              class="form-control auth-input auth-input-icon-end{% if form.password.errors %} is-invalid{% endif %}"
+              required
+            >
+            <button type="button" class="icon-btn password-toggle" data-target="{{ form.password.id_for_label }}" aria-label="Покажи паролата">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+          {% for error in form.password.errors %}
+            <p class="field-error mt-1 mb-0">{{ error }}</p>
+          {% endfor %}
         </div>
-        <button type="submit" class="btn btn-primary">Login</button>
+
+        <button type="submit" class="btn btn-brand-primary w-100 auth-submit-btn mt-2">
+          <i class="bi bi-lock-fill me-2"></i>Вход
+        </button>
+
+        <div class="d-flex justify-content-between gap-2 mt-3 small auth-links-row">
+          <a href="#" class="link-brand">Забравена парола?</a>
+          <a href="{% url 'register' %}" class="link-brand text-end">Нямаш профил? Регистрирай се</a>
+        </div>
       </form>
     </div>
-  </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.querySelectorAll('.password-toggle').forEach((toggle) => {
+    toggle.addEventListener('click', () => {
+      const input = document.getElementById(toggle.dataset.target);
+      if (!input) return;
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      toggle.innerHTML = isPassword ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+      toggle.setAttribute('aria-label', isPassword ? 'Скрий паролата' : 'Покажи паролата');
+    });
+  });
+</script>
 {% endblock %}
