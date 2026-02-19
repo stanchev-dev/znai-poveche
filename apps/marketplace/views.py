@@ -42,10 +42,46 @@ def edit_listing_page(request, listing_id):
     if listing.owner_id != request.user.id:
         return HttpResponseForbidden("Нямаш достъп да редактираш тази обява.")
 
+    image_form = ListingImagesEditForm(listing=listing)
+
     if request.method == "POST":
         form = ListingEditForm(request.POST, instance=listing)
-        if form.is_valid():
-            form.save()
+        image_form = ListingImagesEditForm(request.POST, request.FILES, listing=listing)
+        if form.is_valid() and image_form.is_valid():
+            listing = form.save()
+
+            listing_images = {image.id: image for image in listing.images.all()}
+
+            for image_id in image_form.delete_ids:
+                listing_images[image_id].delete()
+                listing_images.pop(image_id, None)
+
+            ordered_existing = []
+            seen_ids = set()
+            for image_id in image_form.ordering_ids:
+                if image_id in listing_images and image_id not in seen_ids:
+                    ordered_existing.append(listing_images[image_id])
+                    seen_ids.add(image_id)
+
+            remaining_existing = [
+                image
+                for image in listing.images.exclude(id__in=image_form.delete_ids).order_by("position", "id")
+                if image.id not in seen_ids
+            ]
+            final_images = ordered_existing + remaining_existing
+
+            for new_image in image_form.new_images:
+                final_images.append(listing.images.create(image=new_image, position=0))
+
+            for index, image in enumerate(final_images):
+                if image.position != index:
+                    image.position = index
+                    image.save(update_fields=["position"])
+
+            first_image = listing.images.order_by("position", "id").first()
+            listing.image = first_image.image if first_image else None
+            listing.save(update_fields=["image", "updated_at"])
+
             messages.success(request, "Обявата е редактирана успешно.")
             return redirect("marketplace-my-listings-page")
     else:
@@ -56,6 +92,7 @@ def edit_listing_page(request, listing_id):
         "marketplace/edit_listing.html",
         {
             "form": form,
+            "image_form": image_form,
             "listing": listing,
             "existing_images_json": json.dumps([
                 {"id": image.id, "url": image.image.url}
