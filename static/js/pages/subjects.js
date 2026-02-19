@@ -11,11 +11,38 @@
     return label.charAt(0).toUpperCase();
   }
 
-  function authorMeta(author) {
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('\"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+
+  function roleBadge(author) {
+    if (!author.role) return '';
+    const roleClass = author.role === 'teacher' ? 'role-badge--teacher' : 'role-badge--learner';
+    const roleLabel = author.role_label || (author.role === 'teacher' ? 'Учител' : 'Учащ');
+    return `<span class="badge rounded-pill listing-pill role-badge ${roleClass}">${escapeHtml(roleLabel)}</span>`;
+  }
+
+  function subjectBadge(post, isGlobalFeed) {
+    if (!isGlobalFeed || !post.subject) return '';
+    return `<span class="badge rounded-pill listing-pill subject-badge" style="${window.subjectBadgeUtils.getSubjectBadgeStyle(post.subject)}">${escapeHtml(post.subject.name)}</span>`;
+  }
+
+  function authorMeta(post, isGlobalFeed) {
     return `
-      <div class="discussion-author-meta">
-        <span class="discussion-author-avatar" aria-hidden="true">${getAuthorInitial(author)}</span>
-        <span class="discussion-author-text">${author.username} • Ниво ${author.level}</span>
+      <div class="discussion-author-row d-flex align-items-center justify-content-between gap-2 flex-wrap">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <span class="discussion-author-avatar" aria-hidden="true">${getAuthorInitial(post.author)}</span>
+          <span class="discussion-author-text">${escapeHtml(post.author.username)} • Ниво ${escapeHtml(post.author.level)}</span>
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            ${subjectBadge(post, isGlobalFeed)}
+            ${roleBadge(post.author)}
+          </div>
+        </div>
       </div>`;
   }
 
@@ -24,6 +51,7 @@
   }
 
   function render(posts) {
+    const isGlobalFeed = slug === 'all';
     if (!posts.length) {
       list.innerHTML = '<div class="alert alert-info">Няма резултати</div>';
       return;
@@ -33,9 +61,9 @@
       <article class="discussion-card">
         <span class="discussion-accent" aria-hidden="true"></span>
         <div class="discussion-main">
-          <h2 class="discussion-title mb-2">${post.title}</h2>
-          <p class="discussion-snippet mb-2">${post.excerpt}</p>
-          ${authorMeta(post.author)}
+          <h2 class="discussion-title mb-2">${escapeHtml(post.title)}</h2>
+          <p class="discussion-snippet mb-2">${escapeHtml(post.excerpt)}</p>
+          ${authorMeta(post, isGlobalFeed)}
         </div>
         <div class="discussion-side">
           <span class="discussion-points-pill">${post.score} точки</span>
