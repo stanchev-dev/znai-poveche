@@ -555,6 +555,18 @@ class ListingAPITests(APITestCase):
 
 
 class MyListingsPageTests(TestCase):
+    def _image_file(self, name="img.png"):
+        png_1x1 = (
+            b"\x89PNG\r\n\x1a\n"
+            b"\x00\x00\x00\rIHDR"
+            b"\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00"
+            b"\x90wS\xde"
+            b"\x00\x00\x00\x0cIDATx\x9cc````\x00\x00\x00\x05\x00\x01"
+            b"\x0d\n-\xb4"
+            b"\x00\x00\x00\x00IEND\xaeB`\x82"
+        )
+        return SimpleUploadedFile(name=name, content=png_1x1, content_type="image/png")
+
     def setUp(self):
         self.owner = User.objects.create_user(username="owner", password="testpass123")
         self.other = User.objects.create_user(username="other", password="testpass123")

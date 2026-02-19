@@ -244,6 +244,11 @@ class ListingCreateSerializer(serializers.ModelSerializer):
 
         return value
 
+    def validate_price_per_hour(self, value):
+        if isinstance(value, str):
+            return value.replace(",", ".")
+        return value
+
     def validate(self, attrs):
         attrs.setdefault("contact_email", "")
         attrs.setdefault("contact_url", "")
