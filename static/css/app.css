@@ -1589,3 +1589,39 @@ h6 {
     transform: none;
   }
 }
+
+.lb-filter-dd {
+  min-width: 180px;
+}
+
+.lb-dd-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  background-color: #ffffff;
+  color: #111827;
+}
+
+.lb-dd-toggle:hover,
+.lb-dd-toggle:focus,
+.lb-dd-toggle:active,
+.lb-dd-toggle.show {
+  background-color: #ffffff;
+  color: #111827;
+}
+
+.lb-dd-toggle:focus-visible {
+  border-color: rgba(111, 44, 243, 0.6);
+  box-shadow: 0 0 0 0.2rem rgba(111, 44, 243, 0.18);
+  outline: none;
+}
+
+.lb-dd-toggle:disabled,
+.lb-dd-toggle.disabled {
+  background-color: #f8f9fa;
+}
+
+.lb-dd-menu {
+  min-width: 100%;
+}
