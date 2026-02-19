@@ -1,8 +1,12 @@
 from datetime import timedelta
+from io import BytesIO
+import os
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.utils import timezone
+from PIL import Image
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -37,6 +41,19 @@ class ListingAPITests(APITestCase):
             description="A" * 250,
             contact_phone="+359000000",
         )
+
+
+    def _image_file(self, name="img.jpg", size=(20, 20), image_format="JPEG", noisy=False):
+        buffer = BytesIO()
+        if noisy:
+            raw = os.urandom(size[0] * size[1] * 3)
+            image = Image.frombytes("RGB", size, raw)
+        else:
+            image = Image.new("RGB", size, color=(123, 45, 67))
+        image.save(buffer, format=image_format)
+        buffer.seek(0)
+        content_type = "image/jpeg" if image_format == "JPEG" else "image/png"
+        return SimpleUploadedFile(name=name, content=buffer.read(), content_type=content_type)
 
     def test_guest_can_list_and_detail_without_contacts(self):
         list_response = self.client.get(reverse("listing-list-create"))
@@ -140,6 +157,59 @@ class ListingAPITests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("non_field_errors", response.data)
+
+
+    def test_create_rejects_more_than_four_images(self):
+        self.client.force_authenticate(self.other_user)
+        payload = {
+            "subject": self.physics.slug,
+            "price_per_hour": "60.50",
+            "lesson_mode": Listing.LessonMode.ONLINE,
+            "description": "Experienced tutor",
+            "contact_phone": "+359123456",
+        }
+        files = [
+            self._image_file(name=f"img-{index}.jpg")
+            for index in range(5)
+        ]
+
+        response = self.client.post(
+            reverse("listing-list-create"),
+            {**payload, "images": files},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("images", response.data)
+        self.assertIn("Можеш да качиш до 4 снимки.", response.data["images"][0])
+
+    def test_create_rejects_image_larger_than_two_mb(self):
+        self.client.force_authenticate(self.other_user)
+        payload = {
+            "subject": self.physics.slug,
+            "price_per_hour": "60.50",
+            "lesson_mode": Listing.LessonMode.ONLINE,
+            "description": "Experienced tutor",
+            "contact_phone": "+359123456",
+        }
+        oversized_image = self._image_file(
+            name="too-large.png",
+            size=(1200, 1200),
+            image_format="PNG",
+            noisy=True,
+        )
+        self.assertGreater(oversized_image.size, 2 * 1024 * 1024)
+
+        response = self.client.post(
+            reverse("listing-list-create"),
+            {**payload, "images": [oversized_image]},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("images", response.data)
+        self.assertIn(
+            "Невалиден файл. Приемаме само jpg, jpeg, png до 2MB.",
+            response.data["images"][0],
+        )
 
     def test_vip_ordering_returns_active_vip_first(self):
         vip_listing = Listing.objects.create(
