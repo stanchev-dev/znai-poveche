@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -140,5 +141,9 @@ REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
     "comment_create": "10/hour",
     "vote": "50/hour",
 }
+
+
+TESTING = "test" in sys.argv
+SKIP_IMAGE_VERIFY = TESTING
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

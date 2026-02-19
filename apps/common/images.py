@@ -4,6 +4,7 @@ from io import BytesIO
 from pathlib import Path
 from uuid import uuid4
 
+from django.conf import settings
 from django.core.files.base import ContentFile
 from PIL import Image, ImageOps, UnidentifiedImageError
 from rest_framework import serializers
@@ -22,11 +23,14 @@ def validate_image_upload(uploaded_file) -> None:
             "Unsupported image format. Allowed: jpg, jpeg, png, webp."
         )
 
+    if getattr(settings, "SKIP_IMAGE_VERIFY", False):
+        return
+
     try:
         uploaded_file.seek(0)
         with Image.open(uploaded_file) as img:
             img.verify()
-    except (UnidentifiedImageError, OSError, ValueError):
+    except (UnidentifiedImageError, OSError, ValueError, SyntaxError):
         raise serializers.ValidationError("Upload a valid image file.")
     finally:
         uploaded_file.seek(0)

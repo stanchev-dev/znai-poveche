@@ -73,7 +73,13 @@ class Subject(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base = slugify(self.name) or "subject"
+            slug = base
+            i = 2
+            while Subject.objects.exclude(pk=self.pk).filter(slug=slug).exists():
+                slug = f"{base}-{i}"
+                i += 1
+            self.slug = slug
 
         if self.theme_color:
             theme_color = self.theme_color.strip()
