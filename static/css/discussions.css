@@ -1,6 +1,7 @@
 .discussions-page {
   --discussions-soft-purple: rgba(124, 69, 245, 0.09);
   --discussions-soft-purple-border: rgba(124, 69, 245, 0.22);
+  --grade-blue-rgb: 13, 110, 253;
 }
 
 .discussions-header-card,
@@ -174,4 +175,21 @@
     justify-content: flex-end;
     align-items: center;
   }
+}
+
+
+.zp-grade-badge {
+  --grade-alpha: 0.18;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 999px;
+  line-height: 1.2;
+  color: rgb(var(--grade-blue-rgb));
+  background: rgba(var(--grade-blue-rgb), var(--grade-alpha));
+  border: 1px solid rgba(var(--grade-blue-rgb), calc(var(--grade-alpha) + 0.10));
+  white-space: nowrap;
 }

@@ -101,6 +101,7 @@ class PostListSerializer(serializers.ModelSerializer):
             "title",
             "excerpt",
             "score",
+            "grade",
             "author",
             "created_at",
             "image",
@@ -123,6 +124,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
             "title",
             "body",
             "score",
+            "grade",
             "author",
             "created_at",
             "updated_at",
@@ -156,7 +158,7 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ["id", "subject", "title", "body", "image"]
+        fields = ["id", "subject", "title", "body", "grade", "image"]
 
     def validate_title(self, value: str) -> str:
         if not value.strip():

@@ -32,6 +32,20 @@
     return `<span class="badge rounded-pill listing-pill subject-badge" style="${window.subjectBadgeUtils.getSubjectBadgeStyle(post.subject)}">${escapeHtml(post.subject.name)}</span>`;
   }
 
+
+  function gradeAlpha(grade) {
+    if (!grade) return null;
+    if (grade <= 4) return 0.14;
+    if (grade <= 7) return 0.20;
+    if (grade <= 10) return 0.26;
+    return 0.32;
+  }
+
+  function gradeBadge(post) {
+    if (!post.grade) return '';
+    return `<span class="zp-grade-badge" style="--grade-alpha: ${gradeAlpha(post.grade)};">${escapeHtml(post.grade)}. клас</span>`;
+  }
+
   function authorMeta(post, isGlobalFeed) {
     return `
       <div class="discussion-author-row d-flex align-items-center justify-content-between gap-2 flex-wrap">
@@ -40,6 +54,7 @@
           <span class="discussion-author-text">${escapeHtml(post.author.username)} • Ниво ${escapeHtml(post.author.level)}</span>
           <div class="d-flex flex-wrap gap-2 align-items-center">
             ${subjectBadge(post, isGlobalFeed)}
+            ${gradeBadge(post)}
             ${roleBadge(post.author)}
           </div>
         </div>
