@@ -1141,6 +1141,17 @@ h6 {
   border-top: 1px solid #eef1f4;
 }
 
+
+.listing-card .listing-card-actions--under-content {
+  justify-content: flex-start;
+  padding-left: calc(148px + 2rem) !important;
+}
+
+.my-discussion-card .listing-card-actions--under-content {
+  justify-content: flex-start;
+  padding-left: 1.55rem !important;
+}
+
 .my-listings-action-btn {
   min-height: 44px;
   padding: 0.56rem 1rem;
@@ -1200,6 +1211,11 @@ h6 {
     padding-top: 0.25rem;
     border-top: 1px solid #eef1f4;
     margin-top: 0.2rem;
+  }
+
+  .listing-card .listing-card-actions--under-content,
+  .my-discussion-card .listing-card-actions--under-content {
+    padding-left: 1rem !important;
   }
 }
 
