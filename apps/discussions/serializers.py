@@ -123,6 +123,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
     subject = SubjectSummarySerializer()
     author = AuthorSerializer()
     image = serializers.ImageField(read_only=True)
+    user_vote = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Post
@@ -137,12 +138,14 @@ class PostDetailSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "image",
+            "user_vote",
         ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
     author = AuthorSerializer()
     image = serializers.ImageField(read_only=True)
+    user_vote = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Comment
@@ -153,6 +156,7 @@ class CommentSerializer(serializers.ModelSerializer):
             "author",
             "created_at",
             "image",
+            "user_vote",
         ]
 
 
@@ -239,4 +243,4 @@ class CommentCreateSerializer(serializers.ModelSerializer):
 
 
 class VoteInputSerializer(serializers.Serializer):
-    value = serializers.ChoiceField(choices=[1, -1])
+    value = serializers.ChoiceField(choices=[1, -1, 0])

@@ -1,4 +1,4 @@
-from django.db import IntegrityError, transaction
+from django.db import transaction
 from django.db.models import (
     ExpressionWrapper,
     F,
@@ -7,6 +7,7 @@ from django.db.models import (
     Q,
     Subquery,
     Sum,
+    Value,
 )
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
@@ -147,12 +148,28 @@ class PostCreateAPIView(PostListView):
 
 
 class PostDetailView(RetrieveAPIView):
-    queryset = Post.objects.select_related(
-        "subject",
-        "author",
-        "author__profile",
-    )
     serializer_class = PostDetailSerializer
+
+    def get_queryset(self):
+        queryset = Post.objects.select_related(
+            "subject",
+            "author",
+            "author__profile",
+        )
+        user = self.request.user
+        if not user.is_authenticated:
+            return queryset.annotate(user_vote=Value(0, output_field=IntegerField()))
+
+        vote_subquery = PostVote.objects.filter(
+            post=OuterRef("pk"),
+            voter=user,
+        ).values("value")[:1]
+        return queryset.annotate(
+            user_vote=Coalesce(
+                Subquery(vote_subquery, output_field=IntegerField()),
+                Value(0, output_field=IntegerField()),
+            )
+        )
 
 
 class PostCommentListView(ListCreateAPIView):
@@ -175,7 +192,21 @@ class PostCommentListView(ListCreateAPIView):
         return CommentSerializer
 
     def get_queryset(self):
-        return self.queryset.filter(post_id=self.kwargs["post_id"]).all()
+        queryset = self.queryset.filter(post_id=self.kwargs["post_id"]).all()
+        user = self.request.user
+        if not user.is_authenticated:
+            return queryset.annotate(user_vote=Value(0, output_field=IntegerField()))
+
+        vote_subquery = CommentVote.objects.filter(
+            comment=OuterRef("pk"),
+            voter=user,
+        ).values("value")[:1]
+        return queryset.annotate(
+            user_vote=Coalesce(
+                Subquery(vote_subquery, output_field=IntegerField()),
+                Value(0, output_field=IntegerField()),
+            )
+        )
 
     def perform_create(self, serializer):
         points_to_add = 1
@@ -227,7 +258,9 @@ def compute_vote_deltas(
     if existing_value is None:
         if new_value == 1:
             return 1, 2
-        return -1, -1
+        if new_value == -1:
+            return -1, -1
+        return 0, 0
     if existing_value == new_value:
         return 0, 0
     if existing_value == 1 and new_value == -1:
@@ -264,24 +297,24 @@ class BaseVoteAPIView(APIView):
                 "voter": request.user,
                 self.target_field: target,
             }
-            try:
-                vote, created = (
-                    self.vote_model.objects.select_for_update().get_or_create(
-                        **vote_lookup,
-                        defaults={"value": vote_value},
-                    )
-                )
-            except IntegrityError:
-                vote = self.vote_model.objects.select_for_update().get(
-                    **vote_lookup
-                )
-                created = False
+            vote = self.vote_model.objects.select_for_update().filter(
+                **vote_lookup
+            ).first()
+            created = vote is None
 
             existing_value = None if created else vote.value
             score_delta, reputation_delta = compute_vote_deltas(
                 existing_value,
                 vote_value,
             )
+
+            final_vote_value = vote_value
+            if existing_value == vote_value:
+                score_delta, reputation_delta = compute_vote_deltas(
+                    existing_value,
+                    0,
+                )
+                final_vote_value = 0
 
             if (
                 score_delta < 0
@@ -292,6 +325,13 @@ class BaseVoteAPIView(APIView):
                 reputation_delta = 0
 
             if score_delta == 0 and reputation_delta == 0:
+                if final_vote_value == 0:
+                    if vote:
+                        vote.delete()
+                elif vote and vote.value != final_vote_value:
+                    vote.value = final_vote_value
+                    vote.save(update_fields=["value"])
+
                 author_profile = Profile.objects.get(user=target.author)
                 return Response(
                     {
@@ -301,7 +341,7 @@ class BaseVoteAPIView(APIView):
                             author_profile.reputation_points
                         ),
                         "author_level": author_profile.level,
-                        "vote_value": vote.value,
+                        "vote_value": final_vote_value,
                     },
                     status=status.HTTP_200_OK,
                 )
@@ -320,8 +360,16 @@ class BaseVoteAPIView(APIView):
                 update_fields=["reputation_points", "max_level_reached"]
             )
 
-            if not created:
-                vote.value = vote_value
+            if final_vote_value == 0:
+                if vote:
+                    vote.delete()
+            elif created:
+                self.vote_model.objects.create(
+                    **vote_lookup,
+                    value=final_vote_value,
+                )
+            else:
+                vote.value = final_vote_value
                 vote.save(update_fields=["value"])
 
             return Response(
@@ -330,7 +378,7 @@ class BaseVoteAPIView(APIView):
                     "new_score": target.score,
                     "author_reputation_points": author_profile.reputation_points,
                     "author_level": author_profile.level,
-                    "vote_value": vote_value,
+                    "vote_value": final_vote_value,
                 },
                 status=status.HTTP_200_OK,
             )
