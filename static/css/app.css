@@ -1686,3 +1686,156 @@ h6 {
   background: rgba(255, 255, 255, 0.18);
   color: #fff;
 }
+
+.marketplace-publish-page {
+  --publish-border: #e9eaf3;
+}
+
+.publish-section-card {
+  background: #ffffff;
+  border: 1px solid var(--publish-border);
+}
+
+.publish-input,
+.publish-description {
+  border-color: #d7d9e5;
+  border-radius: 0.85rem;
+}
+
+.publish-input:focus,
+.publish-description:focus,
+.lesson-mode-btn:focus-visible,
+.listing-image-tile:focus-visible {
+  border-color: var(--brand-purple-cta, #7c45f5);
+  box-shadow: 0 0 0 0.2rem rgba(124, 69, 245, 0.22);
+  outline: none;
+}
+
+.lesson-mode-group {
+  gap: 0.6rem;
+}
+
+.lesson-mode-btn {
+  border: 1px solid var(--brand-purple-cta, #7c45f5);
+  color: var(--brand-purple-cta, #7c45f5);
+  background: #ffffff;
+  border-radius: 0.8rem !important;
+  padding: 0.58rem 1rem;
+}
+
+.lesson-mode-btn:hover {
+  border-color: var(--brand-purple-cta, #7c45f5);
+  color: var(--brand-purple-cta, #7c45f5);
+  background: rgba(124, 69, 245, 0.08);
+}
+
+.btn-check:checked + .lesson-mode-btn,
+.btn-check:active + .lesson-mode-btn {
+  color: #ffffff;
+  background: var(--brand-purple-cta, #7c45f5);
+  border-color: var(--brand-purple-cta, #7c45f5);
+}
+
+.listing-image-tile {
+  width: min(280px, 100%);
+  aspect-ratio: 1 / 1;
+  border: 1.5px dashed #c5c8da;
+  border-radius: 1rem;
+  background: #fbfbff;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.listing-image-tile:hover {
+  border-color: var(--brand-purple-cta, #7c45f5);
+  background: #f6f1ff;
+}
+
+.listing-image-placeholder {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  color: #5f647b;
+  font-weight: 600;
+}
+
+.listing-image-placeholder .bi {
+  font-size: 1.5rem;
+}
+
+.listing-image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.listing-cover-badge {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+.listing-remove-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.6rem;
+  width: 1.65rem;
+  height: 1.65rem;
+  line-height: 1.5rem;
+  text-align: center;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  font-size: 1.2rem;
+}
+
+.image-info-icon {
+  color: #6b6f85;
+  cursor: pointer;
+}
+
+.olx-dark-tooltip .tooltip-inner {
+  background-color: #111111;
+  color: #ffffff;
+  border-radius: 0.7rem;
+  padding: 0.55rem 0.7rem;
+  max-width: 260px;
+  text-align: left;
+}
+
+.olx-dark-tooltip.bs-tooltip-end .tooltip-arrow::before,
+.olx-dark-tooltip.bs-tooltip-start .tooltip-arrow::before,
+.olx-dark-tooltip.bs-tooltip-top .tooltip-arrow::before,
+.olx-dark-tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+  border-right-color: #111111;
+  border-left-color: #111111;
+  border-top-color: #111111;
+  border-bottom-color: #111111;
+}
+
+.publish-submit-btn:hover {
+  background: var(--brand-purple-light, #8b5cf6);
+  border-color: var(--brand-purple-light, #8b5cf6);
+}
+
+@media (max-width: 575.98px) {
+  .publish-section-card {
+    padding: 1.1rem !important;
+  }
+
+  .lesson-mode-btn {
+    width: 100%;
+  }
+
+  .listing-image-tile {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 4 / 3;
+  }
+}
