@@ -294,10 +294,40 @@ class BaseVoteAPIView(APIView):
             prev_vote = vote.value if vote else 0
             next_vote = 0 if prev_vote == vote_value else vote_value
 
+            if (
+                not self.allow_negative_score()
+                and target.score <= 0
+                and next_vote == -1
+            ):
+                author_profile = Profile.objects.select_for_update().get(
+                    user=target.author
+                )
+                if vote and vote.value == -1:
+                    vote.delete()
+
+                return Response(
+                    {
+                        "score": target.score,
+                        "user_vote": 0,
+                        "author_points": author_profile.reputation_points,
+                        "author_level": author_profile.level,
+                    },
+                    status=status.HTTP_200_OK,
+                )
+
             score_delta, reputation_delta = compute_vote_deltas(
                 prev_vote,
                 next_vote,
             )
+
+            if (
+                not self.allow_negative_score()
+                and target.score == 0
+                and prev_vote == -1
+                and next_vote == 0
+            ):
+                score_delta = 0
+                reputation_delta = 0
 
             if score_delta != 0:
                 if not self.allow_negative_score():

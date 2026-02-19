@@ -374,11 +374,24 @@ class VoteTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["score"], 0)
-        self.assertEqual(response.data["user_vote"], -1)
+        self.assertEqual(response.data["user_vote"], 0)
         self.post.refresh_from_db()
         author_profile = Profile.objects.get(user=self.author)
         self.assertEqual(self.post.score, 0)
         self.assertEqual(author_profile.reputation_points, 0)
+
+
+    def test_post_downvote_at_zero_does_not_create_vote_record(self):
+        response = self.client.post(
+            reverse("api-posts-vote", kwargs={"pk": self.post.id}),
+            {"value": -1},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["score"], 0)
+        self.assertEqual(response.data["user_vote"], 0)
+        self.assertFalse(self.post.votes.filter(voter=self.voter).exists())
 
     def test_switch_upvote_to_downvote_applies_minus_two_delta(self):
         self.client.post(
@@ -470,6 +483,26 @@ class VoteTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["user_vote"], 0)
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.score, 0)
+
+
+    def test_post_unvote_after_blocked_downvote_keeps_score_at_zero(self):
+        self.client.post(
+            reverse("api-posts-vote", kwargs={"pk": self.post.id}),
+            {"value": -1},
+            format="json",
+        )
+
+        response = self.client.post(
+            reverse("api-posts-vote", kwargs={"pk": self.post.id}),
+            {"value": 0},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["score"], 0)
         self.assertEqual(response.data["user_vote"], 0)
         self.post.refresh_from_db()
         self.assertEqual(self.post.score, 0)
