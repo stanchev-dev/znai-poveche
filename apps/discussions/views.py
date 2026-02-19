@@ -7,11 +7,19 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 
 @ensure_csrf_cookie
 def discussions_page(request):
-    return render(request, "discussions/subjects.html", {"subject_slug": "all"})
+    return render(
+        request,
+        "discussions/subjects.html",
+        {"subject_slug": "all", "active_subject_slug": "all"},
+    )
 
 @ensure_csrf_cookie
 def subjects_page(request, slug):
-    return render(request, "discussions/subjects.html", {"subject_slug": slug})
+    return render(
+        request,
+        "discussions/subjects.html",
+        {"subject_slug": slug, "active_subject_slug": slug},
+    )
 
 
 @ensure_csrf_cookie

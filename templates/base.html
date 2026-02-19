@@ -29,8 +29,14 @@
         <li class="nav-item dropdown subjects-dropdown">
           <a class="nav-link nav-action-link subjects-dropdown-trigger dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Предмети</a>
           <ul class="dropdown-menu subjects-menu subjects-themed-menu" style="min-width: 220px; max-height: 320px; overflow-y: auto;">
+            <li>
+              <a class="dropdown-item{% if active_subject_slug == 'all' %} active{% endif %}" href="{% url 'discussions-page' %}">Всички предмети</a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
             {% for subject in nav_subjects %}
-              <li><a class="dropdown-item" href="{% url 'subjects-page' slug=subject.slug %}">{{ subject.name }}</a></li>
+              <li>
+                <a class="dropdown-item{% if active_subject_slug == subject.slug %} active{% endif %}" href="{% url 'subjects-page' slug=subject.slug %}">{{ subject.name }}</a>
+              </li>
             {% empty %}
               <li><span class="dropdown-item disabled">Няма предмети</span></li>
             {% endfor %}
