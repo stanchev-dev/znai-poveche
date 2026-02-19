@@ -1,3 +1,4 @@
+{% load static %}
 {% extends "base.html" %}
 
 {% block title %}Класация{% endblock %}
@@ -13,20 +14,45 @@
 
       <form class="leaderboard-filter row g-2 align-items-end" method="get">
         <div class="col-12 col-sm-auto">
-          <label for="scope-select" class="form-label small text-muted mb-1">Обхват</label>
-          <select id="scope-select" name="scope" class="form-select">
-            <option value="global" {% if scope == 'global' %}selected{% endif %}>Глобална</option>
-            <option value="subject" {% if scope == 'subject' %}selected{% endif %}>По предмет</option>
-          </select>
+          <label for="scope-trigger" class="form-label small text-muted mb-1">Обхват</label>
+          <div class="dropdown lb-filter-dd">
+            <button
+              type="button"
+              id="scope-trigger"
+              class="form-select lb-dd-toggle"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              {% if scope == 'subject' %}По предмет{% else %}Глобална{% endif %}
+            </button>
+            <ul class="dropdown-menu subjects-menu subjects-themed-menu lb-dd-menu" aria-labelledby="scope-trigger">
+              <li><button type="button" class="dropdown-item" data-value="global">Глобална</button></li>
+              <li><button type="button" class="dropdown-item" data-value="subject">По предмет</button></li>
+            </ul>
+            <input type="hidden" id="scope-select" name="scope" value="{{ scope|default:'global' }}">
+          </div>
         </div>
         <div class="col-12 col-sm-auto {% if scope != 'subject' %}d-none{% endif %}" id="subject-filter-wrap" {% if scope != 'subject' %}aria-hidden="true"{% endif %}>
-          <label for="subject-select" class="form-label small text-muted mb-1">Предмет</label>
-          <select id="subject-select" name="subject" class="form-select" {% if scope != 'subject' %}disabled{% endif %}>
-            <option value="">Избери предмет</option>
-            {% for subject in subjects %}
-            <option value="{{ subject.slug }}" {% if selected_subject and selected_subject.id == subject.id %}selected{% endif %}>{{ subject.name }}</option>
-            {% endfor %}
-          </select>
+          <label for="subject-trigger" class="form-label small text-muted mb-1">Предмет</label>
+          <div class="dropdown lb-filter-dd">
+            <button
+              type="button"
+              id="subject-trigger"
+              class="form-select lb-dd-toggle"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              {% if scope != 'subject' %}disabled aria-disabled="true"{% endif %}
+            >
+              {% if selected_subject %}{{ selected_subject.name }}{% else %}Избери предмет{% endif %}
+            </button>
+            <ul class="dropdown-menu subjects-menu subjects-themed-menu lb-dd-menu" aria-labelledby="subject-trigger">
+              <li><button type="button" class="dropdown-item" data-value="">Избери предмет</button></li>
+              {% for subject in subjects %}
+              <li><button type="button" class="dropdown-item" data-value="{{ subject.slug }}">{{ subject.name }}</button></li>
+              {% endfor %}
+            </ul>
+            <input type="hidden" id="subject-select" name="subject" value="{% if selected_subject %}{{ selected_subject.slug }}{% endif %}">
+          </div>
         </div>
         <div class="col-12 col-sm-auto d-grid">
           <button type="submit" class="btn btn-brand-purple lb-show-btn">Покажи</button>
@@ -123,26 +149,10 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/pages/leaderboard_filters.js' %}"></script>
+{% if is_paginated %}
 <script>
   (function () {
-    const scopeSelect = document.getElementById('scope-select');
-    const subjectWrap = document.getElementById('subject-filter-wrap');
-
-    if (scopeSelect && subjectWrap) {
-      const subjectSelect = document.getElementById('subject-select');
-      const syncSubjectVisibility = function () {
-        const isSubject = scopeSelect.value === 'subject';
-        subjectWrap.classList.toggle('d-none', !isSubject);
-        subjectWrap.setAttribute('aria-hidden', String(!isSubject));
-        if (subjectSelect) {
-          subjectSelect.disabled = !isSubject;
-        }
-      };
-      scopeSelect.addEventListener('change', syncSubjectVisibility);
-      syncSubjectVisibility();
-    }
-
-    {% if is_paginated %}
     const currentUrl = window.location.pathname + window.location.search;
     window.zpPagination.render({
       containerId: 'leaderboard-pagination',
@@ -153,7 +163,7 @@
         window.location.href = window.zpPagination.updatePageInUrl(currentUrl, page);
       },
     });
-    {% endif %}
   })();
 </script>
+{% endif %}
 {% endblock %}
