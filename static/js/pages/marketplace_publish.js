@@ -6,6 +6,8 @@
     const imageInlineError = document.getElementById('image-inline-error');
     if (!form || !errorsBox || !subjectSelect) return;
 
+    const touchedFields = new Set();
+
     const FIELD_RULES = {
       subject: {
         message: 'Избери предмет.',
@@ -96,6 +98,10 @@
       toggleFieldIcons(fieldName, isValid);
     }
 
+    function shouldApplyFieldState(fieldName) {
+      return form.classList.contains('form-submitted') || touchedFields.has(fieldName);
+    }
+
     function setLessonModeState(isValid) {
       const radios = form.querySelectorAll('input[name="lesson_mode"]');
       radios.forEach((radio) => {
@@ -139,6 +145,13 @@
       const rule = FIELD_RULES[fieldName];
       if (!rule) return true;
       const isValid = rule.isValid();
+
+      if (!shouldApplyFieldState(fieldName)) {
+        form[fieldName].classList.remove('is-invalid', 'is-valid');
+        toggleFieldIcons(fieldName, false);
+        return isValid;
+      }
+
       setFieldState(fieldName, isValid);
       return isValid;
     }
@@ -150,6 +163,7 @@
 
         ['input', 'change', 'blur'].forEach((eventName) => {
           field.addEventListener(eventName, () => {
+            touchedFields.add(fieldName);
             validateField(fieldName);
           });
         });
@@ -158,6 +172,7 @@
       const lessonModeInputs = form.querySelectorAll('input[name="lesson_mode"]');
       lessonModeInputs.forEach((input) => {
         input.addEventListener('change', () => {
+          touchedFields.add('lesson_mode');
           setLessonModeState(FIELD_RULES.lesson_mode.isValid());
         });
       });
@@ -201,11 +216,11 @@
         .map((subject) => `<option value="${subject.slug}">${subject.name}</option>`)
         .join('');
 
-      validateField('subject');
     }
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
+      form.classList.add('form-submitted');
       errorsBox.innerHTML = '';
       clearInlineImageError();
       clearFieldStates();
@@ -255,7 +270,6 @@
     });
 
     bindLiveValidation();
-    initialValidationPass();
     loadSubjects();
   }
 
