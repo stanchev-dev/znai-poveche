@@ -3,6 +3,10 @@
 
 {% block title %}Детайли за публикация{% endblock %}
 
+{% block extra_css %}
+<link href="{% static 'css/discussions.css' %}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 <div class="row g-4 align-items-start">
   <div class="col-12">
@@ -20,7 +24,7 @@
       <form id="comment-form">
         <textarea id="comment-body" class="form-control mb-2" rows="3" required></textarea>
         <input id="comment-image" type="file" class="form-control mb-2" accept="image/*">
-        <button class="btn btn-primary" type="submit">Публикувай</button>
+        <button class="btn btn-brand-purple" type="submit">Публикувай</button>
       </form>
     </section>
     {% endif %}
@@ -31,5 +35,6 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/subject_badges.js' %}"></script>
 <script src="{% static 'js/pages/post_detail.js' %}"></script>
 {% endblock %}

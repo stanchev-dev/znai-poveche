@@ -363,7 +363,7 @@ class VoteTests(APITestCase):
         self.assertEqual(self.post.score, 1)
         self.assertEqual(author_profile.reputation_points, 2)
 
-    def test_post_downvote_awards_score_and_points(self):
+    def test_post_downvote_at_zero_keeps_score_and_points(self):
         response = self.client.post(
             reverse("api-posts-vote", kwargs={"pk": self.post.id}),
             {"value": -1},
@@ -373,7 +373,7 @@ class VoteTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.post.refresh_from_db()
         author_profile = Profile.objects.get(user=self.author)
-        self.assertEqual(self.post.score, -1)
+        self.assertEqual(self.post.score, 0)
         self.assertEqual(author_profile.reputation_points, 0)
 
     def test_switch_upvote_to_downvote(self):
@@ -392,8 +392,8 @@ class VoteTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.post.refresh_from_db()
         author_profile = Profile.objects.get(user=self.author)
-        self.assertEqual(self.post.score, -1)
-        self.assertEqual(author_profile.reputation_points, 0)
+        self.assertEqual(self.post.score, 0)
+        self.assertEqual(author_profile.reputation_points, 2)
 
     def test_switch_downvote_to_upvote(self):
         self.client.post(
