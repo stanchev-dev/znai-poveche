@@ -38,7 +38,7 @@ def my_listings_page(request):
 
 @login_required
 def edit_listing_page(request, listing_id):
-    listing = get_object_or_404(Listing.objects.select_related("owner"), pk=listing_id)
+    listing = get_object_or_404(Listing.objects.select_related("owner").prefetch_related("images"), pk=listing_id)
     if listing.owner_id != request.user.id:
         return HttpResponseForbidden("Нямаш достъп да редактираш тази обява.")
 
@@ -51,7 +51,18 @@ def edit_listing_page(request, listing_id):
     else:
         form = ListingEditForm(instance=listing)
 
-    return render(request, "marketplace/edit_listing.html", {"form": form, "listing": listing})
+    return render(
+        request,
+        "marketplace/edit_listing.html",
+        {
+            "form": form,
+            "listing": listing,
+            "existing_images_json": json.dumps([
+                {"id": image.id, "url": image.image.url}
+                for image in listing.images.order_by("position", "id")
+            ]),
+        },
+    )
 
 
 @login_required

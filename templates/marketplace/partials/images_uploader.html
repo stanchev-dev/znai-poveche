@@ -9,12 +9,14 @@
       <div id="listing-images-grid" class="listing-images-grid" aria-live="polite"></div>
       <div id="image-inline-error" class="text-danger small mt-2 {% if not form.non_field_errors %}d-none{% endif %}" aria-live="polite">{% if form.non_field_errors %}{{ form.non_field_errors|join:', ' }}{% endif %}</div>
     </div>
-    <div class="col-lg-4">
-      <div class="publish-image-tip">
-        <strong class="d-block mb-2">Съвет</strong>
-        Качи ясни снимки (лице или материали) — така учениците ти вярват повече.
-        <div class="mt-2">До 4 снимки • до 2MB • .jpg/.jpeg/.png</div>
+    {% if show_image_tip|default:True %}
+      <div class="col-lg-4">
+        <div class="publish-image-tip">
+          <strong class="d-block mb-2">Съвет</strong>
+          Качи ясни снимки (лице или материали) — така учениците ти вярват повече.
+          <div class="mt-2">До 4 снимки • до 2MB • .jpg/.jpeg/.png</div>
+        </div>
       </div>
-    </div>
+    {% endif %}
   </div>
 </section>
