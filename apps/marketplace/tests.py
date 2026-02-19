@@ -1,4 +1,5 @@
 from datetime import timedelta
+from decimal import Decimal
 from io import BytesIO
 import os
 
@@ -595,3 +596,38 @@ class MyListingsPageTests(TestCase):
         delete_response = self.client.get(reverse("marketplace-delete-page", kwargs={"listing_id": self.listing.id}))
         self.assertEqual(edit_response.status_code, 403)
         self.assertEqual(delete_response.status_code, 403)
+
+    def test_edit_page_hides_contact_email_and_contact_url_fields(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("marketplace-edit-page", kwargs={"listing_id": self.listing.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Contact email")
+        self.assertNotContains(response, "Contact url")
+
+    def test_edit_listing_save_still_works_without_contact_email_and_contact_url(self):
+        self.listing.contact_email = "owner@example.com"
+        self.listing.contact_url = "https://example.com/profile"
+        self.listing.save(update_fields=["contact_email", "contact_url", "updated_at"])
+
+        self.client.force_login(self.owner)
+        response = self.client.post(
+            reverse("marketplace-edit-page", kwargs={"listing_id": self.listing.id}),
+            {
+                "subject": self.subject.id,
+                "price_per_hour": "55.00",
+                "lesson_mode": Listing.LessonMode.OFFLINE,
+                "description": "C" * 120,
+                "contact_name": "Updated Owner",
+                "contact_phone": "+359888123456",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.listing.refresh_from_db()
+        self.assertEqual(self.listing.price_per_hour, Decimal("55.00"))
+        self.assertEqual(self.listing.lesson_mode, Listing.LessonMode.OFFLINE)
+        self.assertEqual(self.listing.contact_name, "Updated Owner")
+        self.assertEqual(self.listing.contact_phone, "+359888123456")
+        self.assertEqual(self.listing.contact_email, "owner@example.com")
+        self.assertEqual(self.listing.contact_url, "https://example.com/profile")
