@@ -590,6 +590,16 @@ class MyListingsPageTests(TestCase):
         self.assertContains(response, "Редактирай")
         self.assertContains(response, "Изтрий")
 
+    def test_my_listings_renders_page_header_include(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.get(reverse("marketplace-my-listings-page"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Твоите обяви")
+        self.assertContains(response, "+ Добави обява")
+        self.assertNotContains(response, "{% include \"common/includes/page_pill_header.html\" with")
+
     def test_owner_checks_for_edit_and_delete(self):
         self.client.force_login(self.other)
         edit_response = self.client.get(reverse("marketplace-edit-page", kwargs={"listing_id": self.listing.id}))
