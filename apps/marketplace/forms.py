@@ -23,8 +23,8 @@ class ListingPublishForm(forms.Form):
     )
     description = forms.CharField(
         required=True,
-        min_length=40,
-        error_messages={"required": "Попълни описание.", "min_length": "Описанието трябва да е поне 40 символа."},
+        min_length=20,
+        error_messages={"required": "Попълни описание.", "min_length": "Въведи поне 20 символа."},
     )
     contact_name = forms.CharField(
         required=True,
@@ -67,13 +67,23 @@ class ListingPublishForm(forms.Form):
         value = (self.cleaned_data.get("contact_name") or "").strip()
         if not value:
             raise forms.ValidationError("Попълни лице за контакт.")
+
+        normalized = re.sub(r"[\s-]+", "", value)
+        if normalized.isdigit():
+            raise forms.ValidationError("Лицето за контакт не може да бъде само числа.")
+
         return value
 
     def clean_contact_phone(self):
         raw_value = (self.cleaned_data.get("contact_phone") or "").strip()
-        collapsed = raw_value.replace(" ", "")
+        collapsed = re.sub(r"[\s-]+", "", raw_value)
 
-        if not collapsed or len(collapsed) < 9 or len(collapsed) > 13:
+        if collapsed.startswith("+"):
+            digits_only = collapsed[1:]
+        else:
+            digits_only = collapsed
+
+        if not digits_only or len(digits_only) < 9 or len(digits_only) > 13:
             raise forms.ValidationError("Въведи валиден телефон.")
 
         if not (collapsed.startswith("0") or collapsed.startswith("+359")):

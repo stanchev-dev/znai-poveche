@@ -209,6 +209,55 @@ class ListingAPITests(APITestCase):
         self.assertIn("contact_phone", response.data)
 
 
+    def test_create_fails_when_description_is_too_short(self):
+        self.client.force_authenticate(self.owner)
+        payload = {
+            "subject": self.math.slug,
+            "price_per_hour": "30",
+            "lesson_mode": Listing.LessonMode.ONLINE,
+            "description": "Кратко инфо",
+            "contact_name": "Иван Иванов",
+            "contact_phone": "+359888777666",
+        }
+
+        response = self.client.post(reverse("listing-list-create"), payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("description", response.data)
+        self.assertIn("Въведи поне 20 символа.", response.data["description"][0])
+
+    def test_create_fails_when_contact_name_is_only_digits(self):
+        self.client.force_authenticate(self.owner)
+        payload = {
+            "subject": self.math.slug,
+            "price_per_hour": "30",
+            "lesson_mode": Listing.LessonMode.ONLINE,
+            "description": "Подробно описание за уроците и начина на провеждане.",
+            "contact_name": "12345",
+            "contact_phone": "+359888777666",
+        }
+
+        response = self.client.post(reverse("listing-list-create"), payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("contact_name", response.data)
+        self.assertIn("Лицето за контакт не може да бъде само числа.", response.data["contact_name"][0])
+
+    def test_create_accepts_phone_with_dashes(self):
+        self.client.force_authenticate(self.owner)
+        payload = {
+            "subject": self.math.slug,
+            "price_per_hour": "30",
+            "lesson_mode": Listing.LessonMode.ONLINE,
+            "description": "Подробно описание за уроците и начина на провеждане.",
+            "contact_name": "Иван Иванов",
+            "contact_phone": "088-599-5855",
+        }
+
+        response = self.client.post(reverse("listing-list-create"), payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
     def test_create_rejects_more_than_four_images(self):
         self.client.force_authenticate(self.other_user)
         payload = {
