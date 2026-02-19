@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
 from apps.common.images import process_image, validate_image_upload
@@ -46,12 +47,38 @@ class SubjectSerializer(serializers.ModelSerializer):
 
 
 class AuthorSerializer(serializers.ModelSerializer):
-    display_name = serializers.CharField(source="profile.display_name")
-    level = serializers.IntegerField(source="profile.level")
+    display_name = serializers.SerializerMethodField()
+    level = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
+    role_label = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["username", "display_name", "level"]
+        fields = ["username", "display_name", "level", "role", "role_label"]
+
+    def get_display_name(self, obj) -> str:
+        try:
+            return obj.profile.display_name or obj.get_username()
+        except ObjectDoesNotExist:
+            return obj.get_username()
+
+    def get_level(self, obj) -> int:
+        try:
+            return obj.profile.level
+        except ObjectDoesNotExist:
+            return 1
+
+    def get_role(self, obj) -> str:
+        try:
+            return obj.profile.role
+        except ObjectDoesNotExist:
+            return "learner"
+
+    def get_role_label(self, obj) -> str:
+        try:
+            return obj.profile.get_role_display()
+        except ObjectDoesNotExist:
+            return "Учащ"
 
 
 class SubjectSummarySerializer(serializers.ModelSerializer):
