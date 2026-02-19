@@ -250,7 +250,7 @@ def compute_score_delta(prev_vote: int, next_vote: int) -> int:
     return next_vote - prev_vote
 
 
-def rep_value_post(vote: int) -> int:
+def rep_value(vote: int) -> int:
     return 1 if vote == 1 else 0
 
 
@@ -266,7 +266,7 @@ class BaseVoteAPIView(APIView):
         return True
 
     def compute_reputation_delta(self, prev_vote: int, next_vote: int) -> int:
-        return next_vote - prev_vote
+        return rep_value(next_vote) - rep_value(prev_vote)
 
     def post(self, request, pk):
         serializer = self.serializer_class(data=request.data)
@@ -377,10 +377,6 @@ class PostVoteAPIView(BaseVoteAPIView):
 
     def allow_negative_score(self) -> bool:
         return False
-
-    def compute_reputation_delta(self, prev_vote: int, next_vote: int) -> int:
-        return rep_value_post(next_vote) - rep_value_post(prev_vote)
-
 
 class CommentVoteAPIView(BaseVoteAPIView):
     target_model = Comment
