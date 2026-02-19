@@ -30,4 +30,4 @@ class Profile(models.Model):
 
     @property
     def level(self) -> int:
-        return (self.reputation_points // 25) + 1
+        return max(1, (self.reputation_points // 25) + 1)
