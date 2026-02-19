@@ -250,8 +250,18 @@ def compute_vote_deltas(
     existing_value: int | None, new_value: int
 ) -> tuple[int, int]:
     prev_value = existing_value or 0
-    delta = new_value - prev_value
-    return delta, delta
+    score_delta = new_value - prev_value
+
+    was_upvote = prev_value == 1
+    is_upvote = new_value == 1
+    if not was_upvote and is_upvote:
+        reputation_delta = 1
+    elif was_upvote and not is_upvote:
+        reputation_delta = -1
+    else:
+        reputation_delta = 0
+
+    return score_delta, reputation_delta
 
 
 class BaseVoteAPIView(APIView):

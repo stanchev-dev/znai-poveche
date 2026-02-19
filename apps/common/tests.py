@@ -90,8 +90,13 @@ class LeaderboardPageScopeTests(TestCase):
         self.user_one = self.user_model.objects.create_user(username="ivan")
         self.user_two = self.user_model.objects.create_user(username="maria")
 
-        Profile.objects.create(user=self.user_one, reputation_points=40)
-        Profile.objects.create(user=self.user_two, reputation_points=30)
+        profile_one, _ = Profile.objects.get_or_create(user=self.user_one)
+        profile_one.reputation_points = 40
+        profile_one.save(update_fields=["reputation_points"])
+
+        profile_two, _ = Profile.objects.get_or_create(user=self.user_two)
+        profile_two.reputation_points = 30
+        profile_two.save(update_fields=["reputation_points"])
 
         self.subject_math = Subject.objects.create(name="Математика")
         self.subject_history = Subject.objects.create(name="История")
