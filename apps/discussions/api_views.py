@@ -343,7 +343,8 @@ class BaseVoteAPIView(APIView):
             author_profile = Profile.objects.select_for_update().get(
                 user=target.author
             )
-            if request.user.id != target.author_id and reputation_delta != 0:
+            should_apply_reputation = reputation_delta != 0
+            if should_apply_reputation:
                 apply_reputation_delta(author_profile, reputation_delta)
                 author_profile.save(
                     update_fields=["reputation_points", "max_level_reached"]
