@@ -246,15 +246,12 @@ def apply_reputation_delta(profile: Profile, reputation_delta: int) -> None:
         profile.max_level_reached = new_level
 
 
-def compute_vote_deltas(
-    existing_value: int | None, new_value: int
-) -> tuple[int, int]:
-    prev_value = existing_value or 0
-    score_delta = new_value - prev_value
+def compute_score_delta(prev_vote: int, next_vote: int) -> int:
+    return next_vote - prev_vote
 
-    reputation_delta = new_value - prev_value
 
-    return score_delta, reputation_delta
+def compute_reputation_delta(next_vote: int) -> int:
+    return next_vote
 
 
 class BaseVoteAPIView(APIView):
@@ -318,10 +315,8 @@ class BaseVoteAPIView(APIView):
                     status=status.HTTP_200_OK,
                 )
 
-            score_delta, reputation_delta = compute_vote_deltas(
-                prev_vote,
-                next_vote,
-            )
+            score_delta = compute_score_delta(prev_vote, next_vote)
+            reputation_delta = compute_reputation_delta(next_vote)
 
             if (
                 not self.allow_negative_score()
