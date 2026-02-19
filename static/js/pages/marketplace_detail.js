@@ -65,7 +65,7 @@
 
   function renderGallery(images) {
     if (!images.length) {
-      gallery.innerHTML = `<div class="card marketplace-detail-gallery-card"><div class="card-body p-2 p-md-3"><img src="${defaultImage}" alt="Снимка на обява" class="img-fluid rounded marketplace-detail-image"></div></div>`;
+      gallery.innerHTML = `<div class="card marketplace-detail-gallery-card"><div class="card-body p-2 p-md-3"><div class="marketplace-detail-image-frame rounded"><img src="${defaultImage}" alt="Снимка на обява" class="img-fluid marketplace-detail-image"></div></div></div>`;
       return;
     }
 
@@ -75,7 +75,9 @@
         <div class="card-body p-2 p-md-3">
           <div class="marketplace-carousel" data-count="${images.length}">
             <button type="button" class="carousel-nav carousel-prev ${images.length === 1 ? 'd-none' : ''}" aria-label="Предишна снимка">&#10094;</button>
-            <img class="img-fluid rounded marketplace-detail-image" id="carousel-main-image" alt="Снимка на обява">
+            <div class="marketplace-detail-image-frame rounded">
+              <img class="img-fluid marketplace-detail-image" id="carousel-main-image" alt="Снимка на обява">
+            </div>
             <button type="button" class="carousel-nav carousel-next ${images.length === 1 ? 'd-none' : ''}" aria-label="Следваща снимка">&#10095;</button>
           </div>
           <div class="carousel-thumbs ${images.length <= 1 ? 'd-none' : ''}" id="carousel-thumbs"></div>
