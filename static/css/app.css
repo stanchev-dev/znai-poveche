@@ -5,6 +5,11 @@
   --brand-purple-cta: #7c45f5;
   --brand-purple-cta-dark: #6730df;
   --footer-purple: #2a0f4d;
+  --zp-primary: var(--bs-primary, var(--brand-purple, #6f2cf3));
+  --subject-badge-bg: var(--zp-primary, var(--brand-purple, #6f2cf3));
+  --subject-badge-border: var(--brand-purple-dark, var(--zp-primary, #5723c5));
+  --surface-subtle: var(--bs-tertiary-bg, #f8f9fa);
+  --bs-form-select-bg-img: var(--bs-form-select-bg-img, none);
 }
 
 body {
