@@ -21,6 +21,23 @@ h6 {
   font-family: inherit;
 }
 
+
+.discussions-header-card {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid rgba(124, 69, 245, 0.22);
+  box-shadow: 0 12px 30px rgba(17, 24, 39, 0.06);
+  padding: 1.1rem 1.2rem;
+}
+
+.discussions-header-card h1 {
+  font-weight: 800;
+}
+
+.discussions-cta-btn {
+  white-space: nowrap;
+}
+
 .hero-section {
   position: relative;
   overflow: hidden;
