@@ -18,59 +18,22 @@
   border-color: #dee2e6;
 }
 
-.discussions-page .discussions-sort-toggle {
-  --bs-btn-color: #111827;
-  --bs-btn-bg: #ffffff;
-  --bs-btn-border-color: #dee2e6;
-  --bs-btn-hover-color: #111827;
-  --bs-btn-hover-bg: #ffffff;
-  --bs-btn-hover-border-color: #dee2e6;
-  --bs-btn-active-color: #111827;
-  --bs-btn-active-bg: #ffffff;
-  --bs-btn-active-border-color: #7c45f5;
-  --bs-btn-font-weight: 400;
-
-  position: relative;
-  padding-right: 2.35rem;
-  text-align: left;
+.discussions-page .discussions-sort-select {
+  color: #111827;
+  background-color: #ffffff;
+  border-color: #dee2e6;
 }
 
-.discussions-page .discussions-sort-toggle::after {
-  position: absolute;
-  right: 0.95rem;
-  top: 50%;
-  transform: translateY(-50%);
-  margin-left: 0;
+.discussions-page .discussions-sort-select:hover {
+  background-color: #ffffff;
+  border-color: #dee2e6;
 }
 
-.discussions-page .discussions-sort-toggle:focus,
-.discussions-page .discussions-sort-toggle:focus-visible,
-.discussions-page .discussions-sort-toggle.show {
+.discussions-page .discussions-sort-select:focus,
+.discussions-page .discussions-sort-select:focus-visible {
+  background-color: #ffffff;
   border-color: var(--brand-purple-cta, #7c45f5);
   box-shadow: 0 0 0 0.24rem rgba(124, 69, 245, 0.22);
-}
-
-.discussions-page .discussions-sort-menu {
-  border: 1px solid rgba(124, 69, 245, 0.22);
-  border-radius: 0.75rem;
-  padding: 0.3rem;
-  box-shadow: 0 14px 24px rgba(17, 24, 39, 0.12);
-}
-
-.discussions-page .discussions-sort-item {
-  border-radius: 0.5rem;
-}
-
-.discussions-page .discussions-sort-item:hover,
-.discussions-page .discussions-sort-item:focus-visible {
-  color: var(--brand-purple, #6f2cf3);
-  background-color: rgba(124, 69, 245, 0.14);
-}
-
-.discussions-page .discussions-sort-item.active,
-.discussions-page .discussions-sort-item:active {
-  color: #ffffff;
-  background-color: var(--brand-purple-cta, #7c45f5);
 }
 
 .discussions-page .form-select:focus,
