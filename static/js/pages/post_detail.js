@@ -12,7 +12,7 @@
   function chip(author) { return `<span class="badge bg-light text-dark">${author.username} (${author.display_name}, ниво ${author.level})</span>`; }
   function imgIf(url) {
     return url
-      ? `<div class="marketplace-detail-image-frame rounded mt-2"><img src="${url}" class="marketplace-detail-image" alt="image"></div>`
+      ? `<div class="discussion-image-frame marketplace-detail-image-frame rounded mt-2"><img src="${url}" class="discussion-image marketplace-detail-image" alt="image"></div>`
       : '';
   }
   function alertHtml(text, type='warning') { return `<div class="alert alert-${type}">${text}</div>`; }
