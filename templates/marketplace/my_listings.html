@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Твоите обяви{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h1 class="h3 mb-0">Твоите обяви</h1>
+  <a class="btn btn-brand-purple" href="{% url 'marketplace-publish-page' %}">+ Добави обява</a>
+</div>
+
+{% if listings %}
+  <div class="vstack gap-3">
+    {% for listing in listings %}
+      <article class="card listing-card">
+        <a href="{% url 'marketplace-detail-page' listing_id=listing.id %}" class="listing-card-link text-reset text-decoration-none" aria-label="Отвори обявата за {{ listing.subject.name }}">
+          <div class="listing-card-body">
+            <div class="listing-card-left">
+              <div class="listing-card-avatar-wrap" aria-hidden="true">
+                {% if listing.image %}
+                  <img src="{{ listing.image.url }}" alt="" class="listing-card-avatar" loading="lazy">
+                {% else %}
+                  <img src="{% static 'img/default-avatar.svg' %}" alt="" class="listing-card-avatar" loading="lazy">
+                {% endif %}
+              </div>
+            </div>
+            <div class="listing-card-middle">
+              <h2 class="listing-card-title h5 mb-2">Уроци по {{ listing.subject.name }}</h2>
+              <p class="listing-card-description mb-2">{{ listing.description|truncatechars:140 }}</p>
+              <div class="listing-card-badges">
+                <span class="badge rounded-pill listing-pill subject-badge">{{ listing.subject.name }}</span>
+                <span class="badge rounded-pill listing-pill lesson-mode-badge {% if listing.lesson_mode == 'online' %}lesson-mode-badge--online{% elif listing.lesson_mode == 'in_person' %}lesson-mode-badge--in-person{% else %}lesson-mode-badge--online-and-in-person{% endif %}">{{ listing.get_lesson_mode_display }}</span>
+              </div>
+            </div>
+            <div class="listing-card-right">
+              <div class="listing-card-price">{{ listing.price_per_hour }} €/ч</div>
+            </div>
+          </div>
+        </a>
+        <div class="listing-card-actions d-flex justify-content-end gap-2 px-3 pb-3">
+          <a href="{% url 'marketplace-edit-page' listing_id=listing.id %}" class="btn btn-sm btn-brand-outline rounded-pill">Редактирай</a>
+          <a href="{% url 'marketplace-delete-page' listing_id=listing.id %}" class="btn btn-sm btn-outline-danger rounded-pill">Изтрий</a>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 my-listings-empty-state">
+    <h2 class="h4 mb-2">Нямаш активни обяви.</h2>
+    <p class="text-muted mb-3">Създай първата си обява в Маркетплейс.</p>
+    <div>
+      <a class="btn btn-brand-purple" href="{% url 'marketplace-publish-page' %}">+ Добави обява</a>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

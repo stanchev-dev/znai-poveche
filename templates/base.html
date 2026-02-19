@@ -77,6 +77,12 @@
                   <span>Твоят профил</span>
                 </a>
               </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'marketplace-my-listings-page' %}">
+                  <i class="bi bi-card-list nav-dd-icon"></i>
+                  <span>Твоите обяви</span>
+                </a>
+              </li>
             {% else %}
               <li>
                 <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'login' %}">
