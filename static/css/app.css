@@ -1839,3 +1839,158 @@ h6 {
     aspect-ratio: 4 / 3;
   }
 }
+
+/* Marketplace publish refinements */
+.marketplace-publish-page .publish-main-card {
+  background: #f8f7ff;
+  border: 1px solid #ece8ff;
+  border-radius: 1.2rem;
+  padding: 1rem;
+}
+
+.publish-subject-select {
+  background-color: #fff;
+}
+
+.publish-subject-select:focus {
+  background-color: #fff;
+}
+
+.publish-subject-select option {
+  background: var(--footer-purple, #2a0f4d);
+  color: #fff;
+  padding: 0.55rem 0.8rem;
+}
+
+.publish-subject-select option:checked {
+  background: rgba(196, 181, 253, 0.35);
+  color: #fff;
+}
+
+.publish-subject-select option:hover {
+  background: rgba(196, 181, 253, 0.55);
+}
+
+.listing-images-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.listing-image-card {
+  aspect-ratio: 1 / 1;
+  border-radius: 0.9rem;
+  border: 1px dashed #c7cbdf;
+  background: #f8f9ff;
+  position: relative;
+  overflow: hidden;
+}
+
+.listing-image-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.listing-image-add {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  color: #5f647b;
+  font-weight: 600;
+  border-style: dashed;
+}
+
+.listing-image-add .bi {
+  display: block;
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
+}
+
+.listing-image-placeholder-tile {
+  background: #fbfbff;
+  border: 1px dashed #e0e2ef;
+}
+
+.listing-cover-action {
+  position: absolute;
+  left: 0.45rem;
+  bottom: 0.45rem;
+  border: 0;
+  background: rgba(17, 17, 17, 0.75);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  padding: 0.2rem 0.5rem;
+}
+
+.publish-image-tip {
+  background: #111;
+  color: #fff;
+  border-radius: 0.8rem;
+  padding: 0.9rem;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+/* Marketplace detail carousel */
+.marketplace-carousel {
+  position: relative;
+}
+
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(17, 17, 17, 0.72);
+  color: #fff;
+  z-index: 2;
+}
+
+.carousel-prev { left: 0.5rem; }
+.carousel-next { right: 0.5rem; }
+
+.carousel-thumbs {
+  margin-top: 0.7rem;
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+}
+
+.carousel-thumb {
+  border: 2px solid transparent;
+  border-radius: 0.5rem;
+  padding: 0;
+  background: transparent;
+}
+
+.carousel-thumb img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 0.4rem;
+}
+
+.carousel-thumb.active {
+  border-color: var(--brand-purple-cta, #7c45f5);
+}
+
+main#app-root,
+.marketplace-detail-page,
+.marketplace-detail-page .row,
+.marketplace-detail-page .col-12 {
+  overflow: visible;
+}
+
+@media (max-width: 991.98px) {
+  .listing-images-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 575.98px) {
+  .listing-images-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

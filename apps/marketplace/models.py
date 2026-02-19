@@ -38,6 +38,7 @@ class Listing(models.Model):
         null=True,
     )
     description = models.TextField()
+    contact_name = models.CharField(max_length=120, blank=True, default="")
     contact_phone = models.CharField(max_length=30, blank=True)
     contact_email = models.EmailField(blank=True, default="")
     contact_url = models.URLField(blank=True, default="")
@@ -50,6 +51,30 @@ class Listing(models.Model):
 
     def __str__(self) -> str:
         return f"Listing #{self.pk} by {self.owner_id}"
+
+    def save(self, *args, **kwargs):
+        if (
+            self.image
+            and getattr(self.image, "_committed", True) is False
+            and isinstance(getattr(self.image, "file", None), UploadedFile)
+        ):
+            validate_image_upload(self.image)
+            self.image = process_image(self.image, max_side=1600, quality=80)
+        super().save(*args, **kwargs)
+
+
+class ListingImage(models.Model):
+    listing = models.ForeignKey(
+        Listing,
+        on_delete=models.CASCADE,
+        related_name="images",
+    )
+    image = models.ImageField(upload_to=listing_image_upload_to)
+    position = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["position", "id"]
 
     def save(self, *args, **kwargs):
         if (
