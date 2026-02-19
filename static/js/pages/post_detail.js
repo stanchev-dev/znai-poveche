@@ -82,7 +82,7 @@
   function alertHtml(text, type = 'warning') { return `<div class="alert alert-${type}">${text}</div>`; }
   function loginAlert() { return `${alertHtml(`Трябва да сте логнати. <a href="${loginUrl}">Вход</a>`, 'warning')}`; }
 
-  async function castVote(url, scoreEl, targetType, voteValue, voteWrap) {
+  async function castVote(url, scoreEl, targetType, voteValue, voteWrap, targetId) {
     if (targetType === 'post' && voteValue === -1) {
       const currentScore = Number(scoreEl.textContent || 0);
       if (currentScore <= 0) return;
@@ -103,7 +103,15 @@
       }
 
       const nextScore = data.score ?? data.new_score;
-      if (nextScore !== undefined) scoreEl.textContent = nextScore;
+      if (nextScore !== undefined && scoreEl) {
+        scoreEl.textContent = nextScore;
+      } else if (targetType === 'post' && scoreEl) {
+        const postRes = await window.apiUtils.apiFetch(`/api/posts/${targetId}/`);
+        if (postRes.ok) {
+          const postData = await postRes.json().catch(() => ({}));
+          if (postData.score !== undefined) scoreEl.textContent = postData.score;
+        }
+      }
 
       const voteState = Number(data.vote_value ?? voteValue);
       if (voteWrap) {
@@ -162,9 +170,11 @@
   }
 
   function votingHtml(type, id, score) {
+    const isPost = type === 'post';
+    const scoreId = isPost ? 'post-score' : `${type}-score-${id}`;
     return `
       <button class="vote-btn vote-btn--up" id="${type}-up-${id}" type="button" aria-label="Положителен вот">▲</button>
-      <strong id="${type}-score-${id}" class="vote-score">${score}</strong>
+      <span id="${scoreId}" class="vote-score" ${isPost ? 'data-post-score' : ''}>${score}</span>
       <button class="vote-btn vote-btn--down" id="${type}-down-${id}" type="button" aria-label="Отрицателен вот">▼</button>
     `;
   }
@@ -205,9 +215,9 @@
 
     const voteWrap = document.getElementById(`post-vote-${post.id}`);
     voteWrap.innerHTML = votingHtml('post', post.id, post.score);
-    const scoreEl = document.getElementById(`post-score-${post.id}`);
-    document.getElementById(`post-up-${post.id}`).onclick = () => castVote(`/api/posts/${postId}/vote/`, scoreEl, 'post', 1, voteWrap);
-    document.getElementById(`post-down-${post.id}`).onclick = () => castVote(`/api/posts/${postId}/vote/`, scoreEl, 'post', -1, voteWrap);
+    const scoreEl = document.querySelector('[data-post-score]');
+    document.getElementById(`post-up-${post.id}`).onclick = () => castVote(`/api/posts/${postId}/vote/`, scoreEl, 'post', 1, voteWrap, post.id);
+    document.getElementById(`post-down-${post.id}`).onclick = () => castVote(`/api/posts/${postId}/vote/`, scoreEl, 'post', -1, voteWrap, post.id);
   }
 
   async function loadComments() {
@@ -233,11 +243,11 @@
 
     commentsList.querySelectorAll('[id^="comment-up-"]').forEach((btn) => {
       const id = btn.id.replace('comment-up-', '');
-      btn.onclick = () => castVote(`/api/comments/${id}/vote/`, document.getElementById(`comment-score-${id}`), 'comment', 1, document.getElementById(`comment-vote-${id}`));
+      btn.onclick = () => castVote(`/api/comments/${id}/vote/`, document.getElementById(`comment-score-${id}`), 'comment', 1, document.getElementById(`comment-vote-${id}`), id);
     });
     commentsList.querySelectorAll('[id^="comment-down-"]').forEach((btn) => {
       const id = btn.id.replace('comment-down-', '');
-      btn.onclick = () => castVote(`/api/comments/${id}/vote/`, document.getElementById(`comment-score-${id}`), 'comment', -1, document.getElementById(`comment-vote-${id}`));
+      btn.onclick = () => castVote(`/api/comments/${id}/vote/`, document.getElementById(`comment-score-${id}`), 'comment', -1, document.getElementById(`comment-vote-${id}`), id);
     });
   }
 
