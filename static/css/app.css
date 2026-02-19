@@ -2235,7 +2235,7 @@ main#app-root,
 .auth-page-wrap {
   min-height: calc(100vh - 180px);
   align-items: flex-start;
-  padding-top: clamp(2rem, 8vh, 5rem);
+  padding-top: clamp(0.75rem, 3vh, 1.8rem);
 }
 
 .auth-card {
@@ -2321,9 +2321,13 @@ main#app-root,
   line-height: 1.4;
 }
 
+.auth-card .form-label {
+  margin-bottom: 0.35rem;
+}
+
 @media (max-width: 575.98px) {
   .auth-page-wrap {
-    padding-top: 1.25rem;
+    padding-top: 0.5rem;
   }
 
   .auth-card .card-body {
