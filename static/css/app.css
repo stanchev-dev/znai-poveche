@@ -130,6 +130,20 @@ h6 {
   box-shadow: 0 0 0 0.22rem rgba(124, 69, 245, 0.25), 0 10px 22px rgba(17, 24, 39, 0.16);
 }
 
+.lb-show-btn {
+  background: #6d35e5;
+  border-color: #622fd1;
+  color: #ffffff;
+}
+
+.lb-show-btn:hover,
+.lb-show-btn:focus,
+.lb-show-btn:focus-visible {
+  background: #7843ee;
+  border-color: #6d35e5;
+  color: #ffffff;
+}
+
 
 .btn-brand-outline {
   border: 1px solid var(--brand-purple, #6f2cf3);
@@ -372,8 +386,8 @@ h6 {
 }
 
 .avatar-btn {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
@@ -483,29 +497,43 @@ h6 {
   align-items: center;
   gap: 0.45rem;
   border-radius: 999px;
-  padding: 0.26rem 0.4rem 0.26rem 0.18rem;
+  padding: 0.2rem 0.38rem 0.2rem 0.16rem;
 }
 
 
 .account-toggle {
   border: 1px solid rgba(196, 181, 253, 0.42);
-  color: #ffffff;
-  background-color: var(--footer-purple, #2a0f4d);
+  color: #ffffff !important;
+  background-color: #35135f;
 }
 
 .account-toggle:hover,
 .account-toggle:focus,
 .account-toggle:focus-visible {
-  color: #ffffff;
-  background-color: var(--brand-purple-dark, #5b21d1);
+  color: #ffffff !important;
+  background-color: #3f1771;
   border-color: rgba(196, 181, 253, 0.52);
 }
 
 .account-toggle.show,
 .account-toggle:active {
-  color: #ffffff;
-  background-color: var(--footer-purple, #2a0f4d);
+  color: #ffffff !important;
+  background-color: #3f1771;
   border-color: rgba(196, 181, 253, 0.52);
+}
+
+.show > .account-toggle.dropdown-toggle,
+.account-toggle.dropdown-toggle,
+.account-toggle.dropdown-toggle:hover,
+.account-toggle.dropdown-toggle:focus,
+.account-toggle.dropdown-toggle:active,
+.account-toggle.dropdown-toggle.show {
+  color: #ffffff !important;
+}
+
+.account-toggle.dropdown-toggle::after,
+.show > .account-toggle.dropdown-toggle::after {
+  color: #ffffff;
 }
 
 .account-toggle:focus-visible {
@@ -515,7 +543,7 @@ h6 {
   font-size: 1rem;
   font-weight: 600;
   line-height: 1.25;
-  color: inherit;
+  color: #ffffff !important;
   max-width: 172px;
   white-space: nowrap;
   overflow: hidden;
@@ -1561,4 +1589,3 @@ h6 {
     transform: none;
   }
 }
-
