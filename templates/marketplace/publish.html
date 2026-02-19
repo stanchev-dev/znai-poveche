@@ -21,14 +21,24 @@
         <div class="row g-3">
           <div class="col-md-6">
             <label for="subject" class="form-label">Предмет</label>
-            <select id="subject" name="subject" class="form-select publish-input publish-subject-select" required>
-              <option value="">Зареждане...</option>
-            </select>
+            <div class="publish-field-wrap" data-validation-field="subject">
+              <select id="subject" name="subject" class="form-select publish-input publish-subject-select" required>
+                <option value="">Зареждане...</option>
+              </select>
+              <span class="publish-valid-icon d-none" aria-hidden="true">
+                <i class="bi bi-check-circle-fill"></i>
+              </span>
+            </div>
           </div>
 
           <div class="col-md-6">
             <label for="price_per_hour" class="form-label">Цена на час</label>
-            <input id="price_per_hour" name="price_per_hour" type="text" inputmode="decimal" class="form-control publish-input" required>
+            <div class="publish-field-wrap" data-validation-field="price_per_hour">
+              <input id="price_per_hour" name="price_per_hour" type="text" inputmode="decimal" class="form-control publish-input" required>
+              <span class="publish-valid-icon d-none" aria-hidden="true">
+                <i class="bi bi-check-circle-fill"></i>
+              </span>
+            </div>
           </div>
 
           <div class="col-12">
@@ -60,7 +70,8 @@
           <div class="col-lg-4">
             <div class="publish-image-tip">
               <strong class="d-block mb-2">Съвет</strong>
-              Качи ясни снимки с добро качество (например твоя снимка или учебни материали). Професионалните снимки вдъхват доверие и увеличават шанса ученици да ти пишат.<div class="mt-2">До 4 снимки • до 2MB • .jpg, .jpeg, .png</div>
+              Качи ясни снимки (лице или материали) — така учениците ти вярват повече.
+              <div class="mt-2">До 4 снимки • до 2MB • .jpg/.jpeg/.png</div>
             </div>
           </div>
         </div>
@@ -68,14 +79,19 @@
 
       <section class="card shadow-sm border-0 rounded-4 p-4 publish-section-card">
         <h2 class="h5 mb-3">Описание</h2>
-        <textarea
-          id="description"
-          name="description"
-          class="form-control publish-input publish-description"
-          rows="6"
-          required
-          placeholder="Опиши урока така, че ученик да разбере веднага: за кой клас е, какво ще научи и как протича. Можеш да добавиш и примерни теми."
-        ></textarea>
+        <div class="publish-field-wrap" data-validation-field="description">
+          <textarea
+            id="description"
+            name="description"
+            class="form-control publish-input publish-description"
+            rows="6"
+            required
+            placeholder="Опиши урока така, че ученик да разбере веднага: за кой клас е, какво ще научи и как протича. Можеш да добавиш и примерни теми."
+          ></textarea>
+          <span class="publish-valid-icon d-none" aria-hidden="true">
+            <i class="bi bi-check-circle-fill"></i>
+          </span>
+        </div>
         <div class="form-text">Въведи поне 20 символа.</div>
       </section>
 
@@ -84,11 +100,21 @@
         <div class="row g-3">
           <div class="col-md-6">
             <label for="contact_name" class="form-label">Лице за контакт</label>
-            <input id="contact_name" name="contact_name" type="text" class="form-control publish-input" required placeholder="Пр: Иван Иванов">
+            <div class="publish-field-wrap" data-validation-field="contact_name">
+              <input id="contact_name" name="contact_name" type="text" class="form-control publish-input" required placeholder="Пр: Иван Иванов">
+              <span class="publish-valid-icon d-none" aria-hidden="true">
+                <i class="bi bi-check-circle-fill"></i>
+              </span>
+            </div>
           </div>
           <div class="col-md-6">
             <label for="contact_phone" class="form-label">Телефонен номер</label>
-            <input id="contact_phone" name="contact_phone" type="text" class="form-control publish-input" required placeholder="Пр: 088 333 7777">
+            <div class="publish-field-wrap" data-validation-field="contact_phone">
+              <input id="contact_phone" name="contact_phone" type="text" class="form-control publish-input" required placeholder="Пр: 088 333 7777">
+              <span class="publish-valid-icon d-none" aria-hidden="true">
+                <i class="bi bi-check-circle-fill"></i>
+              </span>
+            </div>
           </div>
         </div>
       </section>

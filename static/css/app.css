@@ -1702,6 +1702,36 @@ h6 {
   border-radius: 0.85rem;
 }
 
+
+.publish-field-wrap {
+  position: relative;
+}
+
+.publish-valid-icon {
+  position: absolute;
+  right: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #1f9d55;
+  font-size: 1rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.publish-field-wrap .publish-description + .publish-valid-icon {
+  top: 1rem;
+  transform: none;
+}
+
+.publish-field-wrap .publish-input.is-valid,
+.publish-field-wrap .publish-description.is-valid {
+  padding-right: 2.2rem;
+}
+
+.publish-field-wrap .publish-input.is-invalid,
+.publish-field-wrap .publish-description.is-invalid {
+  padding-right: 2.2rem;
+}
 .publish-input:focus,
 .publish-description:focus,
 .lesson-mode-btn:focus-visible,
