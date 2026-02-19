@@ -250,12 +250,23 @@ def compute_score_delta(prev_vote: int, next_vote: int) -> int:
     return next_vote - prev_vote
 
 
-def rep_value(vote: int) -> int:
+def rep_value_post(vote: int) -> int:
     return 1 if vote == 1 else 0
 
 
-def compute_reputation_delta(prev_vote: int, next_vote: int) -> int:
-    return rep_value(next_vote) - rep_value(prev_vote)
+def rep_value_comment(vote: int) -> int:
+    return vote
+
+
+def compute_reputation_delta(
+    prev_vote: int,
+    next_vote: int,
+    *,
+    is_comment_vote: bool,
+) -> int:
+    if is_comment_vote:
+        return rep_value_comment(next_vote) - rep_value_comment(prev_vote)
+    return rep_value_post(next_vote) - rep_value_post(prev_vote)
 
 
 class BaseVoteAPIView(APIView):
@@ -320,7 +331,11 @@ class BaseVoteAPIView(APIView):
                 )
 
             score_delta = compute_score_delta(prev_vote, next_vote)
-            reputation_delta = compute_reputation_delta(prev_vote, next_vote)
+            reputation_delta = compute_reputation_delta(
+                prev_vote,
+                next_vote,
+                is_comment_vote=self.target_model is Comment,
+            )
 
             if (
                 not self.allow_negative_score()
