@@ -29,6 +29,21 @@
   </div>
 
   <div id="listing-meta" data-listing-id="{{ listing_id }}"></div>
+
+  <div id="listing-image-lightbox" class="listing-image-lightbox" aria-hidden="true">
+    <button type="button" class="listing-image-lightbox-close" id="listing-lightbox-close" aria-label="Затвори разширената снимка">
+      <i class="bi bi-x-lg" aria-hidden="true"></i>
+    </button>
+    <button type="button" class="listing-image-lightbox-nav listing-image-lightbox-prev d-none" id="listing-lightbox-prev" aria-label="Предишна снимка">
+      &#10094;
+    </button>
+    <div class="listing-image-lightbox-dialog" id="listing-lightbox-dialog">
+      <img id="listing-lightbox-image" class="listing-image-lightbox-image" alt="Разширена снимка на обява">
+    </div>
+    <button type="button" class="listing-image-lightbox-nav listing-image-lightbox-next d-none" id="listing-lightbox-next" aria-label="Следваща снимка">
+      &#10095;
+    </button>
+  </div>
 </div>
 {% endblock %}
 

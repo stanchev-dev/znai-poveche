@@ -13,6 +13,12 @@
   const price = document.getElementById('listing-price');
   const owner = document.getElementById('listing-owner');
   const callBtn = document.getElementById('call-btn');
+  const lightbox = document.getElementById('listing-image-lightbox');
+  const lightboxDialog = document.getElementById('listing-lightbox-dialog');
+  const lightboxImage = document.getElementById('listing-lightbox-image');
+  const lightboxClose = document.getElementById('listing-lightbox-close');
+  const lightboxPrev = document.getElementById('listing-lightbox-prev');
+  const lightboxNext = document.getElementById('listing-lightbox-next');
   const defaultImage = '/static/img/default-avatar.svg';
   let contactData = null;
 
@@ -70,6 +76,49 @@
     }
 
     let current = 0;
+
+    function syncLightbox() {
+      const currentImage = images[current] || images[0] || defaultImage;
+      lightboxImage.src = currentImage;
+      lightboxPrev.classList.toggle('d-none', images.length <= 1);
+      lightboxNext.classList.toggle('d-none', images.length <= 1);
+    }
+
+    function update() {
+      const currentImage = images[current] || images[0];
+      mainImage.src = currentImage || defaultImage;
+      thumbs.querySelectorAll('button').forEach((btn, index) => {
+        btn.classList.toggle('active', index === current);
+      });
+      if (lightbox.classList.contains('is-open')) {
+        syncLightbox();
+      }
+    }
+
+    function closeModal() {
+      lightbox.classList.remove('is-open');
+      lightbox.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('listing-lightbox-open');
+    }
+
+    function openModal() {
+      syncLightbox();
+      lightbox.classList.add('is-open');
+      lightbox.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('listing-lightbox-open');
+      lightboxClose.focus();
+    }
+
+    function next() {
+      current = (current + 1) % images.length;
+      update();
+    }
+
+    function prev() {
+      current = (current - 1 + images.length) % images.length;
+      update();
+    }
+
     gallery.innerHTML = `
       <div class="card marketplace-detail-gallery-card">
         <div class="card-body p-2 p-md-3">
@@ -77,6 +126,9 @@
             <button type="button" class="carousel-nav carousel-prev ${images.length === 1 ? 'd-none' : ''}" aria-label="Предишна снимка">&#10094;</button>
             <div class="marketplace-detail-image-frame rounded">
               <img class="img-fluid marketplace-detail-image" id="carousel-main-image" alt="Снимка на обява">
+              <button type="button" class="listing-expand-btn" id="listing-expand-btn" aria-label="Разшири снимката">
+                <i class="bi bi-arrows-fullscreen" aria-hidden="true"></i>
+              </button>
             </div>
             <button type="button" class="carousel-nav carousel-next ${images.length === 1 ? 'd-none' : ''}" aria-label="Следваща снимка">&#10095;</button>
           </div>
@@ -86,14 +138,7 @@
 
     const mainImage = document.getElementById('carousel-main-image');
     const thumbs = document.getElementById('carousel-thumbs');
-
-    function update() {
-      const currentImage = images[current] || images[0];
-      mainImage.src = currentImage || defaultImage;
-      thumbs.querySelectorAll('button').forEach((btn, index) => {
-        btn.classList.toggle('active', index === current);
-      });
-    }
+    const expandBtn = document.getElementById('listing-expand-btn');
 
     if (images.length > 1) {
       images.forEach((src, index) => {
@@ -108,26 +153,42 @@
         thumbs.appendChild(btn);
       });
 
-      gallery.querySelector('.carousel-prev').addEventListener('click', () => {
-        current = (current - 1 + images.length) % images.length;
-        update();
-      });
-      gallery.querySelector('.carousel-next').addEventListener('click', () => {
-        current = (current + 1) % images.length;
-        update();
-      });
-
-      window.addEventListener('keydown', (event) => {
-        if (event.key === 'ArrowLeft') {
-          current = (current - 1 + images.length) % images.length;
-          update();
-        }
-        if (event.key === 'ArrowRight') {
-          current = (current + 1) % images.length;
-          update();
-        }
-      });
+      gallery.querySelector('.carousel-prev').addEventListener('click', prev);
+      gallery.querySelector('.carousel-next').addEventListener('click', next);
+      lightboxPrev.addEventListener('click', prev);
+      lightboxNext.addEventListener('click', next);
     }
+
+    lightboxClose.addEventListener('click', closeModal);
+    lightbox.addEventListener('click', (event) => {
+      if (event.target === lightbox || !lightboxDialog.contains(event.target)) {
+        closeModal();
+      }
+    });
+
+    expandBtn.addEventListener('click', openModal);
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && lightbox.classList.contains('is-open')) {
+        closeModal();
+        return;
+      }
+
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
+        return;
+      }
+
+      if (images.length <= 1) {
+        return;
+      }
+
+      if (event.key === 'ArrowLeft') {
+        prev();
+      }
+      if (event.key === 'ArrowRight') {
+        next();
+      }
+    });
 
     update();
   }
