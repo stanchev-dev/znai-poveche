@@ -10,7 +10,11 @@
   const commentsList = document.getElementById('comments-list');
 
   function chip(author) { return `<span class="badge bg-light text-dark">${author.username} (${author.display_name}, ниво ${author.level})</span>`; }
-  function imgIf(url) { return url ? `<img src="${url}" class="img-fluid rounded mt-2" alt="image">` : ''; }
+  function imgIf(url) {
+    return url
+      ? `<div class="marketplace-detail-image-frame rounded mt-2"><img src="${url}" class="marketplace-detail-image" alt="image"></div>`
+      : '';
+  }
   function alertHtml(text, type='warning') { return `<div class="alert alert-${type}">${text}</div>`; }
   function loginAlert() { return `${alertHtml(`Трябва да сте логнати. <a href="${loginUrl}">Вход</a>`, 'warning')}`; }
 
