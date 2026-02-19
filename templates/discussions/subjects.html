@@ -24,27 +24,11 @@
   <section class="discussions-filters-card mb-4">
     <div class="row g-2 align-items-center">
       <div class="col-lg-3 col-md-4">
-        <label for="sort-dropdown-toggle" class="form-label small text-muted mb-1">Сортиране</label>
-        <div class="dropdown discussions-sort-dropdown">
-          <button
-            id="sort-dropdown-toggle"
-            class="btn dropdown-toggle discussions-sort-toggle w-100 text-start"
-            type="button"
-            data-bs-toggle="dropdown"
-            data-bs-display="static"
-            aria-expanded="false"
-          >
-            Най-нови
-          </button>
-          <ul class="dropdown-menu discussions-sort-menu w-100" aria-labelledby="sort-dropdown-toggle">
-            <li>
-              <button class="dropdown-item discussions-sort-item active" type="button" data-sort-value="new">Най-нови</button>
-            </li>
-            <li>
-              <button class="dropdown-item discussions-sort-item" type="button" data-sort-value="top">Най-висок рейтинг</button>
-            </li>
-          </ul>
-        </div>
+        <label for="sort-select" class="form-label small text-muted mb-1">Сортиране</label>
+        <select id="sort-select" class="form-select discussions-sort-select">
+          <option value="new">Най-нови</option>
+          <option value="top">Най-висок рейтинг</option>
+        </select>
       </div>
       <div class="col-lg-6 col-md-5">
         <label for="search-input" class="form-label small text-muted mb-1">Ключова дума</label>
