@@ -1,4 +1,5 @@
 from decimal import Decimal, InvalidOperation
+from pathlib import Path
 import re
 
 from django import forms
@@ -8,6 +9,9 @@ from .models import Listing
 
 PRICE_PATTERN = re.compile(r"^\d+(?:[\.,]\d{1,2})?$")
 PHONE_ALLOWED_PATTERN = re.compile(r"^\+?\d+$")
+MAX_LISTING_IMAGES = 4
+MAX_LISTING_IMAGE_SIZE_BYTES = 2 * 1024 * 1024
+ALLOWED_LISTING_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png"}
 
 
 class ListingPublishForm(forms.Form):
@@ -114,3 +118,48 @@ class ListingEditForm(forms.ModelForm):
             "contact_name": forms.TextInput(attrs={"class": "form-control"}),
             "contact_phone": forms.TextInput(attrs={"class": "form-control"}),
         }
+
+
+class ListingImagesEditForm(forms.Form):
+    images = forms.FileField(required=False)
+    deleted_image_ids = forms.CharField(required=False)
+    ordering_image_ids = forms.CharField(required=False)
+
+    def __init__(self, *args, listing=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.listing = listing
+        self.new_images = []
+        self.delete_ids = set()
+        self.ordering_ids = []
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.listing is None:
+            raise forms.ValidationError("Липсва обява за редакция на снимки.")
+
+        self.new_images = list(self.files.getlist("images"))
+        self.delete_ids = self._parse_csv_ids(cleaned_data.get("deleted_image_ids") or "")
+        self.ordering_ids = self._parse_csv_ids(cleaned_data.get("ordering_image_ids") or "", as_list=True)
+
+        existing_ids = set(self.listing.images.values_list("id", flat=True))
+        if self.delete_ids - existing_ids:
+            raise forms.ValidationError("Невалиден избор на снимки за изтриване.")
+
+        remaining_existing_count = len(existing_ids - self.delete_ids)
+        if remaining_existing_count + len(self.new_images) > MAX_LISTING_IMAGES:
+            raise forms.ValidationError(f"Можеш да качиш до {MAX_LISTING_IMAGES} снимки.")
+
+        for image in self.new_images:
+            extension = Path(image.name or "").suffix.lower()
+            if extension not in ALLOWED_LISTING_IMAGE_EXTENSIONS or image.size > MAX_LISTING_IMAGE_SIZE_BYTES:
+                raise forms.ValidationError("Невалиден файл. Приемаме само jpg, jpeg, png до 2MB.")
+
+        return cleaned_data
+
+    def _parse_csv_ids(self, raw_value, as_list=False):
+        parsed = []
+        for chunk in raw_value.split(','):
+            chunk = chunk.strip()
+            if chunk.isdigit():
+                parsed.append(int(chunk))
+        return parsed if as_list else set(parsed)

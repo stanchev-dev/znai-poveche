@@ -46,6 +46,10 @@
             <i class="bi bi-pencil" aria-hidden="true"></i>
             <span>Редактирай</span>
           </a>
+          <a href="{% url 'marketplace-edit-images-page' listing_id=listing.id %}" class="btn btn-brand-outline my-listings-action-btn">
+            <i class="bi bi-image" aria-hidden="true"></i>
+            <span>Редакция на снимки</span>
+          </a>
           <a href="{% url 'marketplace-delete-page' listing_id=listing.id %}" class="btn btn-outline-danger my-listings-action-btn my-listings-action-btn--danger">
             <i class="bi bi-trash" aria-hidden="true"></i>
             <span>Изтрий</span>

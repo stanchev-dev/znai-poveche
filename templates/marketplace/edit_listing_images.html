@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Редакция на снимки{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center marketplace-publish-page">
+  <div class="col-xl-10 col-lg-11">
+    <div class="d-flex flex-column flex-sm-row align-items-sm-end justify-content-between gap-2 mb-4">
+      <div>
+        <h1 class="h3 mb-1">Редакция на снимки</h1>
+        <p class="text-muted mb-0">Управлявай снимките за обявата по {{ listing.subject.name }}.</p>
+      </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="publish-main-card d-grid gap-4" novalidate>
+      {% csrf_token %}
+      {% include "marketplace/partials/images_uploader.html" %}
+      <div class="d-flex justify-content-end gap-2 mt-1">
+        <a href="{% url 'marketplace-my-listings-page' %}" class="btn btn-outline-secondary">Назад</a>
+        <button type="submit" class="btn btn-brand-purple">Запази снимките</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/marketplace_images.js' %}"></script>
+{% endblock %}

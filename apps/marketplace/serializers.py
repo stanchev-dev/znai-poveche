@@ -13,15 +13,16 @@ from apps.common.utils import (
     normalize_hex,
 )
 
-from .forms import ListingPublishForm
+from .forms import (
+    ALLOWED_LISTING_IMAGE_EXTENSIONS,
+    MAX_LISTING_IMAGES,
+    MAX_LISTING_IMAGE_SIZE_BYTES,
+    ListingPublishForm,
+)
 from .models import Listing, ListingImage
 
 
 User = get_user_model()
-
-MAX_LISTING_IMAGES = 4
-MAX_LISTING_IMAGE_SIZE_BYTES = 2 * 1024 * 1024
-ALLOWED_LISTING_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png"}
 
 
 class SubjectSummarySerializer(serializers.ModelSerializer):
