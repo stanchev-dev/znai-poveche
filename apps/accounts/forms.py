@@ -6,30 +6,31 @@ from .models import Profile
 
 
 class RegistrationForm(UserCreationForm):
-    display_name = forms.CharField(max_length=50, required=True)
-    role = forms.ChoiceField(
-        choices=Profile.Role.choices,
+    email = forms.EmailField(
         required=True,
-        label="Ти си:",
-        widget=forms.RadioSelect,
+        label="Имейл адрес",
+        widget=forms.EmailInput(
+            attrs={
+                "autocomplete": "email",
+            }
+        ),
     )
 
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ("username", "display_name", "role", "password1", "password2")
+        fields = ("username", "email", "password1", "password2")
 
-    def clean_display_name(self):
-        display_name = (self.cleaned_data.get("display_name") or "").strip()
-        if not display_name:
-            raise forms.ValidationError("Display name is required.")
-        return display_name
+    def clean_email(self):
+        email = (self.cleaned_data.get("email") or "").strip().lower()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("Потребител с този имейл вече съществува.")
+        return email
 
     def save(self, commit=True):
         user = super().save(commit=commit)
         if commit:
-            user.profile.display_name = self.cleaned_data["display_name"]
-            user.profile.role = self.cleaned_data["role"]
-            user.profile.save(update_fields=["display_name", "role"])
+            user.email = self.cleaned_data["email"]
+            user.save(update_fields=["email"])
         return user
 
 
