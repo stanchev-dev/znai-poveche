@@ -56,19 +56,8 @@
   box-shadow: 0 14px 30px rgba(17, 24, 39, 0.09);
 }
 
-.discussion-card-link {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  border-radius: 18px;
-}
-
-.discussion-card-link:focus-visible {
-  outline: 2px solid var(--brand-purple-cta, #7c45f5);
-  outline-offset: 2px;
-}
-
-.discussion-accent {
+.discussion-card::before {
+  content: "";
   position: absolute;
   left: 0.6rem;
   top: 0.8rem;
@@ -76,6 +65,17 @@
   width: 4px;
   border-radius: 999px;
   background: linear-gradient(180deg, #8b5cf6 0%, #6f2cf3 100%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.discussion-card-link {
+  z-index: 1;
+}
+
+.discussion-card-link:focus-visible {
+  outline: 2px solid var(--brand-purple-cta, #7c45f5);
+  outline-offset: 2px;
 }
 
 .discussion-main {
@@ -136,7 +136,6 @@
   gap: 0.6rem;
 }
 
-.discussion-accent,
 .discussion-main,
 .discussion-side {
   position: relative;
