@@ -1611,10 +1611,24 @@ h6 {
   color: #111827;
 }
 
-.lb-dd-toggle:focus-visible {
-  border-color: rgba(111, 44, 243, 0.6);
-  box-shadow: 0 0 0 0.2rem rgba(111, 44, 243, 0.18);
-  outline: none;
+.lb-filter-dd {
+  --bs-focus-ring-color: rgba(126, 70, 245, 0.25);
+}
+
+.lb-filter-dd .lb-dd-toggle,
+.lb-filter-dd .lb-dd-toggle:focus,
+.lb-filter-dd .lb-dd-toggle:focus-visible,
+.lb-filter-dd .lb-dd-toggle:active,
+.lb-filter-dd .show > .lb-dd-toggle {
+  outline: none !important;
+}
+
+.lb-filter-dd .lb-dd-toggle:focus,
+.lb-filter-dd .lb-dd-toggle:focus-visible,
+.lb-filter-dd .lb-dd-toggle:active,
+.lb-filter-dd .show > .lb-dd-toggle {
+  border-color: var(--zp-primary) !important;
+  box-shadow: 0 0 0 0.25rem rgba(126, 70, 245, 0.25) !important;
 }
 
 .lb-dd-toggle:disabled,
