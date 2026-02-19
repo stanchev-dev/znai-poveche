@@ -6,6 +6,8 @@ from .api_views import (
     PostCommentListView,
     PostDetailView,
     PostListView,
+    MyPostBodyUpdateAPIView,
+    MyPostDeleteAPIView,
     PostVoteAPIView,
     SubjectListView,
 )
@@ -14,6 +16,8 @@ urlpatterns = [
     path("subjects/", SubjectListView.as_view(), name="api-subjects-list"),
     path("posts/", PostListView.as_view(), name="api-posts-list"),
     path("posts/<int:pk>/", PostDetailView.as_view(), name="api-posts-detail"),
+    path("my-posts/<int:pk>/", MyPostBodyUpdateAPIView.as_view(), name="api-my-posts-edit"),
+    path("my-posts/<int:pk>/delete/", MyPostDeleteAPIView.as_view(), name="api-my-posts-delete"),
     path(
         "posts/<int:pk>/vote/",
         PostVoteAPIView.as_view(),

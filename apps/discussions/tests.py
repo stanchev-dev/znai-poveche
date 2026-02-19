@@ -812,3 +812,116 @@ class DiscussionImageUploadTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         exif_transpose_mock.assert_called()
+
+
+class MyDiscussionsPageTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="owner", password="pass12345")
+        self.other = User.objects.create_user(username="other", password="pass12345")
+        self.subject = Subject.objects.create(name="Biologia", slug="biologia")
+        self.my_post = Post.objects.create(
+            subject=self.subject,
+            author=self.user,
+            title="Moqta tema",
+            body="Moeto opisanie",
+        )
+        self.other_post = Post.objects.create(
+            subject=self.subject,
+            author=self.other,
+            title="Chujda tema",
+            body="Chujdo opisanie",
+        )
+
+    def test_my_discussions_requires_authentication(self):
+        response = self.client.get(reverse("my-discussions-page"))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("login"), response.url)
+
+    def test_my_discussions_lists_only_current_user_posts(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("my-discussions-page"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.my_post.title)
+        self.assertNotContains(response, self.other_post.title)
+
+    def test_edit_discussion_changes_only_body(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("my-discussions-edit-page", kwargs={"post_id": self.my_post.id}),
+            {"body": "Novo opisanie"},
+        )
+
+        self.assertRedirects(response, reverse("my-discussions-page"))
+        self.my_post.refresh_from_db()
+        self.assertEqual(self.my_post.body, "Novo opisanie")
+        self.assertEqual(self.my_post.title, "Moqta tema")
+
+    def test_edit_discussion_for_non_owner_forbidden(self):
+        self.client.force_login(self.other)
+
+        response = self.client.post(
+            reverse("my-discussions-edit-page", kwargs={"post_id": self.my_post.id}),
+            {"body": "Nope"},
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_delete_discussion_for_owner(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse("my-discussions-delete-page", kwargs={"post_id": self.my_post.id})
+        )
+
+        self.assertRedirects(response, reverse("my-discussions-page"))
+        self.assertFalse(Post.objects.filter(id=self.my_post.id).exists())
+
+
+class MyPostApiPermissionTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="api-owner", password="pass12345")
+        self.other = User.objects.create_user(username="api-other", password="pass12345")
+        self.subject = Subject.objects.create(name="Fizika", slug="fizika")
+        self.post = Post.objects.create(
+            subject=self.subject,
+            author=self.user,
+            title="Original title",
+            body="Original body",
+        )
+
+    def test_patch_updates_only_body_even_when_title_is_sent(self):
+        self.client.force_authenticate(self.user)
+
+        response = self.client.patch(
+            reverse("api-my-posts-edit", kwargs={"pk": self.post.id}),
+            {"body": "Updated body", "title": "Hacked title"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.body, "Updated body")
+        self.assertEqual(self.post.title, "Original title")
+
+    def test_patch_for_non_owner_returns_404(self):
+        self.client.force_authenticate(self.other)
+
+        response = self.client.patch(
+            reverse("api-my-posts-edit", kwargs={"pk": self.post.id}),
+            {"body": "No access"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_for_non_owner_returns_404(self):
+        self.client.force_authenticate(self.other)
+
+        response = self.client.delete(
+            reverse("api-my-posts-delete", kwargs={"pk": self.post.id})
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

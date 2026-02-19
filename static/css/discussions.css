@@ -193,3 +193,15 @@
   border: 1px solid rgba(var(--grade-blue-rgb), calc(var(--grade-alpha) + 0.10));
   white-space: nowrap;
 }
+
+.my-discussion-card .discussion-card-link {
+  display: block;
+  position: relative;
+  z-index: 2;
+  padding: 0.1rem 0.1rem 0;
+}
+
+.my-discussion-card .listing-card-actions {
+  position: relative;
+  z-index: 3;
+}
