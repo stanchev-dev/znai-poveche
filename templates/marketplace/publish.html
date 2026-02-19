@@ -59,23 +59,7 @@
         </div>
       </section>
 
-      <section class="card shadow-sm border-0 rounded-4 p-4 publish-section-card">
-        <h2 class="h5 mb-3">Снимки</h2>
-        <div class="row g-3 align-items-start">
-          <div class="col-lg-8">
-            <input id="images" name="images" type="file" class="d-none" accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple>
-            <div id="listing-images-grid" class="listing-images-grid" aria-live="polite"></div>
-            <div id="image-inline-error" class="text-danger small mt-2 d-none" aria-live="polite"></div>
-          </div>
-          <div class="col-lg-4">
-            <div class="publish-image-tip">
-              <strong class="d-block mb-2">Съвет</strong>
-              Качи ясни снимки (лице или материали) — така учениците ти вярват повече.
-              <div class="mt-2">До 4 снимки • до 2MB • .jpg/.jpeg/.png</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {% include "marketplace/partials/images_uploader.html" with existing_images_json="[]" %}
 
       <section class="card shadow-sm border-0 rounded-4 p-4 publish-section-card">
         <h2 class="h5 mb-3">Описание</h2>

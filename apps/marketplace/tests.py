@@ -14,7 +14,7 @@ from rest_framework.test import APITestCase
 
 from apps.discussions.models import Subject
 from apps.accounts.models import Profile
-from apps.marketplace.models import Listing
+from apps.marketplace.models import Listing, ListingImage
 
 
 User = get_user_model()
@@ -631,3 +631,108 @@ class MyListingsPageTests(TestCase):
         self.assertEqual(self.listing.contact_phone, "+359888123456")
         self.assertEqual(self.listing.contact_email, "owner@example.com")
         self.assertEqual(self.listing.contact_url, "https://example.com/profile")
+
+
+class ListingImageEditPageTests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(username="owner2", password="testpass123")
+        self.other = User.objects.create_user(username="other2", password="testpass123")
+        self.subject = Subject.objects.create(name="Chemistry")
+        self.listing = Listing.objects.create(
+            subject=self.subject,
+            owner=self.owner,
+            price_per_hour="30.00",
+            lesson_mode=Listing.LessonMode.ONLINE,
+            description="A" * 30,
+            contact_name="Owner",
+            contact_phone="+359888777666",
+        )
+        self.image1 = ListingImage.objects.create(listing=self.listing, image=self._image_file(name="a.jpg"), position=0)
+        self.image2 = ListingImage.objects.create(listing=self.listing, image=self._image_file(name="b.jpg"), position=1)
+        self.listing.image = self.image1.image
+        self.listing.save(update_fields=["image", "updated_at"])
+
+    def _image_file(self, name="img.jpg", size=(20, 20), image_format="JPEG", noisy=False):
+        buffer = BytesIO()
+        if noisy:
+            raw = os.urandom(size[0] * size[1] * 3)
+            image = Image.frombytes("RGB", size, raw)
+        else:
+            image = Image.new("RGB", size, color=(120, 40, 90))
+        image.save(buffer, format=image_format)
+        buffer.seek(0)
+        content_type = "image/jpeg" if image_format == "JPEG" else "image/png"
+        return SimpleUploadedFile(name=name, content=buffer.read(), content_type=content_type)
+
+    def test_owner_can_open_images_edit_page(self):
+        self.client.login(username="owner2", password="testpass123")
+        response = self.client.get(reverse("marketplace-edit-images-page", kwargs={"listing_id": self.listing.id}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_non_owner_gets_403(self):
+        self.client.login(username="other2", password="testpass123")
+        response = self.client.get(reverse("marketplace-edit-images-page", kwargs={"listing_id": self.listing.id}))
+        self.assertEqual(response.status_code, 403)
+
+    def test_can_reorder_delete_and_add_images(self):
+        self.client.login(username="owner2", password="testpass123")
+        new_image = self._image_file(name="c.png", image_format="PNG")
+        response = self.client.post(
+            reverse("marketplace-edit-images-page", kwargs={"listing_id": self.listing.id}),
+            {
+                "deleted_image_ids": str(self.image1.id),
+                "ordering_image_ids": str(self.image2.id),
+                "images": [new_image],
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.listing.refresh_from_db()
+        ordered = list(self.listing.images.order_by("position", "id"))
+        self.assertEqual(ordered[0].id, self.image2.id)
+        self.assertEqual(len(ordered), 2)
+        self.assertEqual(self.listing.image.name, ordered[0].image.name)
+
+    def test_can_save_with_zero_images(self):
+        self.client.login(username="owner2", password="testpass123")
+        response = self.client.post(
+            reverse("marketplace-edit-images-page", kwargs={"listing_id": self.listing.id}),
+            {
+                "deleted_image_ids": f"{self.image1.id},{self.image2.id}",
+                "ordering_image_ids": "",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.listing.refresh_from_db()
+        self.assertEqual(self.listing.images.count(), 0)
+        self.assertFalse(self.listing.image)
+
+    def test_rejects_more_than_four_total_images(self):
+        self.client.login(username="owner2", password="testpass123")
+        response = self.client.post(
+            reverse("marketplace-edit-images-page", kwargs={"listing_id": self.listing.id}),
+            {
+                "deleted_image_ids": "",
+                "ordering_image_ids": f"{self.image1.id},{self.image2.id}",
+                "images": [
+                    self._image_file(name="1.jpg"),
+                    self._image_file(name="2.jpg"),
+                    self._image_file(name="3.jpg"),
+                ],
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Можеш да качиш до 4 снимки.")
+
+    def test_rejects_invalid_extension(self):
+        self.client.login(username="owner2", password="testpass123")
+        bad_file = SimpleUploadedFile(name="bad.gif", content=b"GIF89a", content_type="image/gif")
+        response = self.client.post(
+            reverse("marketplace-edit-images-page", kwargs={"listing_id": self.listing.id}),
+            {
+                "deleted_image_ids": "",
+                "ordering_image_ids": f"{self.image1.id},{self.image2.id}",
+                "images": [bad_file],
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Невалиден файл. Приемаме само jpg, jpeg, png до 2MB.")

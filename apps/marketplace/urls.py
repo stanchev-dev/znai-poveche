@@ -8,5 +8,6 @@ urlpatterns = [
     path('marketplace/publish/', views.publish_listing_page, name='marketplace-publish-page'),
     path('marketplace/<int:listing_id>/edit/', views.edit_listing_page, name='marketplace-edit-page'),
     path('marketplace/<int:listing_id>/delete/', views.delete_listing_page, name='marketplace-delete-page'),
+    path('marketplace/my-listings/<int:listing_id>/images/', views.edit_listing_images_page, name='marketplace-edit-images-page'),
     path('marketplace/<int:listing_id>/', views.listing_detail_page, name='marketplace-detail-page'),
 ]
