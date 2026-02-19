@@ -252,14 +252,7 @@ def compute_vote_deltas(
     prev_value = existing_value or 0
     score_delta = new_value - prev_value
 
-    was_upvote = prev_value == 1
-    is_upvote = new_value == 1
-    if not was_upvote and is_upvote:
-        reputation_delta = 1
-    elif was_upvote and not is_upvote:
-        reputation_delta = -1
-    else:
-        reputation_delta = 0
+    reputation_delta = new_value - prev_value
 
     return score_delta, reputation_delta
 

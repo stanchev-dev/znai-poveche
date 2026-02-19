@@ -1,7 +1,6 @@
 from django.core.paginator import Paginator
 from django.db.models import ExpressionWrapper, F, IntegerField, OuterRef, Subquery, Sum
 from django.db.models.functions import Coalesce
-from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.views.decorators.csrf import ensure_csrf_cookie
 
@@ -175,7 +174,9 @@ def leaderboard(request):
 
     if scope == "subject":
         if subject_slug:
-            selected_subject = get_object_or_404(Subject, slug=subject_slug)
+            selected_subject = Subject.objects.filter(slug=subject_slug).first()
+        if selected_subject is None:
+            scope = "global"
 
     if scope == "subject" and selected_subject is not None:
         post_score_subquery = (
