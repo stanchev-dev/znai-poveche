@@ -1625,3 +1625,34 @@ h6 {
 .lb-dd-menu {
   min-width: 100%;
 }
+
+.lb-dd-menu .dropdown-item {
+  color: #fff;
+  background: transparent;
+}
+
+.lb-dd-menu .dropdown-item.active,
+.lb-dd-menu .dropdown-item:active {
+  background: transparent !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+.lb-dd-menu .dropdown-item.active::after {
+  content: " \2713";
+  opacity: 0.9;
+  margin-left: 6px;
+}
+
+.lb-dd-menu .dropdown-item:focus,
+.lb-dd-menu .dropdown-item:focus-visible {
+  background: transparent !important;
+  color: #fff !important;
+  outline: none;
+  box-shadow: none;
+}
+
+.lb-dd-menu .dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
