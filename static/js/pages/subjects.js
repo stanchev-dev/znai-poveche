@@ -59,6 +59,7 @@
 
     list.innerHTML = posts.map((post) => `
       <article class="discussion-card">
+        <a href="/posts/${post.id}/" class="discussion-card-link" aria-label="Отвори дискусията: ${escapeHtml(post.title)}"></a>
         <span class="discussion-accent" aria-hidden="true"></span>
         <div class="discussion-main">
           <h2 class="discussion-title mb-2">${escapeHtml(post.title)}</h2>
@@ -67,7 +68,6 @@
         </div>
         <div class="discussion-side">
           <span class="discussion-points-pill">${post.score} точки</span>
-          <a href="/posts/${post.id}/" class="btn btn-sm btn-brand-outline">Прочети →</a>
         </div>
       </article>`).join('');
   }
