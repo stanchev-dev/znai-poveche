@@ -38,10 +38,6 @@
 
 .discussion-card {
   position: relative;
-  display: flex;
-  gap: 1rem;
-  justify-content: space-between;
-  align-items: center;
   background: #ffffff;
   border-radius: 18px;
   border: 1px solid rgba(124, 69, 245, 0.16);
@@ -78,7 +74,19 @@
   outline-offset: 2px;
 }
 
-.discussion-main {
+.discussion-card__top {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  gap: 1rem;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.discussion-main,
+.discussion-card__main {
+  flex: 1 1 auto;
   min-width: 0;
 }
 
@@ -129,18 +137,14 @@
   justify-content: center;
 }
 
-.discussion-side {
+.discussion-side,
+.discussion-card__points {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 0.6rem;
-}
-
-.discussion-main,
-.discussion-side {
-  position: relative;
-  z-index: 2;
-  pointer-events: none;
+  flex: 0 0 auto;
+  margin-left: auto;
 }
 
 .discussion-points-pill {
@@ -156,15 +160,18 @@
 
 @media (max-width: 767.98px) {
   .discussion-card {
-    flex-direction: column;
-    align-items: flex-start;
     padding-right: 1rem;
   }
 
-  .discussion-side {
+  .discussion-card__top {
+    flex-wrap: wrap;
+  }
+
+  .discussion-side,
+  .discussion-card__points {
     width: 100%;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
   }
 }

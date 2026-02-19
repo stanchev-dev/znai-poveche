@@ -59,13 +59,15 @@
 
     list.innerHTML = posts.map((post) => `
       <article class="discussion-card">
-        <div class="discussion-main">
-          <h2 class="discussion-title mb-2">${escapeHtml(post.title)}</h2>
-          <p class="discussion-snippet mb-2">${escapeHtml(post.excerpt)}</p>
-          ${authorMeta(post, isGlobalFeed)}
-        </div>
-        <div class="discussion-side">
-          <span class="discussion-points-pill">${post.score} точки</span>
+        <div class="discussion-card__top d-flex align-items-start w-100 gap-3">
+          <div class="discussion-main discussion-card__main">
+            <h2 class="discussion-title mb-2">${escapeHtml(post.title)}</h2>
+            <p class="discussion-snippet mb-2">${escapeHtml(post.excerpt)}</p>
+            ${authorMeta(post, isGlobalFeed)}
+          </div>
+          <div class="discussion-side discussion-card__points ms-auto flex-shrink-0">
+            <span class="discussion-points-pill">${post.score} точки</span>
+          </div>
         </div>
         <a href="/posts/${post.id}/" class="stretched-link discussion-card-link" aria-label="Отвори дискусията: ${escapeHtml(post.title)}"></a>
       </article>`).join('');
