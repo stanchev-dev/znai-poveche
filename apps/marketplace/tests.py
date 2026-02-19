@@ -96,7 +96,8 @@ class ListingAPITests(APITestCase):
             "subject": self.physics.slug,
             "price_per_hour": "60.50",
             "lesson_mode": Listing.LessonMode.ONLINE,
-            "description": "Experienced tutor",
+            "description": "Experienced tutor with structured lessons for exam preparation.",
+            "contact_name": "Иван Иванов",
             "contact_phone": "+359123456",
         }
 
@@ -121,7 +122,8 @@ class ListingAPITests(APITestCase):
             "subject": self.physics.slug,
             "price_per_hour": "60.50",
             "lesson_mode": Listing.LessonMode.ONLINE,
-            "description": "Experienced tutor",
+            "description": "Experienced tutor with structured lessons for exam preparation.",
+            "contact_name": "Иван Иванов",
             "contact_phone": "+359123456",
         }
 
@@ -140,13 +142,13 @@ class ListingAPITests(APITestCase):
         self.assertEqual(response.data["author_role"], Profile.Role.LEARNER)
         self.assertEqual(response.data["author_role_label"], "Учащ")
 
-    def test_create_fails_when_all_contacts_missing(self):
+    def test_create_fails_when_required_contact_fields_missing(self):
         self.client.force_authenticate(self.owner)
         payload = {
             "subject": self.math.slug,
             "price_per_hour": "30.00",
             "lesson_mode": Listing.LessonMode.ONLINE_AND_IN_PERSON,
-            "description": "No contacts provided",
+            "description": "No contacts provided but otherwise the listing has enough detail.",
         }
 
         response = self.client.post(
@@ -156,7 +158,55 @@ class ListingAPITests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("non_field_errors", response.data)
+        self.assertIn("contact_name", response.data)
+        self.assertIn("contact_phone", response.data)
+
+    def test_create_fails_when_price_is_not_numeric(self):
+        self.client.force_authenticate(self.owner)
+        payload = {
+            "subject": self.math.slug,
+            "price_per_hour": "asjodnajodnsando",
+            "lesson_mode": Listing.LessonMode.ONLINE,
+            "description": "Подробно описание за уроците и начина на провеждане.",
+            "contact_name": "Иван Иванов",
+            "contact_phone": "+359888777666",
+        }
+
+        response = self.client.post(reverse("listing-list-create"), payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("price_per_hour", response.data)
+
+    def test_create_accepts_price_with_comma_separator(self):
+        self.client.force_authenticate(self.owner)
+        payload = {
+            "subject": self.math.slug,
+            "price_per_hour": "25,50",
+            "lesson_mode": Listing.LessonMode.ONLINE,
+            "description": "Подробно описание за уроците и начина на провеждане.",
+            "contact_name": "Иван Иванов",
+            "contact_phone": "+359888777666",
+        }
+
+        response = self.client.post(reverse("listing-list-create"), payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_fails_when_phone_is_invalid(self):
+        self.client.force_authenticate(self.owner)
+        payload = {
+            "subject": self.math.slug,
+            "price_per_hour": "30",
+            "lesson_mode": Listing.LessonMode.ONLINE,
+            "description": "Подробно описание за уроците и начина на провеждане.",
+            "contact_name": "Иван Иванов",
+            "contact_phone": "123",
+        }
+
+        response = self.client.post(reverse("listing-list-create"), payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("contact_phone", response.data)
 
 
     def test_create_rejects_more_than_four_images(self):
@@ -165,7 +215,8 @@ class ListingAPITests(APITestCase):
             "subject": self.physics.slug,
             "price_per_hour": "60.50",
             "lesson_mode": Listing.LessonMode.ONLINE,
-            "description": "Experienced tutor",
+            "description": "Experienced tutor with structured lessons for exam preparation.",
+            "contact_name": "Иван Иванов",
             "contact_phone": "+359123456",
         }
         files = [
@@ -188,7 +239,8 @@ class ListingAPITests(APITestCase):
             "subject": self.physics.slug,
             "price_per_hour": "60.50",
             "lesson_mode": Listing.LessonMode.ONLINE,
-            "description": "Experienced tutor",
+            "description": "Experienced tutor with structured lessons for exam preparation.",
+            "contact_name": "Иван Иванов",
             "contact_phone": "+359123456",
         }
         oversized_image = self._image_file(

@@ -28,7 +28,7 @@
 
           <div class="col-md-6">
             <label for="price_per_hour" class="form-label">Цена на час</label>
-            <input id="price_per_hour" name="price_per_hour" type="number" step="0.01" min="0" class="form-control publish-input" required>
+            <input id="price_per_hour" name="price_per_hour" type="text" inputmode="decimal" class="form-control publish-input" required>
           </div>
 
           <div class="col-12">
@@ -41,7 +41,7 @@
                 <input id="lesson_mode_in_person" name="lesson_mode" type="radio" class="btn-check" value="in_person" required>
                 <label for="lesson_mode_in_person" class="btn lesson-mode-btn">Присъствено</label>
 
-                <input id="lesson_mode_online_and_in_person" name="lesson_mode" type="radio" class="btn-check" value="online_and_in_person" checked required>
+                <input id="lesson_mode_online_and_in_person" name="lesson_mode" type="radio" class="btn-check" value="online_and_in_person" required>
                 <label for="lesson_mode_online_and_in_person" class="btn lesson-mode-btn">Онлайн + присъствено</label>
               </div>
             </fieldset>
@@ -76,6 +76,7 @@
           required
           placeholder="Опиши урока така, че ученик да разбере веднага: за кой клас е, какво ще научи и как протича. Можеш да добавиш и примерни теми."
         ></textarea>
+        <div class="form-text">Минимум 40 символа.</div>
       </section>
 
       <section class="card shadow-sm border-0 rounded-4 p-4 publish-section-card">
@@ -83,11 +84,11 @@
         <div class="row g-3">
           <div class="col-md-6">
             <label for="contact_name" class="form-label">Лице за контакт</label>
-            <input id="contact_name" name="contact_name" type="text" class="form-control publish-input" placeholder="Иван Иванов">
+            <input id="contact_name" name="contact_name" type="text" class="form-control publish-input" required placeholder="Пр: Иван Иванов">
           </div>
           <div class="col-md-6">
             <label for="contact_phone" class="form-label">Телефонен номер</label>
-            <input id="contact_phone" name="contact_phone" type="text" class="form-control publish-input" placeholder="088 333 7777">
+            <input id="contact_phone" name="contact_phone" type="text" class="form-control publish-input" required placeholder="Пр: 088 333 7777">
           </div>
         </div>
       </section>
