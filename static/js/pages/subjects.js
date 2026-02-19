@@ -4,6 +4,9 @@
   const list = document.getElementById('posts-list');
   const alertBox = document.getElementById('posts-alert');
   const PAGE_SIZE = 10;
+  const sortDropdownToggle = document.getElementById('sort-dropdown-toggle');
+  const sortItems = Array.from(document.querySelectorAll('.discussions-sort-item'));
+  let currentSort = 'new';
   let currentUrl = null;
 
   function getAuthorInitial(author) {
@@ -113,15 +116,36 @@
   }
 
   function buildUrl() {
-    const sort = document.getElementById('sort-select').value;
+    const sort = currentSort;
     const q = encodeURIComponent(document.getElementById('search-input').value.trim());
     let url = `/api/posts/?subject=${encodeURIComponent(slug)}&sort=${sort}&page=1`;
     if (q) url += `&q=${q}`;
     return url;
   }
 
-  document.getElementById('search-btn').addEventListener('click', () => load(buildUrl()));
-  document.getElementById('sort-select').addEventListener('change', () => load(buildUrl()));
+  function setSort(value) {
+    currentSort = value;
+    const selectedItem = sortItems.find((item) => item.dataset.sortValue === value);
+    if (selectedItem) {
+      sortDropdownToggle.textContent = selectedItem.textContent.trim();
+    }
+    sortItems.forEach((item) => {
+      const isActive = item.dataset.sortValue === value;
+      item.classList.toggle('active', isActive);
+      item.setAttribute('aria-current', isActive ? 'true' : 'false');
+    });
+  }
 
+  document.getElementById('search-btn').addEventListener('click', () => load(buildUrl()));
+  sortItems.forEach((item) => {
+    item.addEventListener('click', () => {
+      const nextSort = item.dataset.sortValue || 'new';
+      if (nextSort === currentSort) return;
+      setSort(nextSort);
+      load(buildUrl());
+    });
+  });
+
+  setSort(currentSort);
   load(buildUrl());
 })();
