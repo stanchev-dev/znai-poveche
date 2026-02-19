@@ -942,13 +942,13 @@ h6 {
 
 .marketplace-detail-page .marketplace-detail-image-frame {
   width: 100%;
-  height: 520px;
-  max-height: 60vh;
+  height: min(60vh, 520px);
+  min-height: 320px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: var(--surface-subtle, #f6f7fb);
+  background: #000;
   position: relative;
 }
 
@@ -2069,8 +2069,8 @@ h6 {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border-radius: 999px;
   border: 0;
   background: rgba(17, 17, 17, 0.72);
@@ -2099,7 +2099,7 @@ h6 {
   width: 60px;
   height: 60px;
   display: block;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
   border-radius: 0.4rem;
   background: var(--surface-subtle, #f6f7fb);
@@ -2118,6 +2118,13 @@ main#app-root,
 
 @media (max-width: 991.98px) {
   .listing-images-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 767.98px) {
+  .marketplace-detail-page .marketplace-detail-image-frame {
+    height: clamp(320px, 55vh, 380px);
+    min-height: 0;
+  }
 }
 
 @media (max-width: 575.98px) {
