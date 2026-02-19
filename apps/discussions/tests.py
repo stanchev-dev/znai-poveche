@@ -67,6 +67,44 @@ class NavSubjectsContextProcessorTests(TestCase):
             ["Angliyski ezik", "Matematika", "Zoologia"],
         )
 
+
+
+class DiscussionsNavbarActiveStateTests(TestCase):
+    def setUp(self):
+        self.subject = Subject.objects.create(name="Matematika", slug="matematika")
+
+    def test_global_discussions_marks_all_subjects_as_active(self):
+        response = self.client.get(reverse("discussions-page"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            '<a class="dropdown-item active" href="{}">Всички предмети</a>'.format(
+                reverse("discussions-page")
+            ),
+            html=True,
+        )
+
+    def test_subject_discussions_marks_selected_subject_as_active(self):
+        response = self.client.get(reverse("subjects-page", kwargs={"slug": self.subject.slug}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            '<a class="dropdown-item active" href="{}">{}</a>'.format(
+                reverse("subjects-page", kwargs={"slug": self.subject.slug}),
+                self.subject.name,
+            ),
+            html=True,
+        )
+        self.assertContains(
+            response,
+            '<a class="dropdown-item" href="{}">Всички предмети</a>'.format(
+                reverse("discussions-page")
+            ),
+            html=True,
+        )
+
 class SubjectSerializerColorTests(APITestCase):
     def test_subject_list_returns_gradient_colors_from_theme_color(self):
         Subject.objects.create(
