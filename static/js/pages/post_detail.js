@@ -82,14 +82,72 @@
   function alertHtml(text, type = 'warning') { return `<div class="alert alert-${type}">${text}</div>`; }
   function loginAlert() { return `${alertHtml(`Трябва да сте логнати. <a href="${loginUrl}">Вход</a>`, 'warning')}`; }
 
-  async function castVote(url, scoreEl, targetType, voteValue, voteWrap, targetId) {
-    if (targetType === 'post' && voteValue === -1) {
-      const currentScore = Number(scoreEl.textContent || 0);
-      if (currentScore <= 0) return;
+  function getNumber(value) {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : 0;
+  }
+
+  function applyVoteUI(root, { score, userVote }) {
+    const scoreEl = root.querySelector('.js-vote-score');
+    const upBtn = root.querySelector('.js-vote-up');
+    const downBtn = root.querySelector('.js-vote-down');
+    const parsedUserVote = getNumber(userVote);
+
+    if (scoreEl && score !== undefined) {
+      scoreEl.textContent = String(score);
     }
 
+    root.dataset.userVote = String(parsedUserVote);
+    upBtn?.classList.toggle('is-active', parsedUserVote === 1);
+    downBtn?.classList.toggle('is-active', parsedUserVote === -1);
+  }
+
+  function getVoteStateFromResponse(data) {
+    return getNumber(data.vote_value ?? data.user_vote ?? data.vote ?? data.value ?? 0);
+  }
+
+  function getScoreFromResponse(data) {
+    if (data.score !== undefined) return data.score;
+    if (data.new_score !== undefined) return data.new_score;
+    if (data.points !== undefined) return data.points;
+    return undefined;
+  }
+
+  async function fetchFallbackScoreAndVote(root) {
+    const targetType = root.dataset.type;
+    const targetId = root.dataset.id;
+    const detailUrl = targetType === 'post' ? `/api/posts/${targetId}/` : null;
+    if (!detailUrl) return null;
+
+    const res = await window.apiUtils.apiFetch(detailUrl);
+    if (!res.ok) return null;
+
+    const data = await res.json().catch(() => ({}));
+    const score = getScoreFromResponse(data);
+    return {
+      score,
+      userVote: getVoteStateFromResponse(data)
+    };
+  }
+
+  async function handleVoteClick(root, direction) {
+    if (!isAuthenticated) {
+      postAlert.innerHTML = loginAlert();
+      return;
+    }
+
+    const currentVote = getNumber(root.dataset.userVote);
+    const nextVote = currentVote === direction ? 0 : direction;
+    const targetType = root.dataset.type;
+    const targetId = root.dataset.id;
+    const voteUrl = targetType === 'post' ? `/api/posts/${targetId}/vote/` : `/api/comments/${targetId}/vote/`;
+
     try {
-      const res = await window.apiUtils.apiFetch(url, { method: 'POST', body: JSON.stringify({ value: voteValue }) });
+      const res = await window.apiUtils.apiFetch(voteUrl, {
+        method: 'POST',
+        body: JSON.stringify({ value: nextVote })
+      });
+
       if (res.status === 401 || res.status === 403) {
         postAlert.innerHTML = loginAlert();
         return;
@@ -102,22 +160,25 @@
         return;
       }
 
-      const nextScore = data.score ?? data.new_score;
-      if (nextScore !== undefined && scoreEl) {
-        scoreEl.textContent = nextScore;
-      } else if (targetType === 'post' && scoreEl) {
-        const postRes = await window.apiUtils.apiFetch(`/api/posts/${targetId}/`);
-        if (postRes.ok) {
-          const postData = await postRes.json().catch(() => ({}));
-          if (postData.score !== undefined) scoreEl.textContent = postData.score;
+      const responseScore = getScoreFromResponse(data);
+      let responseVote = getVoteStateFromResponse(data);
+
+      if (data.vote_value === undefined && data.user_vote === undefined) {
+        responseVote = nextVote;
+      }
+
+      if (responseScore === undefined) {
+        const fallback = await fetchFallbackScoreAndVote(root);
+        if (fallback) {
+          applyVoteUI(root, fallback);
+          return;
         }
       }
 
-      const voteState = Number(data.vote_value ?? voteValue);
-      if (voteWrap) {
-        voteWrap.querySelector('.vote-btn--up')?.classList.toggle('is-active', voteState === 1);
-        voteWrap.querySelector('.vote-btn--down')?.classList.toggle('is-active', voteState === -1);
-      }
+      applyVoteUI(root, {
+        score: responseScore,
+        userVote: responseVote
+      });
     } catch (error) {
       postAlert.innerHTML = alertHtml('Грешка при гласуване', 'danger');
     }
@@ -169,13 +230,13 @@
       </div>`;
   }
 
-  function votingHtml(type, id, score) {
-    const isPost = type === 'post';
-    const scoreId = isPost ? 'post-score' : `${type}-score-${id}`;
+  function votingHtml(type, id, score, userVote = 0) {
     return `
-      <button class="vote-btn vote-btn--up" id="${type}-up-${id}" type="button" aria-label="Положителен вот">▲</button>
-      <span id="${scoreId}" class="vote-score" ${isPost ? 'data-post-score' : ''}>${score}</span>
-      <button class="vote-btn vote-btn--down" id="${type}-down-${id}" type="button" aria-label="Отрицателен вот">▼</button>
+      <div class="js-vote" data-type="${type}" data-id="${id}" data-user-vote="${getNumber(userVote)}">
+        <button class="vote-btn vote-btn--up js-vote-up" type="button" aria-label="Положителен вот">▲</button>
+        <span class="vote-score js-vote-score">${getNumber(score)}</span>
+        <button class="vote-btn vote-btn--down js-vote-down" type="button" aria-label="Отрицателен вот">▼</button>
+      </div>
     `;
   }
 
@@ -214,10 +275,11 @@
     </div></article>`;
 
     const voteWrap = document.getElementById(`post-vote-${post.id}`);
-    voteWrap.innerHTML = votingHtml('post', post.id, post.score);
-    const scoreEl = document.querySelector('[data-post-score]');
-    document.getElementById(`post-up-${post.id}`).onclick = () => castVote(`/api/posts/${postId}/vote/`, scoreEl, 'post', 1, voteWrap, post.id);
-    document.getElementById(`post-down-${post.id}`).onclick = () => castVote(`/api/posts/${postId}/vote/`, scoreEl, 'post', -1, voteWrap, post.id);
+    voteWrap.innerHTML = votingHtml('post', post.id, post.score, post.user_vote);
+    const root = voteWrap.querySelector('.js-vote');
+    if (root) {
+      applyVoteUI(root, { score: post.score, userVote: post.user_vote });
+    }
   }
 
   async function loadComments() {
@@ -238,20 +300,25 @@
 
     items.forEach((c) => {
       const voteWrap = document.getElementById(`comment-vote-${c.id}`);
-      if (voteWrap) voteWrap.innerHTML = votingHtml('comment', c.id, c.score);
-    });
-
-    commentsList.querySelectorAll('[id^="comment-up-"]').forEach((btn) => {
-      const id = btn.id.replace('comment-up-', '');
-      btn.onclick = () => castVote(`/api/comments/${id}/vote/`, document.getElementById(`comment-score-${id}`), 'comment', 1, document.getElementById(`comment-vote-${id}`), id);
-    });
-    commentsList.querySelectorAll('[id^="comment-down-"]').forEach((btn) => {
-      const id = btn.id.replace('comment-down-', '');
-      btn.onclick = () => castVote(`/api/comments/${id}/vote/`, document.getElementById(`comment-score-${id}`), 'comment', -1, document.getElementById(`comment-vote-${id}`), id);
+      if (!voteWrap) return;
+      voteWrap.innerHTML = votingHtml('comment', c.id, c.score, c.user_vote);
+      const root = voteWrap.querySelector('.js-vote');
+      if (root) {
+        applyVoteUI(root, { score: c.score, userVote: c.user_vote });
+      }
     });
   }
 
   document.addEventListener('click', (event) => {
+    const upBtn = event.target.closest('.js-vote-up');
+    const downBtn = event.target.closest('.js-vote-down');
+    if (upBtn || downBtn) {
+      const root = event.target.closest('.js-vote');
+      if (!root) return;
+      handleVoteClick(root, upBtn ? 1 : -1);
+      return;
+    }
+
     if (!event.target.classList.contains('report-submit')) return;
     const wrap = event.target.closest('.discussion-report-box');
     if (!wrap) return;

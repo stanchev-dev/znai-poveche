@@ -414,15 +414,12 @@ class VoteTests(APITestCase):
         self.assertEqual(self.post.score, 1)
         self.assertEqual(author_profile.reputation_points, 2)
 
-    def test_repeat_vote_is_idempotent(self):
+    def test_repeat_vote_toggles_to_unvote(self):
         self.client.post(
             reverse("api-posts-vote", kwargs={"pk": self.post.id}),
             {"value": 1},
             format="json",
         )
-        author_profile = Profile.objects.get(user=self.author)
-        author_profile.reputation_points = 5
-        author_profile.save()
 
         response = self.client.post(
             reverse("api-posts-vote", kwargs={"pk": self.post.id}),
@@ -431,10 +428,11 @@ class VoteTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["vote_value"], 0)
         self.post.refresh_from_db()
-        author_profile.refresh_from_db()
-        self.assertEqual(self.post.score, 1)
-        self.assertEqual(author_profile.reputation_points, 5)
+        author_profile = Profile.objects.get(user=self.author)
+        self.assertEqual(self.post.score, 0)
+        self.assertEqual(author_profile.reputation_points, 0)
 
     def test_self_vote_rejected(self):
         self.client.force_authenticate(self.author)
@@ -449,6 +447,24 @@ class VoteTests(APITestCase):
         author_profile = Profile.objects.get(user=self.author)
         self.assertEqual(self.post.score, 0)
         self.assertEqual(author_profile.reputation_points, 0)
+
+    def test_explicit_unvote_value_is_accepted(self):
+        self.client.post(
+            reverse("api-posts-vote", kwargs={"pk": self.post.id}),
+            {"value": 1},
+            format="json",
+        )
+
+        response = self.client.post(
+            reverse("api-posts-vote", kwargs={"pk": self.post.id}),
+            {"value": 0},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["vote_value"], 0)
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.score, 0)
 
     def test_invalid_value_rejected(self):
         response = self.client.post(
