@@ -1,4 +1,7 @@
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 from django.test import TestCase
 from django.urls import reverse
 
@@ -58,3 +61,50 @@ class RegistrationRoleTests(TestCase):
         )
 
         self.assertEqual(user.profile.role, Profile.Role.LEARNER)
+
+
+class RegistrationFlowTests(TestCase):
+    def test_registration_requires_unique_username_case_insensitive(self):
+        User = get_user_model()
+        User.objects.create_user(username="ExistingUser", password="testpass123")
+
+        response = self.client.post(
+            reverse("register"),
+            data={
+                "username": "existinguser",
+                "email": "new@example.com",
+                "password1": "StrongPass123",
+                "password2": "StrongPass123",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Това потребителско име вече е заето.")
+
+    def test_registration_handles_integrity_error_without_500(self):
+        with patch("apps.accounts.views.RegistrationForm.save", side_effect=IntegrityError):
+            response = self.client.post(
+                reverse("register"),
+                data={
+                    "username": "raceuser",
+                    "email": "race@example.com",
+                    "password1": "StrongPass123",
+                    "password2": "StrongPass123",
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Това потребителско име вече е заето.")
+
+    def test_registration_success_uses_redirect(self):
+        response = self.client.post(
+            reverse("register"),
+            data={
+                "username": "freshuser",
+                "email": "fresh@example.com",
+                "password1": "StrongPass123",
+                "password2": "StrongPass123",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)

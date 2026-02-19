@@ -20,6 +20,12 @@ class RegistrationForm(UserCreationForm):
         model = User
         fields = ("username", "email", "password1", "password2")
 
+    def clean_username(self):
+        username = (self.cleaned_data.get("username") or "").strip()
+        if User.objects.filter(username__iexact=username).exists():
+            raise forms.ValidationError("Това потребителско име вече е заето.")
+        return username
+
     def clean_email(self):
         email = (self.cleaned_data.get("email") or "").strip().lower()
         if User.objects.filter(email__iexact=email).exists():
@@ -27,10 +33,12 @@ class RegistrationForm(UserCreationForm):
         return email
 
     def save(self, commit=True):
+        self.instance.email = self.cleaned_data["email"]
         user = super().save(commit=commit)
         if commit:
-            user.email = self.cleaned_data["email"]
-            user.save(update_fields=["email"])
+            return user
+
+        user.email = self.cleaned_data["email"]
         return user
 
 

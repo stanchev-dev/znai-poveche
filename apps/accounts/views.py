@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.db import IntegrityError
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
@@ -31,15 +32,19 @@ def register_view(request):
     if request.method == "POST":
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            form.save()
-            user = authenticate(
-                request,
-                username=form.cleaned_data["username"],
-                password=form.cleaned_data["password1"],
-            )
-            if user is not None:
-                login(request, user)
-            return redirect("/")
+            try:
+                user = form.save()
+            except IntegrityError:
+                form.add_error("username", "Това потребителско име вече е заето.")
+            else:
+                authenticated_user = authenticate(
+                    request,
+                    username=user.username,
+                    password=form.cleaned_data["password1"],
+                )
+                if authenticated_user is not None:
+                    login(request, authenticated_user)
+                return redirect("/")
     else:
         form = RegistrationForm()
     return render(request, "accounts/register.html", {"form": form})
