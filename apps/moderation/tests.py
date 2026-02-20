@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
+from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -328,3 +329,114 @@ class ModerationAPITests(APITestCase):
         report.refresh_from_db()
         self.assertTrue(staff_author.is_active)
         self.assertEqual(report.status, Report.STATUS_OPEN)
+
+
+class ModerationAdminTests(TestCase):
+    def setUp(self):
+        self.client = self.client_class()
+        self.admin = User.objects.create_user(
+            username="admin",
+            password="testpass123",
+            is_staff=True,
+            is_superuser=True,
+        )
+        self.reporter = User.objects.create_user(
+            username="reporter_admin",
+            password="testpass123",
+            email="reporter@example.com",
+        )
+        self.author = User.objects.create_user(
+            username="author_admin",
+            password="testpass123",
+        )
+        self.subject = Subject.objects.create(name="Admin moderation")
+        self.post = Post.objects.create(
+            subject=self.subject,
+            author=self.author,
+            title="Post for admin report",
+            body="Body",
+        )
+        self.comment = Comment.objects.create(
+            post=self.post,
+            author=self.author,
+            body="Comment for admin report",
+        )
+
+    def _make_report_for(self, model, object_id, reason=Report.REASON_SPAM):
+        return Report.objects.create(
+            reporter=self.reporter,
+            content_type=ContentType.objects.get_for_model(model),
+            object_id=object_id,
+            reason=reason,
+        )
+
+    def test_admin_reports_changelist_is_accessible(self):
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("admin:moderation_report_changelist"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Reports")
+
+    def test_delete_target_content_action_handles_post_comment_and_missing_target(self):
+        post_report = self._make_report_for(Post, self.post.id)
+        comment_report = self._make_report_for(
+            Comment,
+            self.comment.id,
+            reason=Report.REASON_ABUSE,
+        )
+        missing_report = self._make_report_for(Comment, 999999, reason=Report.REASON_OTHER)
+
+        self.client.force_login(self.admin)
+        response = self.client.post(
+            reverse("admin:moderation_report_changelist"),
+            {
+                "action": "delete_target_content",
+                "_selected_action": [post_report.id, comment_report.id, missing_report.id],
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Post.objects.filter(id=self.post.id).exists())
+        self.assertFalse(Comment.objects.filter(id=self.comment.id).exists())
+        post_report.refresh_from_db()
+        comment_report.refresh_from_db()
+        missing_report.refresh_from_db()
+        self.assertEqual(post_report.status, Report.STATUS_RESOLVED)
+        self.assertEqual(comment_report.status, Report.STATUS_RESOLVED)
+        self.assertEqual(missing_report.status, Report.STATUS_OPEN)
+
+    def test_delete_reports_only_action_does_not_delete_target_content(self):
+        report = self._make_report_for(Post, self.post.id)
+        self.client.force_login(self.admin)
+
+        response = self.client.post(
+            reverse("admin:moderation_report_changelist"),
+            {
+                "action": "delete_reports_only",
+                "_selected_action": [report.id],
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Report.objects.filter(id=report.id).exists())
+        self.assertTrue(Post.objects.filter(id=self.post.id).exists())
+
+    def test_mark_as_resolved_action(self):
+        report = self._make_report_for(Comment, self.comment.id)
+        self.client.force_login(self.admin)
+
+        response = self.client.post(
+            reverse("admin:moderation_report_changelist"),
+            {
+                "action": "mark_as_resolved",
+                "_selected_action": [report.id],
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        report.refresh_from_db()
+        self.assertEqual(report.status, Report.STATUS_RESOLVED)
+        self.assertIsNotNone(report.resolved_at)
