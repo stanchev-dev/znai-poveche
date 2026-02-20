@@ -115,7 +115,7 @@
         <div class="card-body p-2 p-md-3">
           <div class="marketplace-carousel" data-count="${imageCount}">
             <button type="button" class="carousel-nav carousel-prev" aria-label="Предишна снимка">&#10094;</button>
-            <div class="marketplace-detail-image-frame rounded">
+            <div class="discussion-image-frame marketplace-detail-image-frame rounded">
               <img class="img-fluid marketplace-detail-image carousel-main-image" alt="Илюстрация към дискусия">
               <button type="button" class="listing-expand-btn" aria-label="Разшири снимката">
                 <i class="bi bi-arrows-fullscreen" aria-hidden="true"></i>
