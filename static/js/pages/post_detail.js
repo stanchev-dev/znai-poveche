@@ -156,7 +156,6 @@
         return;
       }
 
-      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         const msg = data.detail || data.non_field_errors?.[0] || 'Грешка при гласуване';
         postAlert.innerHTML = alertHtml(msg, 'danger');
@@ -188,21 +187,23 @@
   }
 
   async function submitReport(targetType, targetId, reason, message) {
-    const res = await window.apiUtils.apiFetch('/api/reports/', {
-      method: 'POST',
-      body: JSON.stringify({ target_type: targetType, target_id: targetId, reason, message })
-    });
-    const data = await res.json().catch(() => ({}));
-    if (res.status === 401 || res.status === 403) {
-      postAlert.innerHTML = loginAlert();
-      return;
+    try {
+      const res = await window.apiUtils.apiFetch('/api/reports/', {
+        method: 'POST',
+        body: JSON.stringify({ target_type: targetType, target_id: targetId, reason, message })
+      });
+      if (res.status === 401 || res.status === 403) {
+        postAlert.innerHTML = loginAlert();
+        return;
+      }
+      if (!res.ok) {
+        postAlert.innerHTML = alertHtml('Неуспешно изпращане на репорта. Опитайте отново.', 'danger');
+        return;
+      }
+      postAlert.innerHTML = alertHtml('Репортът ви е изпратен успешно.', 'success');
+    } catch (error) {
+      postAlert.innerHTML = alertHtml('Неуспешно изпращане на репорта. Опитайте отново.', 'danger');
     }
-    if (!res.ok) {
-      const msg = data.non_field_errors?.[0] || data.detail || 'Грешка при докладване';
-      postAlert.innerHTML = alertHtml(msg, 'danger');
-      return;
-    }
-    postAlert.innerHTML = alertHtml('Докладът е изпратен.', 'success');
   }
 
   function reportFormHtml(type, id) {
@@ -227,7 +228,7 @@
           <textarea class="form-control form-control-sm report-message mb-2" placeholder="Съобщение (по желание)"></textarea>
           <div class="d-flex gap-2 justify-content-end">
             <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}">Отказ</button>
-            <button class="btn btn-sm btn-outline-danger report-submit" type="button">Изпрати доклад</button>
+            <button class="btn btn-sm btn-outline-danger report-submit" type="button">Изпрати репорт</button>
           </div>
         </div>
       </div>`;
