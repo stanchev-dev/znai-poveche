@@ -13,11 +13,11 @@
   const price = document.getElementById('listing-price');
   const owner = document.getElementById('listing-owner');
   const callBtn = document.getElementById('call-btn');
-  const reportBtn = document.getElementById('listing-report-btn');
+  const reportBtn = document.querySelector('[data-report-btn]');
   const reportModalEl = document.getElementById('listing-report-modal');
   const reportReason = document.getElementById('listing-report-reason');
   const reportMessage = document.getElementById('listing-report-message');
-  const reportSubmit = document.getElementById('listing-report-submit');
+  const reportSubmit = document.querySelector('[data-report-submit]');
   const lightbox = document.getElementById('listing-image-lightbox');
   const lightboxDialog = document.getElementById('listing-lightbox-dialog');
   const lightboxImage = document.getElementById('listing-lightbox-image');
@@ -68,13 +68,17 @@
     return `<div class="alert alert-${type}" role="alert">${escapeHtml(message)}</div>`;
   }
 
+  const reportUrl = meta.dataset.reportUrl || '/api/reports/';
+
   async function submitReport() {
     try {
-      const res = await window.apiUtils.apiFetch('/api/reports/', {
+      const targetId = Number(reportBtn?.dataset.targetId || listingId);
+      const targetType = reportBtn?.dataset.targetType || 'listing';
+      const res = await window.apiUtils.apiFetch(reportUrl, {
         method: 'POST',
         body: JSON.stringify({
-          target_type: 'listing',
-          target_id: Number(listingId),
+          target_type: targetType,
+          target_id: targetId,
           reason: reportReason.value,
           message: reportMessage.value
         })
@@ -88,6 +92,7 @@
         return;
       }
       alertBox.innerHTML = alertHtml('Репортът ви е изпратен успешно.', 'success');
+      reportReason.value = 'spam';
       reportMessage.value = '';
       bootstrap.Modal.getOrCreateInstance(reportModalEl).hide();
     } catch (error) {
