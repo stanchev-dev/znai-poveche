@@ -257,7 +257,7 @@
 }
 
 .discussion-image-frame.marketplace-detail-image-frame {
-  background: #111;
+  background: var(--surface-subtle, #f8f9fa);
   min-height: 260px;
   height: min(52vh, 440px);
   border: 1px solid #ece8f8;
@@ -393,4 +393,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+
+.discussion-comment-delete {
+  margin-left: auto;
 }
