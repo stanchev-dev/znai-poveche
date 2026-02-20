@@ -111,150 +111,21 @@
   }
 
   function renderGallery(images) {
-    if (!images.length) {
-      gallery.innerHTML = `<div class="card marketplace-detail-gallery-card"><div class="card-body p-2 p-md-3"><div class="marketplace-detail-image-frame rounded"><img src="${defaultImage}" alt="Снимка на обява" class="img-fluid marketplace-detail-image"></div></div></div>`;
-      return;
-    }
-
-    let current = 0;
-
-    function syncLightbox() {
-      const currentImage = images[current] || images[0] || defaultImage;
-      lightboxImage.src = currentImage;
-      lightboxPrev.classList.toggle('d-none', images.length <= 1);
-      lightboxNext.classList.toggle('d-none', images.length <= 1);
-    }
-
-    function update() {
-      const currentImage = images[current] || images[0];
-      mainImage.src = currentImage || defaultImage;
-      thumbs.querySelectorAll('button').forEach((btn, index) => {
-        btn.classList.toggle('active', index === current);
-      });
-      if (lightbox.classList.contains('is-open')) {
-        syncLightbox();
-      }
-    }
-
-    function closeModal() {
-      lightbox.classList.remove('is-open');
-      lightbox.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('listing-lightbox-open');
-    }
-
-    function openModal() {
-      syncLightbox();
-      lightbox.classList.add('is-open');
-      lightbox.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('listing-lightbox-open');
-      lightboxClose.focus();
-    }
-
-    function next() {
-      current = (current + 1) % images.length;
-      update();
-    }
-
-    function prev() {
-      current = (current - 1 + images.length) % images.length;
-      update();
-    }
-
-    function onLightboxPrev(event) {
-      event.preventDefault();
-      event.stopPropagation();
-      prev();
-    }
-
-    function onLightboxNext(event) {
-      event.preventDefault();
-      event.stopPropagation();
-      next();
-    }
-
-    gallery.innerHTML = `
-      <div class="card marketplace-detail-gallery-card">
-        <div class="card-body p-2 p-md-3">
-          <div class="marketplace-carousel" data-count="${images.length}">
-            <button type="button" class="carousel-nav carousel-prev ${images.length === 1 ? 'd-none' : ''}" aria-label="Предишна снимка">&#10094;</button>
-            <div class="marketplace-detail-image-frame rounded">
-              <img class="img-fluid marketplace-detail-image" id="carousel-main-image" alt="Снимка на обява">
-              <button type="button" class="listing-expand-btn" id="listing-expand-btn" aria-label="Разшири снимката">
-                <i class="bi bi-arrows-fullscreen" aria-hidden="true"></i>
-              </button>
-            </div>
-            <button type="button" class="carousel-nav carousel-next ${images.length === 1 ? 'd-none' : ''}" aria-label="Следваща снимка">&#10095;</button>
-          </div>
-          <div class="carousel-thumbs ${images.length <= 1 ? 'd-none' : ''}" id="carousel-thumbs"></div>
-        </div>
-      </div>`;
-
-    const mainImage = document.getElementById('carousel-main-image');
-    const thumbs = document.getElementById('carousel-thumbs');
-    const expandBtn = document.getElementById('listing-expand-btn');
-
-    if (images.length > 1) {
-      images.forEach((src, index) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = `carousel-thumb ${index === 0 ? 'active' : ''}`;
-        btn.innerHTML = `<img src="${src}" alt="Миниатюра ${index + 1}">`;
-        btn.addEventListener('click', () => {
-          current = index;
-          update();
-        });
-        thumbs.appendChild(btn);
-      });
-
-      gallery.querySelector('.carousel-prev').addEventListener('click', prev);
-      gallery.querySelector('.carousel-next').addEventListener('click', next);
-      lightboxPrev.addEventListener('click', onLightboxPrev);
-      lightboxNext.addEventListener('click', onLightboxNext);
-    }
-
-    lightboxClose.addEventListener('click', closeModal);
-    lightboxDialog.addEventListener('click', (event) => {
-      event.stopPropagation();
+    window.marketplaceImageViewer.init({
+      root: gallery,
+      images,
+      defaultImage,
+      lightbox,
+      lightboxDialog,
+      lightboxImage,
+      lightboxClose,
+      lightboxPrev,
+      lightboxNext,
+      imageAlt: 'Снимка на обява',
+      lightboxAlt: 'Разширена снимка на обява'
     });
-    lightboxImage.addEventListener('click', (event) => {
-      event.stopPropagation();
-    });
-    lightbox.addEventListener('click', (event) => {
-      if (event.target === lightbox) {
-        closeModal();
-      }
-    });
-
-    expandBtn.addEventListener('click', openModal);
-
-    window.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && lightbox.classList.contains('is-open')) {
-        closeModal();
-        return;
-      }
-
-      if (!lightbox.classList.contains('is-open')) {
-        return;
-      }
-
-      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
-        return;
-      }
-
-      if (images.length <= 1) {
-        return;
-      }
-
-      if (event.key === 'ArrowLeft') {
-        prev();
-      }
-      if (event.key === 'ArrowRight') {
-        next();
-      }
-    });
-
-    update();
   }
+
 
   const res = await window.apiUtils.apiFetch(`/api/listings/${listingId}/`);
   if (res.status === 404) {
