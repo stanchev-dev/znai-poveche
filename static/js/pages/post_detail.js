@@ -104,6 +104,14 @@
   function alertHtml(text, type = 'warning') { return `<div class="alert alert-${type}">${text}</div>`; }
   function loginAlert() { return `${alertHtml(`Трябва да сте логнати. <a href="${loginUrl}">Вход</a>`, 'warning')}`; }
 
+  function animateSuccessAlert() {
+    const successAlert = postAlert.querySelector('.alert-success');
+    if (!successAlert) return;
+    successAlert.classList.remove('alert-pop-highlight');
+    void successAlert.offsetWidth;
+    successAlert.classList.add('alert-pop-highlight');
+  }
+
   function getNumber(value) {
     const num = Number(value);
     return Number.isFinite(num) ? num : 0;
@@ -222,10 +230,12 @@
         return;
       }
       postAlert.innerHTML = alertHtml('Репортът ви е изпратен успешно.', 'success');
+      animateSuccessAlert();
       const collapseEl = reportBox?.closest('.collapse');
       if (collapseEl) {
         bootstrap.Collapse.getOrCreateInstance(collapseEl).hide();
       }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       postAlert.innerHTML = alertHtml('Неуспешно изпращане на репорта. Опитайте отново.', 'danger');
     }
