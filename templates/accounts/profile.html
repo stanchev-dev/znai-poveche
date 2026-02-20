@@ -148,7 +148,7 @@
       const dropzone = document.getElementById('profileUploadDropzone');
       const errorBox = document.getElementById('profileAvatarClientError');
       const clearCheckbox = document.getElementById('{{ form.avatar.id_for_label }}_clear_id');
-      const defaultPreviewSrc = avatarPreview.getAttribute('src');
+      const defaultPreviewSrc = "{% static 'img/default-avatar.svg' %}";
 
       if (!fileInput || !avatarPreview || !dropzone) {
         return;
