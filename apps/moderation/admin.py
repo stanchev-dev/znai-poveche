@@ -33,8 +33,10 @@ class ReportAdmin(admin.ModelAdmin):
     def delete_target_content(self, request, queryset):
         deleted_count = 0
         missing_count = 0
+        resolved_at = timezone.now()
 
         for report in queryset:
+            target_pk = report.object_id
             target = report.target
             if target is None:
                 missing_count += 1
@@ -44,9 +46,10 @@ class ReportAdmin(admin.ModelAdmin):
             deleted_count += 1
 
             if hasattr(report, "status"):
-                report.status = Report.STATUS_RESOLVED
-                report.resolved_at = timezone.now()
-                report.save(update_fields=["status", "resolved_at"])
+                Report.objects.filter(pk=report.pk, object_id=target_pk).update(
+                    status=Report.STATUS_RESOLVED,
+                    resolved_at=resolved_at,
+                )
 
         if deleted_count:
             self.message_user(
