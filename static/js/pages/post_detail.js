@@ -150,6 +150,7 @@
         method: 'POST',
         body: JSON.stringify({ value: nextVote })
       });
+      const data = await res.json().catch(() => ({}));
 
       if (res.status === 401 || res.status === 403) {
         postAlert.innerHTML = loginAlert();
@@ -181,6 +182,7 @@
         score: responseScore,
         userVote: responseVote
       });
+      postAlert.innerHTML = '';
     } catch (error) {
       postAlert.innerHTML = alertHtml('Грешка при гласуване', 'danger');
     }
