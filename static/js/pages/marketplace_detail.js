@@ -68,6 +68,14 @@
     return `<div class="alert alert-${type}" role="alert">${escapeHtml(message)}</div>`;
   }
 
+  function animateSuccessAlert() {
+    const successAlert = alertBox.querySelector('.alert-success');
+    if (!successAlert) return;
+    successAlert.classList.remove('alert-pop-highlight');
+    void successAlert.offsetWidth;
+    successAlert.classList.add('alert-pop-highlight');
+  }
+
   const reportUrl = meta.dataset.reportUrl || '/api/reports/';
 
   async function submitReport() {
@@ -92,9 +100,11 @@
         return;
       }
       alertBox.innerHTML = alertHtml('Репортът ви е изпратен успешно.', 'success');
+      animateSuccessAlert();
       reportReason.value = 'spam';
       reportMessage.value = '';
       bootstrap.Modal.getOrCreateInstance(reportModalEl).hide();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       alertBox.innerHTML = alertHtml('Неуспешно изпращане на репорт.', 'danger');
     }
