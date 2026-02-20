@@ -77,9 +77,11 @@
   }
 
   function imgIf(url) {
-    return url
-      ? `<div class="discussion-image-frame marketplace-detail-image-frame rounded mt-3"><img src="${escapeHtml(url)}" class="discussion-image marketplace-detail-image" alt="Илюстрация към дискусия"></div>`
-      : '';
+    if (!url) return '';
+
+    return `
+      <div class="discussion-image-viewer js-discussion-image-viewer mt-3" data-image-url="${escapeHtml(url)}">
+      </div>`;
   }
 
   function alertHtml(text, type = 'warning') { return `<div class="alert alert-${type}">${text}</div>`; }
@@ -307,6 +309,67 @@
     postAlert.innerHTML = alertHtml('Грешка при изтриване на коментар.', 'danger');
   }
 
+
+  function ensureViewerLightbox(node) {
+    const existingId = node.dataset.viewerLightboxId;
+    let lightbox = existingId ? document.getElementById(existingId) : null;
+
+    if (!lightbox) {
+      const lightboxId = `discussion-image-lightbox-${Math.random().toString(36).slice(2, 10)}`;
+      lightbox = document.createElement('div');
+      lightbox.id = lightboxId;
+      lightbox.className = 'listing-image-lightbox';
+      lightbox.setAttribute('aria-hidden', 'true');
+      lightbox.innerHTML = `
+        <button type="button" class="listing-image-lightbox-close" aria-label="Затвори разширената снимка">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="listing-image-lightbox-nav listing-image-lightbox-prev d-none" aria-label="Предишна снимка">
+          &#10094;
+        </button>
+        <div class="listing-image-lightbox-dialog">
+          <img class="listing-image-lightbox-image" alt="Разширена илюстрация към дискусия">
+        </div>
+        <button type="button" class="listing-image-lightbox-nav listing-image-lightbox-next d-none" aria-label="Следваща снимка">
+          &#10095;
+        </button>`;
+      document.body.appendChild(lightbox);
+      node.dataset.viewerLightboxId = lightboxId;
+    }
+
+    return {
+      lightbox,
+      lightboxDialog: lightbox.querySelector('.listing-image-lightbox-dialog'),
+      lightboxImage: lightbox.querySelector('.listing-image-lightbox-image'),
+      lightboxClose: lightbox.querySelector('.listing-image-lightbox-close'),
+      lightboxPrev: lightbox.querySelector('.listing-image-lightbox-prev'),
+      lightboxNext: lightbox.querySelector('.listing-image-lightbox-next')
+    };
+  }
+
+  function initDiscussionImageViewers() {
+    const viewerNodes = document.querySelectorAll('.js-discussion-image-viewer[data-image-url]');
+    viewerNodes.forEach((node) => {
+      const imageUrl = node.dataset.imageUrl;
+      if (!imageUrl) return;
+
+      const viewerLightbox = ensureViewerLightbox(node);
+
+      window.marketplaceImageViewer.init({
+        root: node,
+        images: [imageUrl],
+        lightbox: viewerLightbox.lightbox,
+        lightboxDialog: viewerLightbox.lightboxDialog,
+        lightboxImage: viewerLightbox.lightboxImage,
+        lightboxClose: viewerLightbox.lightboxClose,
+        lightboxPrev: viewerLightbox.lightboxPrev,
+        lightboxNext: viewerLightbox.lightboxNext,
+        imageAlt: 'Илюстрация към дискусия',
+        lightboxAlt: 'Разширена илюстрация към дискусия'
+      });
+    });
+  }
+
   async function loadPost() {
     const res = await window.apiUtils.apiFetch(`/api/posts/${postId}/`);
     if (res.status === 404) {
@@ -348,6 +411,8 @@
     if (root) {
       applyVoteUI(root, { score: post.score, userVote: post.user_vote });
     }
+
+    initDiscussionImageViewers();
   }
 
   async function loadComments() {
@@ -372,6 +437,8 @@
         applyVoteUI(root, { score: c.score, userVote: c.user_vote });
       }
     });
+
+    initDiscussionImageViewers();
   }
 
   document.addEventListener('click', (event) => {
