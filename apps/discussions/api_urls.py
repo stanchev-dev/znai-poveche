@@ -8,6 +8,7 @@ from .api_views import (
     PostListView,
     MyPostBodyUpdateAPIView,
     MyPostDeleteAPIView,
+    MyCommentDeleteAPIView,
     PostVoteAPIView,
     SubjectListView,
 )
@@ -32,6 +33,11 @@ urlpatterns = [
         "comments/<int:pk>/vote/",
         CommentVoteAPIView.as_view(),
         name="api-comments-vote",
+    ),
+    path(
+        "comments/<int:pk>/",
+        MyCommentDeleteAPIView.as_view(),
+        name="api-comments-delete",
     ),
     path("leaderboard/", LeaderboardAPIView.as_view(), name="leaderboard"),
 ]

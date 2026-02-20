@@ -110,7 +110,7 @@
   </div>
 </nav>
 
-<main class="container mb-5 flex-grow-1" id="app-root" data-authenticated="{% if user.is_authenticated %}1{% else %}0{% endif %}" data-login-url="{% url 'login' %}">
+<main class="container mb-5 flex-grow-1" id="app-root" data-authenticated="{% if user.is_authenticated %}1{% else %}0{% endif %}" data-user-id="{% if user.is_authenticated %}{{ user.id }}{% endif %}" data-login-url="{% url 'login' %}">
   {% if messages %}
     <div class="mb-3">
       {% for message in messages %}
