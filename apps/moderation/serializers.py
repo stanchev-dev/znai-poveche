@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
@@ -41,13 +42,13 @@ class ReportCreateSerializer(serializers.ModelSerializer):
         model_class = TARGET_MODEL_MAP.get(target_type)
         if not model_class:
             raise serializers.ValidationError(
-                {"target_type": ["Invalid target_type."]}
+                {"target_type": [_("Невалиден тип на съдържанието.")]}
             )
 
         try:
             target = model_class.objects.get(pk=target_id)
         except model_class.DoesNotExist as exc:
-            raise NotFound(detail="Target not found.") from exc
+            raise NotFound(detail=_("Целевото съдържание не е намерено.")) from exc
 
         reporter = self.context["request"].user
         content_type = ContentType.objects.get_for_model(model_class)
@@ -61,7 +62,7 @@ class ReportCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {
                     "non_field_errors": [
-                        "You already have an open/reviewing report for this target."
+                        _("Вече имаш отворен/преглеждан сигнал за това съдържание.")
                     ]
                 }
             )
@@ -156,10 +157,10 @@ class AdminActionSerializer(serializers.Serializer):
         action = attrs["action"]
         if action == self.ACTION_SET_STATUS and "status" not in attrs:
             raise serializers.ValidationError(
-                {"status": ["This field is required for set_status action."]}
+                {"status": [_("Това поле е задължително за действието set_status.")]}
             )
         if action == self.ACTION_SUSPEND_USER and "suspend_days" not in attrs:
             raise serializers.ValidationError(
-                {"suspend_days": ["This field is required for suspend_user action."]}
+                {"suspend_days": [_("Това поле е задължително за действието suspend_user.")]}
             )
         return attrs
