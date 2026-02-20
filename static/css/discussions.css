@@ -423,101 +423,20 @@
   margin-bottom: 0.5rem;
 }
 
-.discussion-comment-layout {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-}
-
-.discussion-comment-mini-profile {
-  width: 132px;
-  min-width: 132px;
-  padding: 0.7rem;
-  border-radius: 0.9rem;
-  border: 1px solid rgba(124, 69, 245, 0.2);
-  background: linear-gradient(180deg, #faf7ff 0%, #f5f0ff 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.discussion-comment-mini-avatar {
-  width: 56px;
-  height: 56px;
-  object-fit: cover;
-  border: 2px solid rgba(124, 69, 245, 0.3);
-  background: #fff;
-}
-
-.discussion-comment-mini-meta {
-  margin-top: 0.55rem;
-  width: 100%;
-}
-
-.discussion-comment-mini-name {
-  margin: 0;
-  font-weight: 700;
-  color: #111827;
-  font-size: 0.95rem;
-  line-height: 1.3;
-  overflow-wrap: anywhere;
-}
-
-.discussion-comment-mini-username {
-  margin: 0.1rem 0 0;
-  font-size: 0.79rem;
-  color: #6b7280;
-  overflow-wrap: anywhere;
-}
-
-.discussion-mini-role-badge {
-  margin-top: 0.45rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  padding: 0.33rem 0.6rem;
-}
-
-.discussion-mini-role-badge--teacher {
-  background: rgba(124, 69, 245, 0.16);
-  color: #5d2cc5;
-  border: 1px solid rgba(124, 69, 245, 0.3);
-}
-
-.discussion-mini-role-badge--student {
-  background: rgba(111, 66, 193, 0.12);
-  color: #6136bc;
-  border: 1px solid rgba(111, 66, 193, 0.22);
-}
-
 .discussion-comment-content {
   flex: 1 1 auto;
   min-width: 0;
 }
 
+.discussion-comment-content .discussion-author-card {
+  margin-bottom: 0.9rem;
+}
+
 .discussion-comment-body {
+  margin-top: 0.25rem;
   margin-bottom: 0;
   color: #1f2937;
   white-space: pre-line;
-}
-
-@media (max-width: 767.98px) {
-  .discussion-comment-layout {
-    flex-direction: column;
-  }
-
-  .discussion-comment-mini-profile {
-    width: 100%;
-    min-width: 0;
-    flex-direction: row;
-    text-align: left;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .discussion-comment-mini-meta {
-    margin-top: 0;
-  }
 }
 
 .discussion-delete-modal-content {
