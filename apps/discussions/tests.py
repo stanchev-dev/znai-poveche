@@ -589,6 +589,25 @@ class VoteTests(APITestCase):
         self.post.refresh_from_db()
         self.assertEqual(self.post.score, 0)
 
+    def test_post_switch_from_blocked_downvote_to_upvote_increases_by_one(self):
+        self.client.post(
+            reverse("api-posts-vote", kwargs={"pk": self.post.id}),
+            {"value": -1},
+            format="json",
+        )
+
+        response = self.client.post(
+            reverse("api-posts-vote", kwargs={"pk": self.post.id}),
+            {"value": 1},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["score"], 1)
+        self.assertEqual(response.data["user_vote"], 1)
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.score, 1)
+
     def test_invalid_value_rejected(self):
         response = self.client.post(
             reverse("api-posts-vote", kwargs={"pk": self.post.id}),
@@ -622,21 +641,14 @@ class VoteTests(APITestCase):
         self.assertEqual(self.comment.score, -1)
         self.assertEqual(profile.reputation_points, 0)
 
-    def test_vote_throttle(self):
-        for _ in range(50):
+    def test_vote_endpoint_allows_rapid_requests_without_throttle(self):
+        for i in range(60):
             response = self.client.post(
                 reverse("api-posts-vote", kwargs={"pk": self.post.id}),
-                {"value": 1},
+                {"value": 1 if i % 2 == 0 else 0},
                 format="json",
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        response = self.client.post(
-            reverse("api-posts-vote", kwargs={"pk": self.post.id}),
-            {"value": 1},
-            format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
 
     def test_vote_does_not_change_daily_base_points(self):
         profile = Profile.objects.get(user=self.author)
