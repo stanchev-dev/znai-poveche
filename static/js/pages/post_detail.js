@@ -95,7 +95,7 @@
         }
 
         if (entry && typeof entry === 'object') {
-          append(entry.image || entry.url || entry.src);
+          append(entry.image || entry.image_url || entry.url || entry.src);
         }
       });
     }
@@ -104,9 +104,11 @@
       payload.image_urls.forEach(append);
     }
 
-    append(payload.image);
+    if (!list.length) {
+      append(payload.image);
+    }
 
-    return [...new Set(list)];
+    return list;
   }
 
   function discussionGalleryMarkup(imageCount) {
