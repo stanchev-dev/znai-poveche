@@ -8,11 +8,11 @@
   const orderingInput = document.getElementById('ordering_image_ids');
   const existingJsonNode = document.getElementById('existing-images-data');
 
-  const maxFiles = 4;
+  const maxFiles = Math.max(1, Number.parseInt(input.dataset.maxFiles || '4', 10) || 4);
   const allowedTypes = ['image/jpeg', 'image/png'];
   const maxSizeBytes = 2 * 1024 * 1024;
   const invalidFileMessage = 'Невалиден файл. Приемаме само jpg, jpeg, png до 2MB.';
-  const maxFilesMessage = 'Можеш да качиш до 4 снимки.';
+  const maxFilesMessage = input.dataset.maxFilesMessage || `Можеш да качиш до ${maxFiles} снимки.`;
 
   const state = {
     existing: [],
