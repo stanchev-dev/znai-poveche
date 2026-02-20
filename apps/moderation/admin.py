@@ -1,7 +1,37 @@
 from django.contrib import admin, messages
+from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 
+from apps.discussions.models import Comment, Post
+from apps.marketplace.models import Listing
+
 from .models import Report
+
+
+class ReportTargetTypeFilter(admin.SimpleListFilter):
+    title = "Тип съдържание"
+    parameter_name = "target_type"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("comment", "Коментари"),
+            ("post", "Дискусии"),
+            ("listing", "Обяви"),
+        )
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        model_map = {
+            "comment": Comment,
+            "post": Post,
+            "listing": Listing,
+        }
+        model = model_map.get(value)
+        if not model:
+            return queryset
+
+        content_type = ContentType.objects.get_for_model(model)
+        return queryset.filter(content_type=content_type)
 
 
 @admin.register(Report)
@@ -14,7 +44,7 @@ class ReportAdmin(admin.ModelAdmin):
         "reason",
         "status",
     )
-    list_filter = ("created_at", "content_type", "reason", "status")
+    list_filter = (ReportTargetTypeFilter, "created_at", "reason", "status")
     search_fields = (
         "reporter__username",
         "reporter__email",
