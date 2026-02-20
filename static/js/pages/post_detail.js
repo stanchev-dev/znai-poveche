@@ -207,7 +207,7 @@
     }
   }
 
-  async function submitReport(targetType, targetId, reason, message) {
+  async function submitReport(targetType, targetId, reason, message, reportBox) {
     try {
       const res = await window.apiUtils.apiFetch('/api/reports/', {
         method: 'POST',
@@ -222,6 +222,10 @@
         return;
       }
       postAlert.innerHTML = alertHtml('Репортът ви е изпратен успешно.', 'success');
+      const collapseEl = reportBox?.closest('.collapse');
+      if (collapseEl) {
+        bootstrap.Collapse.getOrCreateInstance(collapseEl).hide();
+      }
     } catch (error) {
       postAlert.innerHTML = alertHtml('Неуспешно изпращане на репорта. Опитайте отново.', 'danger');
     }
@@ -420,7 +424,7 @@
     if (!wrap) return;
     const reasonEl = wrap.querySelector('.report-reason');
     const msgEl = wrap.querySelector('.report-message');
-    submitReport(reasonEl.dataset.targetType, Number(reasonEl.dataset.targetId), reasonEl.value, msgEl.value);
+    submitReport(reasonEl.dataset.targetType, Number(reasonEl.dataset.targetId), reasonEl.value, msgEl.value, wrap);
   });
 
   const form = document.getElementById('comment-form');
