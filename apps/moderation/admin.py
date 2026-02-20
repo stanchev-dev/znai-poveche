@@ -90,7 +90,7 @@ class ReportAdmin(admin.ModelAdmin):
         if missing_count:
             self.message_user(
                 request,
-                f"Target not found for {missing_count} report(s).",
+                f"Целевото съдържание не е намерено за {missing_count} сигнал(а).",
                 level=messages.WARNING,
             )
 

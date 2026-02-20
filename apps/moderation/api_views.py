@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from rest_framework import generics, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -80,7 +81,7 @@ class AdminActionsAPIView(APIView):
         target = report.target
         if target is None:
             return Response(
-                {"detail": "Target not found for this report."},
+                {"detail": _("Целевото съдържание за този сигнал не е намерено.")},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -88,7 +89,7 @@ class AdminActionsAPIView(APIView):
         if target_author.is_staff or target_author.is_superuser:
             return Response(
                 {
-                    "detail": "Cannot suspend staff or superuser accounts.",
+                    "detail": _("Не можеш да спреш staff или superuser акаунти."),
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )

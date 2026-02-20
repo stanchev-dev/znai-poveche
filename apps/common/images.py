@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.utils.translation import gettext_lazy as _
 from PIL import Image, ImageOps, UnidentifiedImageError
 from rest_framework import serializers
 
@@ -15,12 +16,12 @@ MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024
 
 def validate_image_upload(uploaded_file) -> None:
     if uploaded_file.size > MAX_IMAGE_SIZE_BYTES:
-        raise serializers.ValidationError("Image must be 2MB or smaller.")
+        raise serializers.ValidationError(_("Снимката трябва да е до 2MB."))
 
     extension = Path(uploaded_file.name or "").suffix.lower()
     if extension not in ALLOWED_EXTENSIONS:
         raise serializers.ValidationError(
-            "Unsupported image format. Allowed: jpg, jpeg, png, webp."
+            _("Неподдържан формат на снимка. Позволени: jpg, jpeg, png, webp.")
         )
 
     if getattr(settings, "SKIP_IMAGE_VERIFY", False):
@@ -31,7 +32,7 @@ def validate_image_upload(uploaded_file) -> None:
         with Image.open(uploaded_file) as img:
             img.verify()
     except (UnidentifiedImageError, OSError, ValueError, SyntaxError):
-        raise serializers.ValidationError("Upload a valid image file.")
+        raise serializers.ValidationError(_("Качи валиден файл със снимка."))
     finally:
         uploaded_file.seek(0)
 

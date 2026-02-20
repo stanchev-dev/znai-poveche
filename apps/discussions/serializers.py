@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from apps.common.images import process_image, validate_image_upload
@@ -202,12 +203,12 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
     def validate_title(self, value: str) -> str:
         if not value.strip():
-            raise serializers.ValidationError("Title cannot be empty.")
+            raise serializers.ValidationError(_("Заглавието не може да е празно."))
         return value
 
     def validate_body(self, value: str) -> str:
         if not value.strip():
-            raise serializers.ValidationError("Body cannot be empty.")
+            raise serializers.ValidationError(_("Текстът не може да е празен."))
         return value
 
     def validate_image(self, value):
@@ -249,7 +250,7 @@ class PostBodyUpdateSerializer(serializers.ModelSerializer):
 
     def validate_body(self, value: str) -> str:
         if not value.strip():
-            raise serializers.ValidationError("Body cannot be empty.")
+            raise serializers.ValidationError(_("Текстът не може да е празен."))
         return value
 
 
@@ -262,7 +263,7 @@ class CommentCreateSerializer(serializers.ModelSerializer):
 
     def validate_body(self, value: str) -> str:
         if not value.strip():
-            raise serializers.ValidationError("Body cannot be empty.")
+            raise serializers.ValidationError(_("Текстът не може да е празен."))
         return value
 
     def validate(self, attrs):

@@ -11,6 +11,7 @@ from django.db.models import (
 )
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.generics import ListCreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
@@ -281,7 +282,7 @@ class BaseVoteAPIView(APIView):
 
             if target.author_id == request.user.id:
                 return Response(
-                    {"detail": "Self-voting is not allowed."},
+                    {"detail": _("Не можеш да гласуваш за собствената си публикация.")},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -400,7 +401,7 @@ class LeaderboardAPIView(APIView):
         scope = request.query_params.get("scope", "global")
         if scope not in {"global", "subject"}:
             return Response(
-                {"detail": "Invalid scope."},
+                {"detail": _("Невалиден обхват.")},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -409,7 +410,7 @@ class LeaderboardAPIView(APIView):
             subject_slug = request.query_params.get("subject")
             if not subject_slug:
                 return Response(
-                    {"detail": "Subject is required."},
+                    {"detail": _("Предметът е задължителен.")},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             subject = get_object_or_404(Subject, slug=subject_slug)

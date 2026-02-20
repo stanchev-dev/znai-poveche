@@ -3,6 +3,7 @@ from pathlib import Path
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from apps.discussions.models import Subject
@@ -336,5 +337,5 @@ class ListingVipUpgradeSerializer(serializers.ModelSerializer):
 
     def validate_vip_until(self, value):
         if value <= timezone.now():
-            raise serializers.ValidationError("vip_until must be in the future.")
+            raise serializers.ValidationError(_("Полето vip_until трябва да е в бъдещето."))
         return value
