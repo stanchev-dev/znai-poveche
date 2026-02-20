@@ -242,6 +242,38 @@
     `;
   }
 
+  function getCommentRoleBadge(author) {
+    const role = String(author?.role || '').trim().toLowerCase();
+    if (!role) return '';
+
+    if (role === 'teacher') {
+      return '<span class="badge rounded-pill discussion-mini-role-badge discussion-mini-role-badge--teacher">Teacher</span>';
+    }
+
+    if (role === 'student' || role === 'learner') {
+      return '<span class="badge rounded-pill discussion-mini-role-badge discussion-mini-role-badge--student">Student</span>';
+    }
+
+    return '';
+  }
+
+  function commentAuthorMiniProfile(author) {
+    const displayName = author?.display_name || author?.username || 'Unknown user';
+    const username = author?.username && author.username !== displayName ? `@${author.username}` : '';
+    const avatar = author?.avatar || '/static/img/default-avatar.svg';
+
+    return `
+      <aside class="discussion-comment-mini-profile" aria-label="Автор на коментара">
+        <img src="${escapeHtml(avatar)}" alt="Аватар на ${escapeHtml(displayName)}" class="discussion-comment-mini-avatar rounded-circle">
+        <div class="discussion-comment-mini-meta">
+          <p class="discussion-comment-mini-name">${escapeHtml(displayName)}</p>
+          ${username ? `<p class="discussion-comment-mini-username">${escapeHtml(username)}</p>` : ''}
+          ${getCommentRoleBadge(author)}
+        </div>
+      </aside>
+    `;
+  }
+
   function commentCardHtml(comment) {
     const canDelete = Boolean(comment.can_delete)
       || (isAuthenticated && (Number(comment.author?.id) === currentUserId));
@@ -249,9 +281,14 @@
       ? `<button class="btn btn-sm btn-outline-danger discussion-comment-delete" type="button" data-comment-id="${comment.id}" aria-label="Изтрий коментара"><i class="bi bi-trash3" aria-hidden="true"></i></button>`
       : '';
     return `<div class="card discussion-comment-card" data-comment-id="${comment.id}"><div class="card-body">
-      <div class="discussion-comment-card-header">${deleteBtn}</div>
-      <p>${escapeHtml(comment.body)}</p>${imgIf(comment.image)}
-      ${reportFormHtml('comment', comment.id)}
+      <div class="discussion-comment-layout">
+        ${commentAuthorMiniProfile(comment.author)}
+        <section class="discussion-comment-content">
+          <div class="discussion-comment-card-header">${deleteBtn}</div>
+          <p class="discussion-comment-body">${escapeHtml(comment.body)}</p>${imgIf(comment.image)}
+          ${reportFormHtml('comment', comment.id)}
+        </section>
+      </div>
     </div></div>`;
   }
 
