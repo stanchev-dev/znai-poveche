@@ -889,7 +889,7 @@ class DiscussionImageUploadTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("image", response.data)
 
-    def test_post_upload_multiple_images_are_saved(self):
+    def test_post_upload_rejects_more_than_one_image(self):
         response = self.client.post(
             reverse("api-posts-list"),
             {
@@ -904,13 +904,28 @@ class DiscussionImageUploadTests(APITestCase):
             format="multipart",
         )
 
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data["images"][0],
+            "Може да качите само 1 снимка към дискусия.",
+        )
+
+    def test_post_upload_single_image_via_images_field_sets_main_image(self):
+        response = self.client.post(
+            reverse("api-posts-list"),
+            {
+                "subject": self.subject.slug,
+                "title": "Single image via images",
+                "body": "Body with one image",
+                "images": [self._image_upload(format="JPEG", name="one.jpg")],
+            },
+            format="multipart",
+        )
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         post = Post.objects.get(id=response.data["id"])
-        saved_images = list(post.images.order_by("position"))
-        self.assertEqual(len(saved_images), 2)
-        self.assertEqual(saved_images[0].position, 0)
-        self.assertEqual(saved_images[1].position, 1)
-        self.assertTrue(all(image.image.name.endswith(".webp") for image in saved_images))
+        self.assertTrue(post.image)
+        self.assertEqual(post.images.count(), 0)
 
     def test_post_detail_returns_images_list(self):
         post = Post.objects.create(

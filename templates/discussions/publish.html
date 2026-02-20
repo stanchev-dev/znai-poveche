@@ -99,7 +99,7 @@
         <h2 class="h5 mb-3">Снимки (по желание)</h2>
         <div class="row g-3 align-items-start">
           <div class="col-lg-8">
-            <input id="images" name="images" type="file" class="d-none" accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple>
+            <input id="images" name="images" type="file" class="d-none" accept=".jpg,.jpeg,.png,image/jpeg,image/png" data-max-files="1" data-max-files-message="Може да качите само 1 снимка към дискусия.">
             <div id="listing-images-grid" class="listing-images-grid" aria-live="polite"></div>
             <div id="image-inline-error" class="text-danger small mt-2 d-none" aria-live="polite"></div>
           </div>
@@ -107,7 +107,7 @@
             <aside class="publish-image-tip" aria-label="Съвет за снимките">
               <strong class="d-block mb-2">Съвет</strong>
               <p class="mb-2">Качи ясна снимка на проблема, който имаш.</p>
-              <p class="mb-0">До 4 снимки • до 2MB • .jpg/.jpeg/.png</p>
+              <p class="mb-0">1 снимка • до 2MB • .jpg/.jpeg/.png</p>
             </aside>
           </div>
         </div>

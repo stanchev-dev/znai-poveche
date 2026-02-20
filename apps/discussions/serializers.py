@@ -217,6 +217,8 @@ class PostCreateSerializer(serializers.ModelSerializer):
         return value
 
     def validate_images(self, value):
+        if len(value) > 1:
+            raise serializers.ValidationError("Може да качите само 1 снимка към дискусия.")
         for image in value:
             validate_image_upload(image)
         return value
@@ -224,22 +226,18 @@ class PostCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         images = validated_data.pop("images", [])
         image = validated_data.get("image")
+
+        if image is None and images:
+            image = images[0]
+
         if image is not None:
             validated_data["image"] = process_image(
                 image,
                 max_side=1600,
                 quality=80,
             )
-        post = super().create(validated_data)
 
-        for index, uploaded_image in enumerate(images):
-            PostImage.objects.create(
-                post=post,
-                image=process_image(uploaded_image, max_side=1600, quality=80),
-                position=index,
-            )
-
-        return post
+        return super().create(validated_data)
 
 
 

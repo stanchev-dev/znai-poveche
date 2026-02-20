@@ -8,7 +8,6 @@
 
   const postAlert = document.getElementById('post-alert');
   const postContainer = document.getElementById('post-container');
-  const galleryTemplate = document.getElementById('discussion-gallery-template');
   const commentsList = document.getElementById('comments-list');
   let pendingDeleteCommentId = null;
   let currentPostSubject = null;
@@ -77,72 +76,29 @@
     `;
   }
 
-  function getImageUrls(payload) {
-    if (!payload || typeof payload !== 'object') return [];
+  function getImageUrl(payload) {
+    if (!payload || typeof payload !== 'object') return '';
 
-    const list = [];
-    const append = (value) => {
-      if (typeof value === 'string' && value) {
-        list.push(value);
+    if (typeof payload.image === 'string' && payload.image) {
+      return payload.image;
+    }
+
+    if (Array.isArray(payload.images) && payload.images.length) {
+      const first = payload.images[0];
+      if (typeof first === 'string') return first;
+      if (first && typeof first === 'object') {
+        return first.image || first.image_url || first.url || first.src || '';
       }
-    };
-
-    if (Array.isArray(payload.images)) {
-      payload.images.forEach((entry) => {
-        if (typeof entry === 'string') {
-          append(entry);
-          return;
-        }
-
-        if (entry && typeof entry === 'object') {
-          append(entry.image || entry.image_url || entry.url || entry.src);
-        }
-      });
     }
 
-    if (Array.isArray(payload.image_urls)) {
-      payload.image_urls.forEach(append);
-    }
-
-    if (!list.length) {
-      append(payload.image);
-    }
-
-    return list;
-  }
-
-  function discussionGalleryMarkup(imageCount) {
-    const fallback = `
-      <div class="card marketplace-detail-gallery-card">
-        <div class="card-body p-2 p-md-3">
-          <div class="marketplace-carousel" data-count="${imageCount}">
-            <button type="button" class="carousel-nav carousel-prev" aria-label="Предишна снимка">&#10094;</button>
-            <div class="discussion-image-frame marketplace-detail-image-frame rounded">
-              <img class="img-fluid marketplace-detail-image carousel-main-image" alt="Илюстрация към дискусия">
-              <button type="button" class="listing-expand-btn" aria-label="Разшири снимката">
-                <i class="bi bi-arrows-fullscreen" aria-hidden="true"></i>
-              </button>
-            </div>
-            <button type="button" class="carousel-nav carousel-next" aria-label="Следваща снимка">&#10095;</button>
-          </div>
-          <div class="carousel-thumbs"></div>
-        </div>
-      </div>`;
-
-    if (!galleryTemplate) return fallback;
-    return galleryTemplate.innerHTML.replace('__COUNT__', String(imageCount));
+    return '';
   }
 
   function imgIf(payload) {
-    const imageUrls = getImageUrls(payload);
-    if (!imageUrls.length) return '';
-
-    const encodedUrls = encodeURIComponent(JSON.stringify(imageUrls));
-
-    return `
-      <div class="discussion-image-viewer js-discussion-image-viewer mt-3" data-image-urls="${escapeHtml(encodedUrls)}">
-        ${discussionGalleryMarkup(imageUrls.length)}
-      </div>`;
+    const imageUrl = getImageUrl(payload);
+    return imageUrl
+      ? `<div class="discussion-image-frame marketplace-detail-image-frame rounded mt-3"><img src="${escapeHtml(imageUrl)}" class="discussion-image marketplace-detail-image" alt="Илюстрация към дискусия"></div>`
+      : '';
   }
 
   function alertHtml(text, type = 'warning') { return `<div class="alert alert-${type}">${text}</div>`; }
@@ -371,76 +327,6 @@
   }
 
 
-  function ensureViewerLightbox(node) {
-    const existingId = node.dataset.viewerLightboxId;
-    let lightbox = existingId ? document.getElementById(existingId) : null;
-
-    if (!lightbox) {
-      const lightboxId = `discussion-image-lightbox-${Math.random().toString(36).slice(2, 10)}`;
-      lightbox = document.createElement('div');
-      lightbox.id = lightboxId;
-      lightbox.className = 'listing-image-lightbox';
-      lightbox.setAttribute('aria-hidden', 'true');
-      lightbox.innerHTML = `
-        <button type="button" class="listing-image-lightbox-close" aria-label="Затвори разширената снимка">
-          <i class="bi bi-x-lg" aria-hidden="true"></i>
-        </button>
-        <button type="button" class="listing-image-lightbox-nav listing-image-lightbox-prev d-none" aria-label="Предишна снимка">
-          &#10094;
-        </button>
-        <div class="listing-image-lightbox-dialog">
-          <img class="listing-image-lightbox-image" alt="Разширена илюстрация към дискусия">
-        </div>
-        <button type="button" class="listing-image-lightbox-nav listing-image-lightbox-next d-none" aria-label="Следваща снимка">
-          &#10095;
-        </button>`;
-      document.body.appendChild(lightbox);
-      node.dataset.viewerLightboxId = lightboxId;
-    }
-
-    return {
-      lightbox,
-      lightboxDialog: lightbox.querySelector('.listing-image-lightbox-dialog'),
-      lightboxImage: lightbox.querySelector('.listing-image-lightbox-image'),
-      lightboxClose: lightbox.querySelector('.listing-image-lightbox-close'),
-      lightboxPrev: lightbox.querySelector('.listing-image-lightbox-prev'),
-      lightboxNext: lightbox.querySelector('.listing-image-lightbox-next')
-    };
-  }
-
-  function initDiscussionImageViewers() {
-    const viewerNodes = document.querySelectorAll('.js-discussion-image-viewer[data-image-urls]');
-    viewerNodes.forEach((node) => {
-      const encodedImageUrls = node.dataset.imageUrls;
-      if (!encodedImageUrls) return;
-
-      let imageUrls = [];
-      try {
-        const parsed = JSON.parse(decodeURIComponent(encodedImageUrls));
-        imageUrls = Array.isArray(parsed) ? parsed.filter(Boolean) : [];
-      } catch (error) {
-        imageUrls = [];
-      }
-
-      if (!imageUrls.length) return;
-
-      const viewerLightbox = ensureViewerLightbox(node);
-
-      window.marketplaceImageViewer.init({
-        root: node,
-        images: imageUrls,
-        lightbox: viewerLightbox.lightbox,
-        lightboxDialog: viewerLightbox.lightboxDialog,
-        lightboxImage: viewerLightbox.lightboxImage,
-        lightboxClose: viewerLightbox.lightboxClose,
-        lightboxPrev: viewerLightbox.lightboxPrev,
-        lightboxNext: viewerLightbox.lightboxNext,
-        imageAlt: 'Илюстрация към дискусия',
-        lightboxAlt: 'Разширена илюстрация към дискусия'
-      });
-    });
-  }
-
   async function loadPost() {
     const res = await window.apiUtils.apiFetch(`/api/posts/${postId}/`);
     if (res.status === 404) {
@@ -483,7 +369,6 @@
       applyVoteUI(root, { score: post.score, userVote: post.user_vote });
     }
 
-    initDiscussionImageViewers();
   }
 
   async function loadComments() {
@@ -509,7 +394,6 @@
       }
     });
 
-    initDiscussionImageViewers();
   }
 
   document.addEventListener('click', (event) => {
