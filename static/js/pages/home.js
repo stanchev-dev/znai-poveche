@@ -31,9 +31,18 @@
     .map((subject) => {
       const name = escapeHtml(subject.name);
       const slug = encodeURIComponent(subject.slug);
-      const iconPath = typeof subject.tile_image === 'string' && subject.tile_image.trim()
-        ? subject.tile_image.trim().replace(/^\/+/, '')
+      const iconPathRaw = typeof subject.tile_image === 'string' && subject.tile_image.trim()
+        ? subject.tile_image.trim()
         : `img/${subject.slug}.svg`;
+      let iconPath = '';
+
+      if (/^https?:\/\//i.test(iconPathRaw) || iconPathRaw.startsWith('/')) {
+        iconPath = iconPathRaw;
+      } else if (iconPathRaw.startsWith('static/')) {
+        iconPath = `/${iconPathRaw}`;
+      } else {
+        iconPath = `/static/${iconPathRaw.replace(/^\/+/, '')}`;
+      }
       const tileBgDark = /^#[0-9A-Fa-f]{6}$/.test(subject.theme_color_dark || '')
         ? subject.theme_color_dark
         : '#2563EB';
@@ -44,7 +53,7 @@
         <div class="col-12 col-md-6 col-xl-4">
           <a class="subject-tile text-decoration-none" data-subject-slug="${escapeHtml(subject.slug)}" href="/subjects/${slug}/" style="--c1: ${escapeHtml(tileBgDark)}; --c2: ${escapeHtml(tileBgLight)};">
             <div class="subject-tile-content">
-              <img class="subject-tile-icon" src="/static/${escapeHtml(iconPath)}" alt="" aria-hidden="true" loading="lazy" />
+              <img class="subject-tile-icon" src="${escapeHtml(iconPath)}" alt="" aria-hidden="true" loading="lazy" />
               <h3 class="subject-tile-title">${name}</h3>
             </div>
           </a>
