@@ -1,0 +1,8 @@
+.marketplace-detail-page .marketplace-detail-image-frame {
+  background-color: var(--surface-subtle, #f8f9fa);
+}
+
+.marketplace-detail-page .marketplace-detail-image {
+  object-fit: cover;
+  object-position: center;
+}

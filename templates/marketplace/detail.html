@@ -3,6 +3,10 @@
 
 {% block title %}Детайли обява{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/marketplace.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="marketplace-detail-page">
   <div id="listing-alert"></div>
@@ -21,7 +25,13 @@
             <div class="marketplace-detail-price-label">Цена на час</div>
             <div id="listing-price" class="marketplace-detail-price">—</div>
             <a id="call-btn" class="btn btn-dark w-100 contacts-cta-btn call-cta rounded-3 py-3" href="#" role="button" aria-label="Обади се">Обади се</a>
-            <button id="listing-report-btn" type="button" class="btn btn-outline-danger w-100 mt-2">Докладвай</button>
+            <button
+              type="button"
+              class="btn btn-outline-danger w-100 mt-2"
+              data-report-btn
+              data-target-id="{{ listing_id }}"
+              data-target-type="listing"
+            >Докладвай</button>
           </div>
         </div>
         <div id="listing-owner" class="mt-3"></div>
@@ -29,7 +39,7 @@
     </div>
   </div>
 
-  <div id="listing-meta" data-listing-id="{{ listing_id }}"></div>
+  <div id="listing-meta" data-listing-id="{{ listing_id }}" data-report-url="{% url 'report-create' %}"></div>
 
   <div class="modal fade" id="listing-report-modal" tabindex="-1" aria-hidden="true" aria-labelledby="listing-report-modal-title">
     <div class="modal-dialog modal-dialog-centered">
@@ -51,7 +61,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отказ</button>
-          <button type="button" id="listing-report-submit" class="btn btn-outline-danger">Изпрати репорт</button>
+          <button type="button" class="btn btn-outline-danger" data-report-submit>Изпрати репорт</button>
         </div>
       </div>
     </div>
