@@ -45,14 +45,10 @@
             <fieldset>
               <legend class="col-form-label pt-0 mb-2">Режим на обучение</legend>
               <div class="btn-group lesson-mode-group w-100 flex-wrap" role="group" aria-label="Режим на обучение">
-                <input id="lesson_mode_online" name="lesson_mode" type="radio" class="btn-check" value="online" required>
-                <label for="lesson_mode_online" class="btn lesson-mode-btn">Онлайн</label>
-
-                <input id="lesson_mode_in_person" name="lesson_mode" type="radio" class="btn-check" value="in_person" required>
-                <label for="lesson_mode_in_person" class="btn lesson-mode-btn">Присъствено</label>
-
-                <input id="lesson_mode_online_and_in_person" name="lesson_mode" type="radio" class="btn-check" value="online_and_in_person" required>
-                <label for="lesson_mode_online_and_in_person" class="btn lesson-mode-btn">Онлайн + присъствено</label>
+                {% for value, label in lesson_mode_choices %}
+                  <input id="lesson_mode_{{ value }}" name="lesson_mode" type="radio" class="btn-check" value="{{ value }}" required>
+                  <label for="lesson_mode_{{ value }}" class="btn lesson-mode-btn">{{ label }}</label>
+                {% endfor %}
               </div>
             </fieldset>
           </div>

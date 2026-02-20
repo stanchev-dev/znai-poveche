@@ -13,7 +13,7 @@ def listing_image_upload_to(instance, filename):
 class Listing(models.Model):
     class LessonMode(models.TextChoices):
         ONLINE = "online", "Онлайн"
-        OFFLINE = "offline", "Присъствено"
+        IN_PERSON = "in_person", "Присъствено"
         ONLINE_AND_IN_PERSON = "online_and_in_person", "Онлайн + присъствено"
 
     subject = models.ForeignKey(

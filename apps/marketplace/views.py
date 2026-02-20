@@ -23,7 +23,11 @@ def listing_detail_page(request, listing_id):
 @login_required
 @ensure_csrf_cookie
 def publish_listing_page(request):
-    return render(request, "marketplace/publish.html")
+    return render(
+        request,
+        "marketplace/publish.html",
+        {"lesson_mode_choices": Listing.LessonMode.choices},
+    )
 
 
 @login_required
