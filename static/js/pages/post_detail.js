@@ -3,6 +3,7 @@
   const postId = meta.dataset.postId;
   const appRoot = document.getElementById('app-root');
   const isAuthenticated = appRoot.dataset.authenticated === '1';
+  const currentUserId = Number(appRoot.dataset.userId || 0);
   const loginUrl = appRoot.dataset.loginUrl;
 
   const postAlert = document.getElementById('post-alert');
@@ -240,6 +241,19 @@
     `;
   }
 
+  function commentCardHtml(comment) {
+    const canDelete = Boolean(comment.can_delete)
+      || (isAuthenticated && (Number(comment.author?.id) === currentUserId));
+    const deleteBtn = canDelete
+      ? `<button class="btn btn-sm btn-outline-danger discussion-comment-delete" type="button" data-comment-id="${comment.id}" aria-label="Изтрий коментара">🗑</button>`
+      : '';
+    return `<div class="card" data-comment-id="${comment.id}"><div class="card-body">
+      <div class="d-flex justify-content-end">${deleteBtn}</div>
+      <p>${escapeHtml(comment.body)}</p>${imgIf(comment.image)}
+      ${reportFormHtml('comment', comment.id)}
+    </div></div>`;
+  }
+
   async function loadPost() {
     const res = await window.apiUtils.apiFetch(`/api/posts/${postId}/`);
     if (res.status === 404) {
@@ -293,10 +307,7 @@
       commentsList.innerHTML = '<div class="alert alert-info">Няма резултати</div>';
       return;
     }
-    commentsList.innerHTML = items.map((c) => `<div class="card"><div class="card-body">
-      <p>${escapeHtml(c.body)}</p>${imgIf(c.image)}
-      ${reportFormHtml('comment', c.id)}
-    </div></div>`).join('');
+    commentsList.innerHTML = items.map((c) => commentCardHtml(c)).join('');
 
     items.forEach((c) => {
       const voteWrap = document.getElementById(`comment-vote-${c.id}`);
@@ -319,6 +330,37 @@
       return;
     }
 
+    const deleteBtn = event.target.closest('.discussion-comment-delete');
+    if (deleteBtn) {
+      if (!confirm('Сигурен ли си, че искаш да изтриеш коментара?')) {
+        return;
+      }
+      const commentId = deleteBtn.dataset.commentId;
+      window.apiUtils.apiFetch(`/api/comments/${commentId}/`, { method: 'DELETE' })
+        .then((res) => {
+          if (res.ok) {
+            deleteBtn.closest('[data-comment-id]')?.remove();
+            if (!commentsList.querySelector('[data-comment-id]')) {
+              commentsList.innerHTML = '<div class="alert alert-info">Няма резултати</div>';
+            }
+            return;
+          }
+          if (res.status === 401 || res.status === 403) {
+            postAlert.innerHTML = alertHtml('Нямаш право да изтриеш този коментар.', 'danger');
+            return;
+          }
+          if (res.status === 404) {
+            postAlert.innerHTML = alertHtml('Коментарът не е намерен.', 'warning');
+            return;
+          }
+          postAlert.innerHTML = alertHtml('Грешка при изтриване на коментар.', 'danger');
+        })
+        .catch(() => {
+          postAlert.innerHTML = alertHtml('Грешка при изтриване на коментар.', 'danger');
+        });
+      return;
+    }
+
     if (!event.target.classList.contains('report-submit')) return;
     const wrap = event.target.closest('.discussion-report-box');
     if (!wrap) return;
@@ -331,11 +373,10 @@
   if (form) {
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      const fd = new FormData();
-      fd.append('body', document.getElementById('comment-body').value);
-      const image = document.getElementById('comment-image').files[0];
-      if (image) fd.append('image', image);
-      const res = await window.apiUtils.apiFetch(`/api/posts/${postId}/comments/`, { method: 'POST', body: fd });
+      const res = await window.apiUtils.apiFetch(`/api/posts/${postId}/comments/`, {
+        method: 'POST',
+        body: JSON.stringify({ body: document.getElementById('comment-body').value })
+      });
       if (res.status === 401 || res.status === 403) {
         postAlert.innerHTML = loginAlert();
         return;

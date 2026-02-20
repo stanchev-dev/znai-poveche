@@ -55,7 +55,7 @@ class AuthorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["username", "display_name", "level", "role", "role_label", "avatar"]
+        fields = ["id", "username", "display_name", "level", "role", "role_label", "avatar"]
 
     def get_display_name(self, obj) -> str:
         try:
@@ -146,6 +146,7 @@ class CommentSerializer(serializers.ModelSerializer):
     author = AuthorSerializer()
     image = serializers.ImageField(read_only=True)
     user_vote = serializers.IntegerField(read_only=True)
+    can_delete = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
@@ -157,7 +158,18 @@ class CommentSerializer(serializers.ModelSerializer):
             "created_at",
             "image",
             "user_vote",
+            "can_delete",
         ]
+
+    def get_can_delete(self, obj: Comment) -> bool:
+        request = self.context.get("request")
+        if request is None or not request.user.is_authenticated:
+            return False
+        return (
+            obj.author_id == request.user.id
+            or request.user.is_staff
+            or request.user.is_superuser
+        )
 
 
 class PostCreateSerializer(serializers.ModelSerializer):
@@ -225,21 +237,17 @@ class CommentCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Body cannot be empty.")
         return value
 
-    def validate_image(self, value):
-        if value is None:
-            return value
-        validate_image_upload(value)
-        return value
-
-    def create(self, validated_data):
-        image = validated_data.get("image")
-        if image is not None:
-            validated_data["image"] = process_image(
-                image,
-                max_side=1600,
-                quality=80,
+    def validate(self, attrs):
+        if "image" in self.initial_data:
+            raise serializers.ValidationError(
+                {"image": "Коментарите не могат да съдържат снимки."}
             )
-        return super().create(validated_data)
+        return super().validate(attrs)
+
+    def validate_image(self, value):
+        raise serializers.ValidationError(
+            "Коментарите не могат да съдържат снимки."
+        )
 
 
 class VoteInputSerializer(serializers.Serializer):

@@ -324,6 +324,88 @@ class CommentCreatePointsTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_comment_create_rejects_image_upload(self):
+        image_bytes = io.BytesIO()
+        image = Image.new("RGB", (8, 8), "purple")
+        image.save(image_bytes, format="PNG")
+        image_bytes.seek(0)
+        upload = SimpleUploadedFile(
+            "comment.png",
+            image_bytes.read(),
+            content_type="image/png",
+        )
+
+        response = self.client.post(
+            reverse("api-posts-comments", kwargs={"post_id": self.post.id}),
+            {"body": "Ok", "image": upload},
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data["image"][0],
+            "Коментарите не могат да съдържат снимки.",
+        )
+
+
+class CommentDeleteTests(APITestCase):
+    def setUp(self):
+        self.author = User.objects.create_user(
+            username="comment_author",
+            password="testpass123",
+        )
+        self.other_user = User.objects.create_user(
+            username="other_user",
+            password="testpass123",
+        )
+        self.admin = User.objects.create_user(
+            username="admin_user",
+            password="testpass123",
+            is_staff=True,
+        )
+        self.subject = Subject.objects.create(name="Delete")
+        self.post = Post.objects.create(
+            subject=self.subject,
+            author=self.author,
+            title="Delete Post",
+            body="Delete body content.",
+        )
+        self.comment = Comment.objects.create(
+            post=self.post,
+            author=self.author,
+            body="Delete me",
+        )
+
+    def test_owner_can_delete_comment(self):
+        self.client.force_authenticate(self.author)
+
+        response = self.client.delete(
+            reverse("api-comments-delete", kwargs={"pk": self.comment.id})
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Comment.objects.filter(pk=self.comment.id).exists())
+
+    def test_other_user_cannot_delete_comment(self):
+        self.client.force_authenticate(self.other_user)
+
+        response = self.client.delete(
+            reverse("api-comments-delete", kwargs={"pk": self.comment.id})
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertTrue(Comment.objects.filter(pk=self.comment.id).exists())
+
+    def test_admin_can_delete_comment(self):
+        self.client.force_authenticate(self.admin)
+
+        response = self.client.delete(
+            reverse("api-comments-delete", kwargs={"pk": self.comment.id})
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Comment.objects.filter(pk=self.comment.id).exists())
+
 
 class VoteTests(APITestCase):
     def setUp(self):

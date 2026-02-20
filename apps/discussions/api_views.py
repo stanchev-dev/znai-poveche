@@ -512,3 +512,14 @@ class MyPostDeleteAPIView(DestroyAPIView):
 
     def get_queryset(self):
         return self.queryset.filter(author=self.request.user)
+
+
+class MyCommentDeleteAPIView(DestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Comment.objects.select_related("author")
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return self.queryset
+        return self.queryset.filter(author=user)
