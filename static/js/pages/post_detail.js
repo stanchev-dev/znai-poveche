@@ -76,11 +76,46 @@
     `;
   }
 
-  function imgIf(url) {
-    if (!url) return '';
+  function getImageUrls(payload) {
+    if (!payload || typeof payload !== 'object') return [];
+
+    const list = [];
+    const append = (value) => {
+      if (typeof value === 'string' && value) {
+        list.push(value);
+      }
+    };
+
+    if (Array.isArray(payload.images)) {
+      payload.images.forEach((entry) => {
+        if (typeof entry === 'string') {
+          append(entry);
+          return;
+        }
+
+        if (entry && typeof entry === 'object') {
+          append(entry.image || entry.url || entry.src);
+        }
+      });
+    }
+
+    if (Array.isArray(payload.image_urls)) {
+      payload.image_urls.forEach(append);
+    }
+
+    append(payload.image);
+
+    return [...new Set(list)];
+  }
+
+  function imgIf(payload) {
+    const imageUrls = getImageUrls(payload);
+    if (!imageUrls.length) return '';
+
+    const encodedUrls = encodeURIComponent(JSON.stringify(imageUrls));
 
     return `
-      <div class="discussion-image-viewer js-discussion-image-viewer mt-3" data-image-url="${escapeHtml(url)}">
+      <div class="discussion-image-viewer js-discussion-image-viewer mt-3" data-image-urls="${escapeHtml(encodedUrls)}">
       </div>`;
   }
 
@@ -258,7 +293,7 @@
       <section class="discussion-comment-content">
         <div class="discussion-comment-card-header">${deleteBtn}</div>
         ${authorCard(comment.author, currentPostSubject, { showSubjectBadge: false })}
-        <p class="discussion-comment-body">${escapeHtml(comment.body)}</p>${imgIf(comment.image)}
+        <p class="discussion-comment-body">${escapeHtml(comment.body)}</p>${imgIf(comment)}
         ${reportFormHtml('comment', comment.id)}
       </section>
     </div></div>`;
@@ -348,16 +383,26 @@
   }
 
   function initDiscussionImageViewers() {
-    const viewerNodes = document.querySelectorAll('.js-discussion-image-viewer[data-image-url]');
+    const viewerNodes = document.querySelectorAll('.js-discussion-image-viewer[data-image-urls]');
     viewerNodes.forEach((node) => {
-      const imageUrl = node.dataset.imageUrl;
-      if (!imageUrl) return;
+      const encodedImageUrls = node.dataset.imageUrls;
+      if (!encodedImageUrls) return;
+
+      let imageUrls = [];
+      try {
+        const parsed = JSON.parse(decodeURIComponent(encodedImageUrls));
+        imageUrls = Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+      } catch (error) {
+        imageUrls = [];
+      }
+
+      if (!imageUrls.length) return;
 
       const viewerLightbox = ensureViewerLightbox(node);
 
       window.marketplaceImageViewer.init({
         root: node,
-        images: [imageUrl],
+        images: imageUrls,
         lightbox: viewerLightbox.lightbox,
         lightboxDialog: viewerLightbox.lightboxDialog,
         lightboxImage: viewerLightbox.lightboxImage,
@@ -395,7 +440,7 @@
       </header>
 
       <p class="discussion-post-description mb-0">${escapeHtml(post.body)}</p>
-      ${imgIf(post.image)}
+      ${imgIf(post)}
 
       ${reportFormHtml('post', post.id)}
 
