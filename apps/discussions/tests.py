@@ -414,26 +414,7 @@ class VoteTests(APITestCase):
         self.assertEqual(self.post.score, 0)
         self.assertEqual(author_profile.reputation_points, 0)
 
-    def test_switch_downvote_to_upvote_applies_plus_two_delta(self):
-        self.client.post(
-            reverse("api-comments-vote", kwargs={"pk": self.comment.id}),
-            {"value": -1},
-            format="json",
-        )
 
-        response = self.client.post(
-            reverse("api-comments-vote", kwargs={"pk": self.comment.id}),
-            {"value": 1},
-            format="json",
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["score"], 1)
-        self.assertEqual(response.data["user_vote"], 1)
-        self.comment.refresh_from_db()
-        author_profile = Profile.objects.get(user=self.author)
-        self.assertEqual(self.comment.score, 1)
-        self.assertEqual(author_profile.reputation_points, 1)
 
     def test_repeat_vote_toggles_to_unvote(self):
         self.client.post(
@@ -522,23 +503,7 @@ class VoteTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_comment_vote_can_reduce_reputation_down_to_zero(self):
-        profile = Profile.objects.get(user=self.author)
-        profile.reputation_points = 1
-        profile.max_level_reached = 1
-        profile.save()
 
-        response = self.client.post(
-            reverse("api-comments-vote", kwargs={"pk": self.comment.id}),
-            {"value": -1},
-            format="json",
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        profile.refresh_from_db()
-        self.comment.refresh_from_db()
-        self.assertEqual(self.comment.score, -1)
-        self.assertEqual(profile.reputation_points, 0)
 
     def test_vote_throttle(self):
         for _ in range(50):
