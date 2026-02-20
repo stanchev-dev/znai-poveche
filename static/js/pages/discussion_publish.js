@@ -164,9 +164,12 @@
       }
 
       const files = (window.marketplaceImages && window.marketplaceImages.files) || [];
+      if (files.length > 1) {
+        renderGlobalError('Може да качите само 1 снимка към дискусия.');
+        return;
+      }
       if (files.length) {
         payload.append('image', files[0]);
-        files.forEach((file) => payload.append('images', file));
       }
 
       const response = await window.apiUtils.apiFetch('/api/posts/', {
