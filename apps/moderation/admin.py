@@ -22,7 +22,7 @@ class ReportAdmin(admin.ModelAdmin):
         "object_id",
     )
     autocomplete_fields = ("reporter",)
-    actions = ("delete_target_content", "delete_reports_only", "mark_as_resolved")
+    actions = ("delete_target_content", "mark_as_resolved")
 
     @admin.display(description="Target")
     def target_display(self, obj):
@@ -60,16 +60,6 @@ class ReportAdmin(admin.ModelAdmin):
                 f"Target not found for {missing_count} report(s).",
                 level=messages.WARNING,
             )
-
-    @admin.action(description="Delete report")
-    def delete_reports_only(self, request, queryset):
-        count = queryset.count()
-        queryset.delete()
-        self.message_user(
-            request,
-            f"Deleted {count} report record(s).",
-            level=messages.SUCCESS,
-        )
 
     @admin.action(description="Mark as resolved")
     def mark_as_resolved(self, request, queryset):
