@@ -8,6 +8,7 @@
 
   const postAlert = document.getElementById('post-alert');
   const postContainer = document.getElementById('post-container');
+  const galleryTemplate = document.getElementById('discussion-gallery-template');
   const commentsList = document.getElementById('comments-list');
   let pendingDeleteCommentId = null;
   let currentPostSubject = null;
@@ -108,6 +109,28 @@
     return [...new Set(list)];
   }
 
+  function discussionGalleryMarkup(imageCount) {
+    const fallback = `
+      <div class="card marketplace-detail-gallery-card">
+        <div class="card-body p-2 p-md-3">
+          <div class="marketplace-carousel" data-count="${imageCount}">
+            <button type="button" class="carousel-nav carousel-prev" aria-label="Предишна снимка">&#10094;</button>
+            <div class="marketplace-detail-image-frame rounded">
+              <img class="img-fluid marketplace-detail-image carousel-main-image" alt="Илюстрация към дискусия">
+              <button type="button" class="listing-expand-btn" aria-label="Разшири снимката">
+                <i class="bi bi-arrows-fullscreen" aria-hidden="true"></i>
+              </button>
+            </div>
+            <button type="button" class="carousel-nav carousel-next" aria-label="Следваща снимка">&#10095;</button>
+          </div>
+          <div class="carousel-thumbs"></div>
+        </div>
+      </div>`;
+
+    if (!galleryTemplate) return fallback;
+    return galleryTemplate.innerHTML.replace('__COUNT__', String(imageCount));
+  }
+
   function imgIf(payload) {
     const imageUrls = getImageUrls(payload);
     if (!imageUrls.length) return '';
@@ -116,6 +139,7 @@
 
     return `
       <div class="discussion-image-viewer js-discussion-image-viewer mt-3" data-image-urls="${escapeHtml(encodedUrls)}">
+        ${discussionGalleryMarkup(imageUrls.length)}
       </div>`;
   }
 
