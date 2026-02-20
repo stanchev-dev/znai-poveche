@@ -97,7 +97,7 @@
   function imgIf(payload) {
     const imageUrl = getImageUrl(payload);
     return imageUrl
-      ? `<div class="discussion-image-frame marketplace-detail-image-frame rounded mt-3"><img src="${escapeHtml(imageUrl)}" class="discussion-image marketplace-detail-image" alt="Илюстрация към дискусия"></div>`
+      ? `<div class="discussion-image-frame marketplace-detail-image-frame rounded"><img src="${escapeHtml(imageUrl)}" class="discussion-image marketplace-detail-image" alt="Илюстрация към дискусия"></div>`
       : '';
   }
 
@@ -355,6 +355,18 @@
     const post = await res.json();
     currentPostSubject = post.subject;
 
+    const postImage = imgIf(post);
+    const postBodyContent = postImage
+      ? `<div class="discussion-post-content row g-3 align-items-start">
+          <div class="col-12 col-lg-7">
+            <p class="discussion-post-description mb-0">${escapeHtml(post.body)}</p>
+          </div>
+          <div class="col-12 col-lg-5 discussion-post-image-col">
+            ${postImage}
+          </div>
+        </div>`
+      : `<p class="discussion-post-description mb-0">${escapeHtml(post.body)}</p>`;
+
     postContainer.innerHTML = `<article class="card discussion-post-card"><div class="card-body">
       <header class="discussion-post-header mb-3">
         <h1 class="h3 mb-2">${escapeHtml(post.title)}</h1>
@@ -365,8 +377,7 @@
         </div>
       </header>
 
-      <p class="discussion-post-description mb-0">${escapeHtml(post.body)}</p>
-      ${imgIf(post)}
+      ${postBodyContent}
 
       ${reportFormHtml('post', post.id)}
 

@@ -256,10 +256,23 @@
   white-space: pre-line;
 }
 
+
+.discussion-post-content {
+  margin-top: 0.25rem;
+}
+
+.discussion-post-image-col {
+  margin-left: auto;
+}
+
+.discussion-post-image-col .discussion-image-frame.marketplace-detail-image-frame {
+  margin-top: 0;
+}
+
 .discussion-image-frame.marketplace-detail-image-frame {
   background: var(--surface-subtle, #f8f9fa);
-  min-height: 260px;
-  height: min(52vh, 440px);
+  min-height: 320px;
+  height: min(60vh, 520px);
   border: 1px solid #ece8f8;
 }
 
