@@ -398,4 +398,31 @@
 
 .discussion-comment-delete {
   margin-left: auto;
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-color: rgba(220, 53, 69, 0.45);
+  color: #c62839;
+}
+
+.discussion-comment-delete:hover {
+  color: #fff;
+  background: #dc3545;
+  border-color: #dc3545;
+}
+
+.discussion-comment-delete .bi {
+  line-height: 1;
+}
+
+.discussion-comment-card-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+.discussion-delete-modal-content {
+  border-radius: 1rem;
 }

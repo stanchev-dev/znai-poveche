@@ -9,6 +9,7 @@
   const postAlert = document.getElementById('post-alert');
   const postContainer = document.getElementById('post-container');
   const commentsList = document.getElementById('comments-list');
+  let pendingDeleteCommentId = null;
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -245,13 +246,58 @@
     const canDelete = Boolean(comment.can_delete)
       || (isAuthenticated && (Number(comment.author?.id) === currentUserId));
     const deleteBtn = canDelete
-      ? `<button class="btn btn-sm btn-outline-danger discussion-comment-delete" type="button" data-comment-id="${comment.id}" aria-label="Изтрий коментара">🗑</button>`
+      ? `<button class="btn btn-sm btn-outline-danger discussion-comment-delete" type="button" data-comment-id="${comment.id}" aria-label="Изтрий коментара"><i class="bi bi-trash3" aria-hidden="true"></i></button>`
       : '';
-    return `<div class="card" data-comment-id="${comment.id}"><div class="card-body">
-      <div class="d-flex justify-content-end">${deleteBtn}</div>
+    return `<div class="card discussion-comment-card" data-comment-id="${comment.id}"><div class="card-body">
+      <div class="discussion-comment-card-header">${deleteBtn}</div>
       <p>${escapeHtml(comment.body)}</p>${imgIf(comment.image)}
       ${reportFormHtml('comment', comment.id)}
     </div></div>`;
+  }
+
+  function ensureDeleteModal() {
+    let modalEl = document.getElementById('comment-delete-modal');
+    if (!modalEl) {
+      modalEl = document.createElement('div');
+      modalEl.className = 'modal fade';
+      modalEl.id = 'comment-delete-modal';
+      modalEl.tabIndex = -1;
+      modalEl.setAttribute('aria-hidden', 'true');
+      modalEl.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content discussion-delete-modal-content">
+            <div class="modal-body pb-0">
+              <p class="mb-0">Сигурен ли си, че искаш да изтриеш коментара?</p>
+            </div>
+            <div class="modal-footer border-0">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отказ</button>
+              <button type="button" class="btn btn-danger" id="confirm-comment-delete">Изтрий</button>
+            </div>
+          </div>
+        </div>`;
+      document.body.appendChild(modalEl);
+    }
+    return modalEl;
+  }
+
+  async function deleteComment(commentId) {
+    const res = await window.apiUtils.apiFetch(`/api/comments/${commentId}/`, { method: 'DELETE' });
+    if (res.ok) {
+      commentsList.querySelector(`[data-comment-id="${commentId}"]`)?.remove();
+      if (!commentsList.querySelector('[data-comment-id]')) {
+        commentsList.innerHTML = '<div class="alert alert-info">Няма резултати</div>';
+      }
+      return;
+    }
+    if (res.status === 401 || res.status === 403) {
+      postAlert.innerHTML = alertHtml('Нямаш право да изтриеш този коментар.', 'danger');
+      return;
+    }
+    if (res.status === 404) {
+      postAlert.innerHTML = alertHtml('Коментарът не е намерен.', 'warning');
+      return;
+    }
+    postAlert.innerHTML = alertHtml('Грешка при изтриване на коментар.', 'danger');
   }
 
   async function loadPost() {
@@ -332,32 +378,10 @@
 
     const deleteBtn = event.target.closest('.discussion-comment-delete');
     if (deleteBtn) {
-      if (!confirm('Сигурен ли си, че искаш да изтриеш коментара?')) {
-        return;
-      }
-      const commentId = deleteBtn.dataset.commentId;
-      window.apiUtils.apiFetch(`/api/comments/${commentId}/`, { method: 'DELETE' })
-        .then((res) => {
-          if (res.ok) {
-            deleteBtn.closest('[data-comment-id]')?.remove();
-            if (!commentsList.querySelector('[data-comment-id]')) {
-              commentsList.innerHTML = '<div class="alert alert-info">Няма резултати</div>';
-            }
-            return;
-          }
-          if (res.status === 401 || res.status === 403) {
-            postAlert.innerHTML = alertHtml('Нямаш право да изтриеш този коментар.', 'danger');
-            return;
-          }
-          if (res.status === 404) {
-            postAlert.innerHTML = alertHtml('Коментарът не е намерен.', 'warning');
-            return;
-          }
-          postAlert.innerHTML = alertHtml('Грешка при изтриване на коментар.', 'danger');
-        })
-        .catch(() => {
-          postAlert.innerHTML = alertHtml('Грешка при изтриване на коментар.', 'danger');
-        });
+      pendingDeleteCommentId = deleteBtn.dataset.commentId;
+      const modalEl = ensureDeleteModal();
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modal.show();
       return;
     }
 
@@ -389,6 +413,22 @@
       loadComments();
     });
   }
+
+  const modalEl = ensureDeleteModal();
+  const confirmDeleteBtn = document.getElementById('confirm-comment-delete');
+  confirmDeleteBtn?.addEventListener('click', async () => {
+    if (!pendingDeleteCommentId) return;
+    confirmDeleteBtn.disabled = true;
+    try {
+      await deleteComment(pendingDeleteCommentId);
+      bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+    } catch (error) {
+      postAlert.innerHTML = alertHtml('Грешка при изтриване на коментар.', 'danger');
+    } finally {
+      confirmDeleteBtn.disabled = false;
+      pendingDeleteCommentId = null;
+    }
+  });
 
   await loadPost();
   await loadComments();

@@ -226,11 +226,10 @@ class PostBodyUpdateSerializer(serializers.ModelSerializer):
 
 class CommentCreateSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
-    image = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Comment
-        fields = ["id", "body", "image"]
+        fields = ["id", "body"]
 
     def validate_body(self, value: str) -> str:
         if not value.strip():
@@ -240,14 +239,9 @@ class CommentCreateSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if "image" in self.initial_data:
             raise serializers.ValidationError(
-                {"image": "Коментарите не могат да съдържат снимки."}
+                {"image": "Снимки към коментари не са позволени."}
             )
         return super().validate(attrs)
-
-    def validate_image(self, value):
-        raise serializers.ValidationError(
-            "Коментарите не могат да съдържат снимки."
-        )
 
 
 class VoteInputSerializer(serializers.Serializer):
