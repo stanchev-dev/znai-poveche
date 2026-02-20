@@ -46,7 +46,7 @@
     return `Публикувана преди ${days} ${days === 1 ? 'ден' : 'дни'}`;
   }
 
-  function authorCard(author, subject) {
+  function authorCard(author, subject, { showSubjectBadge = true } = {}) {
     const displayName = author.display_name || author.username;
     const secondary = author.display_name && author.display_name !== author.username ? `@${author.username}` : '';
     const level = Number.isFinite(Number(author.level)) ? Number(author.level) : null;
@@ -69,7 +69,7 @@
           </div>
           <div class="discussion-seller-pills mb-0">
             <span class="badge rounded-pill listing-pill role-badge ${roleClass}">${escapeHtml(roleLabel)}</span>
-            <span class="badge rounded-pill listing-pill subject-badge" style="${window.subjectBadgeUtils.getSubjectBadgeStyle(subject)}">${escapeHtml(subject.name)}</span>
+            ${showSubjectBadge ? `<span class="badge rounded-pill listing-pill subject-badge" style="${window.subjectBadgeUtils.getSubjectBadgeStyle(subject)}">${escapeHtml(subject.name)}</span>` : ''}
           </div>
         </div>
       </div>
@@ -252,7 +252,7 @@
     return `<div class="card discussion-comment-card" data-comment-id="${comment.id}"><div class="card-body">
       <section class="discussion-comment-content">
         <div class="discussion-comment-card-header">${deleteBtn}</div>
-        ${authorCard(comment.author, currentPostSubject)}
+        ${authorCard(comment.author, currentPostSubject, { showSubjectBadge: false })}
         <p class="discussion-comment-body">${escapeHtml(comment.body)}</p>${imgIf(comment.image)}
         ${reportFormHtml('comment', comment.id)}
       </section>
