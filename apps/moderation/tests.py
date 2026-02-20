@@ -406,22 +406,14 @@ class ModerationAdminTests(TestCase):
         self.assertEqual(comment_report.status, Report.STATUS_RESOLVED)
         self.assertEqual(missing_report.status, Report.STATUS_OPEN)
 
-    def test_delete_reports_only_action_does_not_delete_target_content(self):
-        report = self._make_report_for(Post, self.post.id)
+    def test_changelist_uses_default_delete_selected_action(self):
         self.client.force_login(self.admin)
 
-        response = self.client.post(
-            reverse("admin:moderation_report_changelist"),
-            {
-                "action": "delete_reports_only",
-                "_selected_action": [report.id],
-            },
-            follow=True,
-        )
+        response = self.client.get(reverse("admin:moderation_report_changelist"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(Report.objects.filter(id=report.id).exists())
-        self.assertTrue(Post.objects.filter(id=self.post.id).exists())
+        self.assertContains(response, "Delete selected reports")
+        self.assertNotContains(response, "Delete report")
 
     def test_mark_as_resolved_action(self):
         report = self._make_report_for(Comment, self.comment.id)
