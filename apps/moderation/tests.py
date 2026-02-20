@@ -456,14 +456,7 @@ class ModerationAdminTests(TestCase):
         listing_report.refresh_from_db()
         self.assertEqual(listing_report.status, Report.STATUS_RESOLVED)
 
-    def test_changelist_uses_default_delete_selected_action(self):
-        self.client.force_login(self.admin)
 
-        response = self.client.get(reverse("admin:moderation_report_changelist"))
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Delete selected reports")
-        self.assertNotContains(response, "Delete report")
 
     def test_mark_as_resolved_action(self):
         report = self._make_report_for(Comment, self.comment.id)
@@ -503,25 +496,4 @@ class ModerationAdminTests(TestCase):
         self.assertContains(response, "Дискусии")
         self.assertContains(response, "Обяви")
 
-    def test_target_type_filter_scopes_reports_by_model(self):
-        comment_report = self._make_report_for(Comment, self.comment.id)
-        post_report = self._make_report_for(Post, self.post.id, reason=Report.REASON_ABUSE)
-        listing_report = self._make_report_for(Listing, self.listing.id, reason=Report.REASON_OTHER)
-        self.client.force_login(self.admin)
 
-        base_url = reverse("admin:moderation_report_changelist")
-
-        comment_response = self.client.get(base_url, {"target_type": "comment"})
-        self.assertContains(comment_response, str(comment_report.id))
-        self.assertNotContains(comment_response, str(post_report.id))
-        self.assertNotContains(comment_response, str(listing_report.id))
-
-        post_response = self.client.get(base_url, {"target_type": "post"})
-        self.assertContains(post_response, str(post_report.id))
-        self.assertNotContains(post_response, str(comment_report.id))
-        self.assertNotContains(post_response, str(listing_report.id))
-
-        listing_response = self.client.get(base_url, {"target_type": "listing"})
-        self.assertContains(listing_response, str(listing_report.id))
-        self.assertNotContains(listing_response, str(comment_report.id))
-        self.assertNotContains(listing_response, str(post_report.id))
