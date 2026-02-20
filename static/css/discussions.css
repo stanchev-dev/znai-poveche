@@ -442,3 +442,52 @@
 .discussion-delete-modal-content {
   border-radius: 1rem;
 }
+
+/* Discussion gallery mirrors marketplace carousel controls 1:1 */
+.discussion-image-viewer .marketplace-carousel {
+  position: relative;
+}
+
+.discussion-image-viewer .carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(17, 17, 17, 0.72);
+  color: #fff;
+  z-index: 3;
+}
+
+.discussion-image-viewer .carousel-prev { left: 0.5rem; }
+.discussion-image-viewer .carousel-next { right: 0.5rem; }
+
+.discussion-image-viewer .carousel-thumbs {
+  margin-top: 0.7rem;
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+}
+
+.discussion-image-viewer .carousel-thumb {
+  border: 2px solid transparent;
+  border-radius: 0.5rem;
+  padding: 0;
+  background: transparent;
+}
+
+.discussion-image-viewer .carousel-thumb img {
+  width: 60px;
+  height: 60px;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 0.4rem;
+  background: var(--surface-subtle, #f6f7fb);
+}
+
+.discussion-image-viewer .carousel-thumb.active {
+  border-color: var(--brand-purple-cta, #7c45f5);
+}

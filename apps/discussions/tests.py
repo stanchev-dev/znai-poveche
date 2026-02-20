@@ -17,7 +17,7 @@ from rest_framework.test import APITestCase
 from apps.accounts.models import Profile
 from apps.discussions.admin import SubjectAdminForm
 from apps.discussions.context_processors import nav_subjects
-from apps.discussions.models import Comment, Post, Subject
+from apps.discussions.models import Comment, Post, PostImage, Subject
 
 
 User = get_user_model()
@@ -888,6 +888,45 @@ class DiscussionImageUploadTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("image", response.data)
+
+    def test_post_upload_multiple_images_are_saved(self):
+        response = self.client.post(
+            reverse("api-posts-list"),
+            {
+                "subject": self.subject.slug,
+                "title": "Gallery post",
+                "body": "Body with gallery images",
+                "images": [
+                    self._image_upload(format="JPEG", name="one.jpg"),
+                    self._image_upload(format="PNG", name="two.png"),
+                ],
+            },
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        post = Post.objects.get(id=response.data["id"])
+        saved_images = list(post.images.order_by("position"))
+        self.assertEqual(len(saved_images), 2)
+        self.assertEqual(saved_images[0].position, 0)
+        self.assertEqual(saved_images[1].position, 1)
+        self.assertTrue(all(image.image.name.endswith(".webp") for image in saved_images))
+
+    def test_post_detail_returns_images_list(self):
+        post = Post.objects.create(
+            subject=self.subject,
+            author=self.user,
+            title="Seed",
+            body="Seed body",
+        )
+        PostImage.objects.create(post=post, image=self._image_upload(name="one.jpg"), position=0)
+        PostImage.objects.create(post=post, image=self._image_upload(name="two.jpg"), position=1)
+
+        response = self.client.get(reverse("api-posts-detail", kwargs={"pk": post.id}))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("images", response.data)
+        self.assertEqual(len(response.data["images"]), 2)
 
     def test_comment_upload_rejected(self):
         post = Post.objects.create(
