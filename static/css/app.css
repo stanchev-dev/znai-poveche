@@ -970,7 +970,7 @@ h6 {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: #000;
+  background: transparent;
   position: relative;
 }
 

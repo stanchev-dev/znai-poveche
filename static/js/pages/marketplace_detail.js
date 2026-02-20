@@ -13,6 +13,11 @@
   const price = document.getElementById('listing-price');
   const owner = document.getElementById('listing-owner');
   const callBtn = document.getElementById('call-btn');
+  const reportBtn = document.getElementById('listing-report-btn');
+  const reportModalEl = document.getElementById('listing-report-modal');
+  const reportReason = document.getElementById('listing-report-reason');
+  const reportMessage = document.getElementById('listing-report-message');
+  const reportSubmit = document.getElementById('listing-report-submit');
   const lightbox = document.getElementById('listing-image-lightbox');
   const lightboxDialog = document.getElementById('listing-lightbox-dialog');
   const lightboxImage = document.getElementById('listing-lightbox-image');
@@ -57,6 +62,37 @@
     const nextUrl = window.location.pathname + window.location.search;
     const separator = loginUrl.includes('?') ? '&' : '?';
     return `${loginUrl}${separator}next=${encodeURIComponent(nextUrl)}`;
+  }
+
+  function alertHtml(message, type = 'warning') {
+    return `<div class="alert alert-${type}" role="alert">${escapeHtml(message)}</div>`;
+  }
+
+  async function submitReport() {
+    try {
+      const res = await window.apiUtils.apiFetch('/api/reports/', {
+        method: 'POST',
+        body: JSON.stringify({
+          target_type: 'listing',
+          target_id: Number(listingId),
+          reason: reportReason.value,
+          message: reportMessage.value
+        })
+      });
+      if (res.status === 401 || res.status === 403) {
+        window.location.href = buildLoginRedirectUrl();
+        return;
+      }
+      if (!res.ok) {
+        alertBox.innerHTML = alertHtml('Неуспешно изпращане на репорт.', 'danger');
+        return;
+      }
+      alertBox.innerHTML = alertHtml('Репортът ви е изпратен успешно.', 'success');
+      reportMessage.value = '';
+      bootstrap.Modal.getOrCreateInstance(reportModalEl).hide();
+    } catch (error) {
+      alertBox.innerHTML = alertHtml('Неуспешно изпращане на репорт.', 'danger');
+    }
   }
 
   function revealPhone(phoneLabel) {
@@ -236,6 +272,16 @@
   description.innerHTML = l.description;
   owner.innerHTML = `<div class="card"><div class="card-body"><h2 class="h6 mb-3">Потребител</h2><div class="seller-card-header"><div class="seller-avatar"><img src="${escapeHtml(ownerAvatar)}" alt="Профилна снимка" class="rounded-circle">${ownerLevel !== null ? `<span class="seller-level-badge">${ownerLevel}</span>` : ''}</div><div class="seller-meta"><p class="seller-name">${escapeHtml(ownerDisplayName)}</p>${ownerSecondaryText ? `<p class="seller-subline mb-0">${escapeHtml(ownerSecondaryText)}</p>` : ''}</div></div><div class="seller-pills mb-0"><span class="badge rounded-pill listing-pill role-badge ${roleBadgeClass(l.owner.role)}">${escapeHtml(l.owner.role_label || (l.owner.role === 'teacher' ? 'Учител' : 'Учащ'))}</span>${l.lesson_mode_label ? `<span class="badge rounded-pill listing-pill lesson-mode-badge ${lessonModeBadgeClass(l.lesson_mode)}">${escapeHtml(l.lesson_mode_label)}</span>` : ''}</div></div></div>`;
   price.textContent = `${l.price_per_hour} €/ч`;
+
+  reportBtn?.addEventListener('click', () => {
+    if (!isAuthenticated) {
+      window.location.href = buildLoginRedirectUrl();
+      return;
+    }
+    bootstrap.Modal.getOrCreateInstance(reportModalEl).show();
+  });
+
+  reportSubmit?.addEventListener('click', submitReport);
 
   callBtn.addEventListener('click', async (event) => {
     if (!isAuthenticated) {
