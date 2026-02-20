@@ -39,9 +39,26 @@
                     <i class="bi bi-cloud-arrow-up"></i>
                   </div>
                   <p class="mb-2 fw-semibold">Пусни снимка тук или избери файл</p>
-                  <button type="button" class="btn btn-brand-primary" id="avatarPickerBtn">Избери файл</button>
-                  <div class="small text-muted mt-2">Поддържани формати: .jpg, .jpeg, .png, .webp</div>
-                  {{ form.avatar }}
+                  <div class="d-flex flex-wrap justify-content-center gap-2">
+                    <button type="button" class="btn btn-brand-primary" id="avatarPickerBtn">Избери файл</button>
+                    <button type="button" class="btn btn-outline-secondary" id="avatarResetBtn">Нулирай</button>
+                  </div>
+                  <div class="small text-muted mt-2">Поддържани формати: .jpg, .jpeg, .png</div>
+                  <div class="small text-muted">Макс. размер: 2 MB</div>
+                  <input
+                    type="file"
+                    name="{{ form.avatar.html_name }}"
+                    id="{{ form.avatar.id_for_label }}"
+                    class="visually-hidden"
+                    accept=".jpg,.jpeg,.png"
+                  >
+                  <input
+                    type="checkbox"
+                    name="{{ form.avatar.html_name }}-clear"
+                    id="{{ form.avatar.id_for_label }}_clear_id"
+                    class="visually-hidden"
+                    hidden
+                  >
                   <div class="text-danger small mt-2 d-none" id="profileAvatarClientError"></div>
                   {% if form.avatar.errors %}
                     <div class="text-danger small mt-2">{{ form.avatar.errors|join:', ' }}</div>
@@ -127,18 +144,18 @@
       const avatarPreview = document.getElementById('profileAvatarPreview');
       const cameraBtn = document.getElementById('avatarPickerCamera');
       const pickerBtn = document.getElementById('avatarPickerBtn');
+      const resetBtn = document.getElementById('avatarResetBtn');
       const dropzone = document.getElementById('profileUploadDropzone');
       const errorBox = document.getElementById('profileAvatarClientError');
+      const clearCheckbox = document.getElementById('{{ form.avatar.id_for_label }}_clear_id');
+      const defaultPreviewSrc = avatarPreview.getAttribute('src');
 
       if (!fileInput || !avatarPreview || !dropzone) {
         return;
       }
 
-      fileInput.classList.add('visually-hidden');
-      fileInput.setAttribute('accept', '.jpg,.jpeg,.png,.webp');
-
       const maxBytes = 2 * 1024 * 1024;
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
 
       const clearError = () => {
         errorBox.textContent = '';
@@ -156,7 +173,7 @@
         }
 
         if (!allowedTypes.includes(file.type)) {
-          showError('Моля, избери валиден файл (.jpg, .jpeg, .png, .webp).');
+          showError('Моля, избери валиден файл (.jpg, .jpeg, .png).');
           fileInput.value = '';
           return;
         }
@@ -168,14 +185,27 @@
         }
 
         clearError();
+        if (clearCheckbox) {
+          clearCheckbox.checked = false;
+        }
         const previewUrl = URL.createObjectURL(file);
         avatarPreview.src = previewUrl;
         avatarPreview.onload = () => URL.revokeObjectURL(previewUrl);
       };
 
+      const resetAvatarSelection = () => {
+        fileInput.value = '';
+        avatarPreview.src = defaultPreviewSrc;
+        clearError();
+        if (clearCheckbox) {
+          clearCheckbox.checked = false;
+        }
+      };
+
       const openPicker = () => fileInput.click();
       cameraBtn?.addEventListener('click', openPicker);
       pickerBtn?.addEventListener('click', openPicker);
+      resetBtn?.addEventListener('click', resetAvatarSelection);
       dropzone.addEventListener('click', (event) => {
         if (event.target === dropzone) {
           openPicker();
