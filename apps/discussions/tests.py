@@ -344,7 +344,7 @@ class CommentCreatePointsTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.data["image"][0],
-            "Коментарите не могат да съдържат снимки.",
+            "Снимки към коментари не са позволени.",
         )
 
 
@@ -877,7 +877,7 @@ class DiscussionImageUploadTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("image", response.data)
 
-    def test_comment_upload_valid_image_saved_as_webp(self):
+    def test_comment_upload_rejected(self):
         post = Post.objects.create(
             subject=self.subject,
             author=self.user,
@@ -894,10 +894,11 @@ class DiscussionImageUploadTests(APITestCase):
             format="multipart",
         )
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        comment = Comment.objects.get(id=response.data["id"])
-        self.assertTrue(comment.image)
-        self.assertTrue(comment.image.name.endswith(".webp"))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data["image"][0],
+            "Снимки към коментари не са позволени.",
+        )
 
     @patch("apps.common.images.ImageOps.exif_transpose")
     def test_exif_transpose_is_called(self, exif_transpose_mock):
