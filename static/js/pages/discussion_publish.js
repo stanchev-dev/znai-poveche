@@ -166,6 +166,7 @@
       const files = (window.marketplaceImages && window.marketplaceImages.files) || [];
       if (files.length) {
         payload.append('image', files[0]);
+        files.forEach((file) => payload.append('images', file));
       }
 
       const response = await window.apiUtils.apiFetch('/api/posts/', {

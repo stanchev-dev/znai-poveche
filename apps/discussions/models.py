@@ -137,6 +137,30 @@ class Post(models.Model):
         super().save(*args, **kwargs)
 
 
+class PostImage(models.Model):
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="images",
+    )
+    image = models.ImageField(upload_to=post_image_upload_to)
+    position = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["position", "id"]
+
+    def save(self, *args, **kwargs):
+        if (
+            self.image
+            and getattr(self.image, "_committed", True) is False
+            and isinstance(getattr(self.image, "file", None), UploadedFile)
+        ):
+            validate_image_upload(self.image)
+            self.image = process_image(self.image, max_side=1600, quality=80)
+        super().save(*args, **kwargs)
+
+
 class Comment(models.Model):
     post = models.ForeignKey(
         Post,

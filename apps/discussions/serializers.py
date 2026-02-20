@@ -10,7 +10,7 @@ from apps.common.utils import (
     normalize_hex,
 )
 
-from .models import Comment, Post, Subject
+from .models import Comment, Post, PostImage, Subject
 
 
 User = get_user_model()
@@ -119,10 +119,19 @@ class PostListSerializer(serializers.ModelSerializer):
         return obj.body[:160]
 
 
+
+
+class PostImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostImage
+        fields = ["id", "image", "position"]
+
+
 class PostDetailSerializer(serializers.ModelSerializer):
     subject = SubjectSummarySerializer()
     author = AuthorSerializer()
     image = serializers.ImageField(read_only=True)
+    images = PostImageSerializer(many=True, read_only=True)
     user_vote = serializers.IntegerField(read_only=True)
 
     class Meta:
@@ -138,6 +147,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "image",
+            "images",
             "user_vote",
         ]
 
@@ -179,10 +189,16 @@ class PostCreateSerializer(serializers.ModelSerializer):
         queryset=Subject.objects.all(),
     )
     image = serializers.ImageField(required=False, allow_null=True)
+    images = serializers.ListField(
+        child=serializers.ImageField(),
+        required=False,
+        allow_empty=True,
+        write_only=True,
+    )
 
     class Meta:
         model = Post
-        fields = ["id", "subject", "title", "body", "grade", "image"]
+        fields = ["id", "subject", "title", "body", "grade", "image", "images"]
 
     def validate_title(self, value: str) -> str:
         if not value.strip():
@@ -200,7 +216,13 @@ class PostCreateSerializer(serializers.ModelSerializer):
         validate_image_upload(value)
         return value
 
+    def validate_images(self, value):
+        for image in value:
+            validate_image_upload(image)
+        return value
+
     def create(self, validated_data):
+        images = validated_data.pop("images", [])
         image = validated_data.get("image")
         if image is not None:
             validated_data["image"] = process_image(
@@ -208,7 +230,16 @@ class PostCreateSerializer(serializers.ModelSerializer):
                 max_side=1600,
                 quality=80,
             )
-        return super().create(validated_data)
+        post = super().create(validated_data)
+
+        for index, uploaded_image in enumerate(images):
+            PostImage.objects.create(
+                post=post,
+                image=process_image(uploaded_image, max_side=1600, quality=80),
+                position=index,
+            )
+
+        return post
 
 
 

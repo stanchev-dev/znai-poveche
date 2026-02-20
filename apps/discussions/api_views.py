@@ -155,7 +155,7 @@ class PostDetailView(RetrieveAPIView):
             "subject",
             "author",
             "author__profile",
-        )
+        ).prefetch_related("images")
         user = self.request.user
         if not user.is_authenticated:
             return queryset.annotate(user_vote=Value(0, output_field=IntegerField()))
