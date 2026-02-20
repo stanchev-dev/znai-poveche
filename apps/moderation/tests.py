@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from apps.discussions.models import Comment, Post, Subject
+from apps.marketplace.models import Listing
 
 from .models import Report
 
@@ -38,6 +39,13 @@ class ModerationAPITests(APITestCase):
             post=self.post,
             author=self.author,
             body="Comment body for moderation tests.",
+        )
+        self.listing = Listing.objects.create(
+            subject=self.subject,
+            owner=self.author,
+            price_per_hour="25.00",
+            description="Listing for moderation tests.",
+            contact_phone="0888123456",
         )
 
     def test_guest_cannot_create_report(self):
@@ -88,13 +96,29 @@ class ModerationAPITests(APITestCase):
         response = self.client.post(
             reverse("report-create"),
             {
-                "target_type": "listing",
+                "target_type": "invalid",
                 "target_id": 1,
                 "reason": Report.REASON_OTHER,
             },
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_authenticated_user_can_report_listing(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.post(
+            reverse("report-create"),
+            {
+                "target_type": "listing",
+                "target_id": self.listing.id,
+                "reason": Report.REASON_SPAM,
+                "message": "Подозрителна обява.",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["target_type"], "listing")
+        self.assertEqual(response.data["target_id"], self.listing.id)
 
     def test_duplicate_open_or_reviewing_report_returns_400(self):
         self.client.force_authenticate(self.user)
@@ -361,6 +385,13 @@ class ModerationAdminTests(TestCase):
             author=self.author,
             body="Comment for admin report",
         )
+        self.listing = Listing.objects.create(
+            subject=self.subject,
+            owner=self.author,
+            price_per_hour="30.00",
+            description="Listing for admin report",
+            contact_phone="0888123456",
+        )
 
     def _make_report_for(self, model, object_id, reason=Report.REASON_SPAM):
         return Report.objects.create(
@@ -405,6 +436,25 @@ class ModerationAdminTests(TestCase):
         self.assertEqual(post_report.status, Report.STATUS_RESOLVED)
         self.assertEqual(comment_report.status, Report.STATUS_RESOLVED)
         self.assertEqual(missing_report.status, Report.STATUS_OPEN)
+
+
+    def test_delete_target_content_action_supports_listing(self):
+        listing_report = self._make_report_for(Listing, self.listing.id, reason=Report.REASON_OTHER)
+
+        self.client.force_login(self.admin)
+        response = self.client.post(
+            reverse("admin:moderation_report_changelist"),
+            {
+                "action": "delete_target_content",
+                "_selected_action": [listing_report.id],
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Listing.objects.filter(id=self.listing.id).exists())
+        listing_report.refresh_from_db()
+        self.assertEqual(listing_report.status, Report.STATUS_RESOLVED)
 
     def test_changelist_uses_default_delete_selected_action(self):
         self.client.force_login(self.admin)

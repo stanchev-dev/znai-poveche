@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
 from apps.discussions.models import Comment, Post
+from apps.marketplace.models import Listing
 
 from .models import Report
 
@@ -12,6 +13,7 @@ User = get_user_model()
 TARGET_MODEL_MAP = {
     "post": Post,
     "comment": Comment,
+    "listing": Listing,
 }
 
 
@@ -84,7 +86,7 @@ class ReportCreateSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         model_name = instance.content_type.model
-        data["target_type"] = "post" if model_name == "post" else "comment"
+        data["target_type"] = model_name if model_name in TARGET_MODEL_MAP else "comment"
         data["target_id"] = instance.object_id
         return data
 
@@ -118,7 +120,7 @@ class ReportAdminListSerializer(serializers.ModelSerializer):
 
     def get_target_type(self, obj):
         model_name = obj.content_type.model
-        return "post" if model_name == "post" else "comment"
+        return model_name if model_name in TARGET_MODEL_MAP else "comment"
 
     def get_target_preview(self, obj):
         target = obj.target
@@ -126,6 +128,8 @@ class ReportAdminListSerializer(serializers.ModelSerializer):
             return None
         if isinstance(target, Post):
             return target.title
+        if isinstance(target, Listing):
+            return target.description[:80]
         return target.body[:80]
 
 
