@@ -70,26 +70,42 @@
       }
     }
 
-    root.innerHTML = `
-      <div class="card marketplace-detail-gallery-card">
-        <div class="card-body p-2 p-md-3">
-          <div class="marketplace-carousel" data-count="${galleryImages.length}">
-            <button type="button" class="carousel-nav carousel-prev ${galleryImages.length === 1 ? 'd-none' : ''}" aria-label="Предишна снимка">&#10094;</button>
-            <div class="marketplace-detail-image-frame rounded">
-              <img class="img-fluid marketplace-detail-image" id="carousel-main-image" alt="${imageAlt}">
-              <button type="button" class="listing-expand-btn" id="listing-expand-btn" aria-label="Разшири снимката">
-                <i class="bi bi-arrows-fullscreen" aria-hidden="true"></i>
-              </button>
+    if (!root.querySelector('.marketplace-carousel')) {
+      root.innerHTML = `
+        <div class="card marketplace-detail-gallery-card">
+          <div class="card-body p-2 p-md-3">
+            <div class="marketplace-carousel" data-count="${galleryImages.length}">
+              <button type="button" class="carousel-nav carousel-prev" aria-label="Предишна снимка">&#10094;</button>
+              <div class="marketplace-detail-image-frame rounded">
+                <img class="img-fluid marketplace-detail-image carousel-main-image" alt="${imageAlt}">
+                <button type="button" class="listing-expand-btn" aria-label="Разшири снимката">
+                  <i class="bi bi-arrows-fullscreen" aria-hidden="true"></i>
+                </button>
+              </div>
+              <button type="button" class="carousel-nav carousel-next" aria-label="Следваща снимка">&#10095;</button>
             </div>
-            <button type="button" class="carousel-nav carousel-next ${galleryImages.length === 1 ? 'd-none' : ''}" aria-label="Следваща снимка">&#10095;</button>
+            <div class="carousel-thumbs"></div>
           </div>
-          <div class="carousel-thumbs ${galleryImages.length <= 1 ? 'd-none' : ''}" id="carousel-thumbs"></div>
-        </div>
-      </div>`;
+        </div>`;
+    }
 
-    const mainImage = root.querySelector('#carousel-main-image');
-    const thumbs = root.querySelector('#carousel-thumbs');
-    const expandBtn = root.querySelector('#listing-expand-btn');
+    const carousel = root.querySelector('.marketplace-carousel');
+    const prevButton = root.querySelector('.carousel-prev');
+    const nextButton = root.querySelector('.carousel-next');
+    const mainImage = root.querySelector('.carousel-main-image') || root.querySelector('.marketplace-detail-image');
+    const thumbs = root.querySelector('.carousel-thumbs');
+    const expandBtn = root.querySelector('.listing-expand-btn');
+
+    if (!carousel || !prevButton || !nextButton || !mainImage || !thumbs) {
+      return;
+    }
+
+    carousel.dataset.count = String(galleryImages.length);
+    mainImage.alt = imageAlt;
+    prevButton.classList.toggle('d-none', galleryImages.length === 1);
+    nextButton.classList.toggle('d-none', galleryImages.length === 1);
+    thumbs.classList.toggle('d-none', galleryImages.length <= 1);
+    thumbs.innerHTML = '';
 
     if (galleryImages.length > 1) {
       galleryImages.forEach((src, index) => {
@@ -104,8 +120,8 @@
         thumbs.appendChild(btn);
       });
 
-      root.querySelector('.carousel-prev')?.addEventListener('click', prev);
-      root.querySelector('.carousel-next')?.addEventListener('click', next);
+      prevButton.addEventListener('click', prev);
+      nextButton.addEventListener('click', next);
     }
 
     lightboxPrev.onclick = (event) => {
