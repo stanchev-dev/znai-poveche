@@ -32,7 +32,7 @@ from .serializers import (
     SubjectSerializer,
     VoteInputSerializer,
 )
-from .throttles import CommentCreateThrottle, PostCreateThrottle, VoteThrottle
+from .throttles import CommentCreateThrottle, PostCreateThrottle
 
 
 class PostPagination(PageNumberPagination):
@@ -256,7 +256,7 @@ def rep_value(vote: int) -> int:
 
 class BaseVoteAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    throttle_classes = [VoteThrottle]
+    throttle_classes = []
     serializer_class = VoteInputSerializer
     target_model = None
     vote_model = None
@@ -332,6 +332,14 @@ class BaseVoteAPIView(APIView):
             ):
                 score_delta = 0
                 reputation_delta = 0
+
+            if (
+                not self.allow_negative_score()
+                and target.score == 0
+                and prev_vote == -1
+                and next_vote == 1
+            ):
+                score_delta = 1
 
             if score_delta != 0:
                 if not self.allow_negative_score():

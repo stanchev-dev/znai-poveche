@@ -8,6 +8,3 @@ class PostCreateThrottle(UserRateThrottle):
 class CommentCreateThrottle(UserRateThrottle):
     scope = "comment_create"
 
-
-class VoteThrottle(UserRateThrottle):
-    scope = "vote"
