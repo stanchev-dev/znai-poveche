@@ -53,9 +53,9 @@
         <div class="col-12 col-md-6 col-xl-4">
           <a class="subject-tile text-decoration-none" data-subject-slug="${escapeHtml(subject.slug)}" href="/subjects/${slug}/" style="--c1: ${escapeHtml(tileBgDark)}; --c2: ${escapeHtml(tileBgLight)};">
             <div class="subject-tile-content">
-              <img class="subject-tile-icon" src="${escapeHtml(iconPath)}" alt="" aria-hidden="true" loading="lazy" />
               <h3 class="subject-tile-title">${name}</h3>
             </div>
+            <img class="subject-tile-icon" src="${escapeHtml(iconPath)}" alt="" aria-hidden="true" loading="lazy" />
           </a>
         </div>
       `;
