@@ -194,6 +194,35 @@ class ListingAPITests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_create_listing_succeeds_for_all_lesson_modes(self):
+        self.client.force_authenticate(self.owner)
+
+        cases = [
+            Listing.LessonMode.ONLINE,
+            Listing.LessonMode.IN_PERSON,
+            Listing.LessonMode.ONLINE_AND_IN_PERSON,
+        ]
+
+        for index, lesson_mode in enumerate(cases, start=1):
+            payload = {
+                "subject": self.math.slug,
+                "price_per_hour": "40.00",
+                "lesson_mode": lesson_mode,
+                "description": f"Подробно описание за урок {index} с достатъчна дължина.",
+                "contact_name": "Иван Иванов",
+                "contact_phone": f"+35988877766{index}",
+            }
+
+            response = self.client.post(
+                reverse("listing-list-create"),
+                payload,
+                format="json",
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            created = Listing.objects.get(pk=response.data["id"])
+            self.assertEqual(created.lesson_mode, lesson_mode)
+
     def test_create_fails_when_phone_is_invalid(self):
         self.client.force_authenticate(self.owner)
         payload = {
@@ -628,7 +657,7 @@ class MyListingsPageTests(TestCase):
             {
                 "subject": self.subject.id,
                 "price_per_hour": "55.00",
-                "lesson_mode": Listing.LessonMode.OFFLINE,
+                "lesson_mode": Listing.LessonMode.IN_PERSON,
                 "description": "C" * 120,
                 "contact_name": "Updated Owner",
                 "contact_phone": "+359888123456",
@@ -638,7 +667,7 @@ class MyListingsPageTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.listing.refresh_from_db()
         self.assertEqual(self.listing.price_per_hour, Decimal("55.00"))
-        self.assertEqual(self.listing.lesson_mode, Listing.LessonMode.OFFLINE)
+        self.assertEqual(self.listing.lesson_mode, Listing.LessonMode.IN_PERSON)
         self.assertEqual(self.listing.contact_name, "Updated Owner")
         self.assertEqual(self.listing.contact_phone, "+359888123456")
         self.assertEqual(self.listing.contact_email, "owner@example.com")
