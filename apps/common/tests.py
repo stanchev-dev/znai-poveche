@@ -55,9 +55,9 @@ class WebPageSmokeTests(TestCase):
 class SeedCommandTests(TestCase):
     def test_seed_command_runs(self):
         out = StringIO()
-        call_command('seed', stdout=out)
+        call_command('seed','--force', stdout=out)
         output = out.getvalue()
-        self.assertIn('Seed completed.', output)
+        self.assertIn('Seed summary:', output)
         self.assertTrue(Subject.objects.exists())
 
 
