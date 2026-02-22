@@ -20,7 +20,7 @@ class RegistrationForm(UserCreationForm):
         label="Роля",
         choices=Profile.Role.choices,
         initial=Profile.Role.LEARNER,
-        widget=forms.Select(attrs={"class": "form-select zp-role-select"}),
+        widget=forms.Select(attrs={"class": "form-select auth-input publish-subject-select register-role-select"}),
     )
 
     class Meta(UserCreationForm.Meta):
