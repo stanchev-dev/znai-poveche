@@ -23,6 +23,9 @@
 .discussion-publish-page #body {
   border-radius: 0.72rem;
 }
+.discussion-publish-page ul.dropdown-menu.publish-select-menu.show {
+  transform: translate3d(0px, 0px, 0px) !important;
+}
 
 .discussion-publish-page .publish-select-dropdown,
 .discussion-publish-page .publish-subject-trigger {
