@@ -2446,3 +2446,35 @@ main#app-root,
   justify-content: center;
   font-size: 1.35rem;
 }
+
+.zp-role-select {
+  background-color: var(--brand-purple-cta, #7c45f5);
+  color: #ffffff;
+  border-color: var(--brand-purple-cta-dark, #6730df);
+}
+
+.zp-role-select:hover,
+.zp-role-select:active {
+  background-color: #8b5cf6;
+  border-color: #7c45f5;
+  color: #ffffff;
+}
+
+.zp-role-select:focus,
+.zp-role-select:focus-visible {
+  background-color: #8b5cf6;
+  border-color: #7c45f5;
+  color: #ffffff;
+  box-shadow: 0 0 0 0.24rem rgba(124, 69, 245, 0.25);
+}
+
+.zp-role-select option {
+  background-color: #7c45f5;
+  color: #ffffff;
+}
+
+.zp-role-select option:checked,
+.zp-role-select option:hover {
+  background-color: #8b5cf6;
+  color: #ffffff;
+}

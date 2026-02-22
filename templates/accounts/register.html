@@ -95,6 +95,14 @@
           {% endfor %}
         </div>
 
+        <div class="mb-3">
+          <label class="form-label" for="{{ form.role.id_for_label }}">{{ form.role.label }}</label>
+          {{ form.role }}
+          {% for error in form.role.errors %}
+            <p class="field-error mt-1 mb-0">{{ error }}</p>
+          {% endfor %}
+        </div>
+
         <button type="submit" class="btn btn-brand-primary w-100 auth-submit-btn mt-2" id="register-submit">
           <i class="bi bi-person-plus-fill me-2"></i>Създай профил
         </button>
