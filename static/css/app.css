@@ -2447,34 +2447,36 @@ main#app-root,
   font-size: 1.35rem;
 }
 
-.zp-role-select {
-  background-color: var(--brand-purple-cta, #7c45f5);
-  color: #ffffff;
-  border-color: var(--brand-purple-cta-dark, #6730df);
+.register-role-select {
+  background-color: #fff;
+  color: var(--bs-body-color);
 }
 
-.zp-role-select:hover,
-.zp-role-select:active {
-  background-color: #8b5cf6;
-  border-color: #7c45f5;
-  color: #ffffff;
+.register-role-select:hover,
+.register-role-select:active {
+  background-color: #fff;
+  color: var(--bs-body-color);
 }
 
-.zp-role-select:focus,
-.zp-role-select:focus-visible {
-  background-color: #8b5cf6;
-  border-color: #7c45f5;
-  color: #ffffff;
-  box-shadow: 0 0 0 0.24rem rgba(124, 69, 245, 0.25);
+.register-role-select:focus,
+.register-role-select:focus-visible {
+  background-color: #fff;
+  color: var(--bs-body-color);
+  border-color: var(--brand-purple-cta, #7c45f5);
+  box-shadow: 0 0 0 0.2rem rgba(124, 69, 245, 0.22);
 }
 
-.zp-role-select option {
-  background-color: #7c45f5;
-  color: #ffffff;
+.register-role-select option {
+  background: var(--footer-purple, #2a0f4d);
+  color: #fff;
+  padding: 0.55rem 0.8rem;
 }
 
-.zp-role-select option:checked,
-.zp-role-select option:hover {
-  background-color: #8b5cf6;
-  color: #ffffff;
+.register-role-select option:checked {
+  background: rgba(196, 181, 253, 0.35);
+  color: #fff;
+}
+
+.register-role-select option:hover {
+  background: rgba(196, 181, 253, 0.55);
 }
