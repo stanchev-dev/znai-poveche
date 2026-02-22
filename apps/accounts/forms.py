@@ -15,10 +15,17 @@ class RegistrationForm(UserCreationForm):
             }
         ),
     )
+    role = forms.ChoiceField(
+        required=True,
+        label="Роля",
+        choices=Profile.Role.choices,
+        initial=Profile.Role.LEARNER,
+        widget=forms.Select(attrs={"class": "form-select zp-role-select"}),
+    )
 
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ("username", "email", "password1", "password2")
+        fields = ("username", "email", "password1", "password2", "role")
 
     def clean_username(self):
         username = (self.cleaned_data.get("username") or "").strip()
@@ -35,7 +42,13 @@ class RegistrationForm(UserCreationForm):
     def save(self, commit=True):
         self.instance.email = self.cleaned_data["email"]
         user = super().save(commit=commit)
+        selected_role = self.cleaned_data.get("role", Profile.Role.LEARNER)
+
         if commit:
+            profile = Profile.objects.filter(user=user).first()
+            if profile is not None:
+                profile.role = selected_role
+                profile.save(update_fields=["role"])
             return user
 
         user.email = self.cleaned_data["email"]

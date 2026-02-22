@@ -17,7 +17,7 @@ class ProfileSignalTests(TestCase):
 
 
 class RegistrationRoleTests(TestCase):
-    def test_registration_saves_email_and_defaults(self):
+    def test_registration_saves_email_and_selected_role(self):
         response = self.client.post(
             reverse("register"),
             data={
@@ -25,13 +25,29 @@ class RegistrationRoleTests(TestCase):
                 "email": "newteacher@example.com",
                 "password1": "StrongPass123",
                 "password2": "StrongPass123",
+                "role": Profile.Role.TEACHER,
             },
         )
 
         self.assertEqual(response.status_code, 302)
         user = get_user_model().objects.get(username="newteacher")
         self.assertEqual(user.email, "newteacher@example.com")
-        self.assertEqual(user.profile.role, Profile.Role.LEARNER)
+        self.assertEqual(user.profile.role, Profile.Role.TEACHER)
+
+    def test_registration_keeps_selected_role_on_error(self):
+        response = self.client.post(
+            reverse("register"),
+            data={
+                "username": "rolepersist",
+                "email": "rolepersist@example.com",
+                "password1": "StrongPass123",
+                "password2": "DifferentPass123",
+                "role": Profile.Role.TEACHER,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'option value="teacher" selected')
 
     def test_registration_requires_unique_email(self):
         User = get_user_model()
@@ -48,6 +64,7 @@ class RegistrationRoleTests(TestCase):
                 "email": "existing@example.com",
                 "password1": "StrongPass123",
                 "password2": "StrongPass123",
+                "role": Profile.Role.LEARNER,
             },
         )
 
@@ -75,6 +92,7 @@ class RegistrationFlowTests(TestCase):
                 "email": "new@example.com",
                 "password1": "StrongPass123",
                 "password2": "StrongPass123",
+                "role": Profile.Role.LEARNER,
             },
         )
 
@@ -90,6 +108,7 @@ class RegistrationFlowTests(TestCase):
                     "email": "race@example.com",
                     "password1": "StrongPass123",
                     "password2": "StrongPass123",
+                    "role": Profile.Role.LEARNER,
                 },
             )
 
@@ -104,6 +123,7 @@ class RegistrationFlowTests(TestCase):
                 "email": "fresh@example.com",
                 "password1": "StrongPass123",
                 "password2": "StrongPass123",
+                "role": Profile.Role.LEARNER,
             },
         )
 
