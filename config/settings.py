@@ -136,21 +136,31 @@ USE_I18N = True
 
 USE_TZ = True
 
-
+TESTING = "test" in sys.argv
+SKIP_IMAGE_VERIFY = TESTING
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
+
+
 CLOUDINARY_URL = os.getenv("CLOUDINARY_URL", "")
 
-if CLOUDINARY_URL:
+STATIC_BACKEND = (
+    "django.contrib.staticfiles.storage.StaticFilesStorage"
+    if TESTING
+    else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+)
+
+if CLOUDINARY_URL and not TESTING:
     STORAGES = {
         "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+        "staticfiles": {"BACKEND": STATIC_BACKEND},
     }
 else:
     STORAGES = {
         "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+        "staticfiles": {"BACKEND": STATIC_BACKEND},
     }
+
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -165,9 +175,5 @@ REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
     "post_create": "3/hour",
     "comment_create": "10/hour",
 }
-
-
-TESTING = "test" in sys.argv
-SKIP_IMAGE_VERIFY = TESTING
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
