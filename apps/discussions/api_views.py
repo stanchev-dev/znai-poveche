@@ -329,15 +329,6 @@ class BaseVoteAPIView(APIView):
                 not self.allow_negative_score()
                 and target.score == 0
                 and prev_vote == -1
-                and next_vote == 0
-            ):
-                score_delta = 0
-                reputation_delta = 0
-
-            if (
-                not self.allow_negative_score()
-                and target.score == 0
-                and prev_vote == -1
                 and next_vote == 1
             ):
                 score_delta = 1

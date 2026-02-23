@@ -498,6 +498,33 @@ class VoteTests(APITestCase):
 
 
 
+    def test_undo_downvote_after_switch_restores_score_to_one(self):
+        self.post.score = 1
+        self.post.save(update_fields=["score"])
+
+        self.client.post(
+            reverse("api-posts-vote", kwargs={"pk": self.post.id}),
+            {"value": 1},
+            format="json",
+        )
+        self.client.post(
+            reverse("api-posts-vote", kwargs={"pk": self.post.id}),
+            {"value": -1},
+            format="json",
+        )
+
+        response = self.client.post(
+            reverse("api-posts-vote", kwargs={"pk": self.post.id}),
+            {"value": -1},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["score"], 1)
+        self.assertEqual(response.data["user_vote"], 0)
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.score, 1)
+
     def test_repeat_vote_toggles_to_unvote(self):
         self.client.post(
             reverse("api-posts-vote", kwargs={"pk": self.post.id}),
@@ -560,7 +587,7 @@ class VoteTests(APITestCase):
 
         response = self.client.post(
             reverse("api-posts-vote", kwargs={"pk": self.post.id}),
-            {"value": 0},
+            {"value": -1},
             format="json",
         )
 
