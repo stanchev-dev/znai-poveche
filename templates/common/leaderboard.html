@@ -75,7 +75,7 @@
             </div>
 
             <div class="d-flex align-items-center justify-content-between gap-3">
-              <div class="d-flex align-items-center gap-3 min-w-0">
+              <div class="d-flex align-items-center gap-3 lb-user-block">
                 <div class="leaderboard-avatar" aria-hidden="true">
                   {% if entry.avatar_url %}
                   <img src="{{ entry.avatar_url }}" alt="Аватар на {{ entry.username }}">
@@ -83,12 +83,12 @@
                   <span>{{ entry.initial }}</span>
                   {% endif %}
                 </div>
-                <div class="min-w-0">
-                  <h2 class="h5 mb-1 text-truncate">{{ entry.username }}</h2>
+                <div class="lb-username-wrap">
+                  <h2 class="h5 mb-1 lb-username">{{ entry.username }}</h2>
                   <p class="mb-0 text-muted small">#{{ entry.rank }}</p>
                 </div>
               </div>
-              <div class="text-end">
+              <div class="text-end lb-points-block">
                 <p class="lb-points mb-0">{{ entry.points }}</p>
                 <p class="text-muted small mb-0">точки</p>
               </div>
@@ -119,7 +119,7 @@
               <span class="leaderboard-rank-pill">{{ entry.rank }}</span>
             </td>
             <td>
-              <div class="d-flex align-items-center gap-2 gap-md-3">
+              <div class="d-flex align-items-center gap-2 gap-md-3 lb-user-block">
                 <div class="leaderboard-avatar leaderboard-avatar--sm" aria-hidden="true">
                   {% if entry.avatar_url %}
                   <img src="{{ entry.avatar_url }}" alt="Аватар на {{ entry.username }}">
@@ -127,7 +127,7 @@
                   <span>{{ entry.initial }}</span>
                   {% endif %}
                 </div>
-                <span class="fw-semibold text-break">{{ entry.username }}</span>
+                <span class="fw-semibold lb-username">{{ entry.username }}</span>
               </div>
             </td>
             <td class="d-none d-md-table-cell">
