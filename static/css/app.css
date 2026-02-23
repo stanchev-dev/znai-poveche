@@ -1592,6 +1592,29 @@ h6 {
   flex-shrink: 0;
 }
 
+
+.lb-user-block {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.lb-username-wrap {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.lb-username {
+  display: block;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lb-points-block {
+  flex: 0 0 auto;
+}
+
 .lb-points {
   font-size: 1.85rem;
   font-weight: 800;
