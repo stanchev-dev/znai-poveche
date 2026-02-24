@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-z2$pzxu8z114cnp1r0v4bnx%v-myg85v4*r&wev!z4h87b=%$o")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "0").strip().lower() in ("1", "true", "yes", "on")
+DEBUG = os.getenv("DEBUG", "0e ").strip().lower() in ("1", "true", "yes", "on")
 
 ALLOWED_HOSTS = [host for host in os.getenv('ALLOWED_HOSTS', '').split(',') if host] or ['localhost', '127.0.0.1']
 
@@ -57,6 +57,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "apps.common.middleware.CanonicalDomainRedirectMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -66,7 +67,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
+CANONICAL_HOST = os.getenv("CANONICAL_HOST", "znaipoveche.eu")
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
