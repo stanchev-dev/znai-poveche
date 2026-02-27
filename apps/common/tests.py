@@ -163,6 +163,12 @@ class CanonicalDomainRedirectMiddlewareTests(TestCase):
         self.assertEqual(response.status_code, 301)
         self.assertEqual(response["Location"], "http://znaipoveche.eu/")
 
+    @override_settings(DEBUG=False, CANONICAL_HOST="znaipoveche.eu", ALLOWED_HOSTS=["api.znaipoveche.eu", "znaipoveche.eu"])
+    def test_skips_redirect_for_other_subdomains(self):
+        response = self.client.get("/", HTTP_HOST="api.znaipoveche.eu")
+
+        self.assertEqual(response.status_code, 200)
+
     @override_settings(DEBUG=True, CANONICAL_HOST="znaipoveche.eu", ALLOWED_HOSTS=["127.0.0.1", "znaipoveche.eu"])
     def test_skips_redirect_when_debug_is_true(self):
         response = self.client.get("/", HTTP_HOST="127.0.0.1:8000")
