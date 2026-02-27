@@ -2,7 +2,7 @@ from io import StringIO
 from types import SimpleNamespace
 
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
@@ -153,3 +153,30 @@ class LeaderboardPageScopeTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["scope"], "global")
         self.assertIsNone(response.context["selected_subject"])
+
+
+class CanonicalDomainRedirectMiddlewareTests(TestCase):
+    @override_settings(DEBUG=False, CANONICAL_HOST="znaipoveche.eu", ALLOWED_HOSTS=["www.znaipoveche.eu", "znaipoveche.eu"])
+    def test_redirects_non_canonical_host_in_production(self):
+        response = self.client.get("/", HTTP_HOST="www.znaipoveche.eu")
+
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response["Location"], "http://znaipoveche.eu/")
+
+    @override_settings(DEBUG=True, CANONICAL_HOST="znaipoveche.eu", ALLOWED_HOSTS=["127.0.0.1", "znaipoveche.eu"])
+    def test_skips_redirect_when_debug_is_true(self):
+        response = self.client.get("/", HTTP_HOST="127.0.0.1:8000")
+
+        self.assertEqual(response.status_code, 200)
+
+    @override_settings(DEBUG=False, CANONICAL_HOST="znaipoveche.eu", ALLOWED_HOSTS=["localhost", "znaipoveche.eu"])
+    def test_skips_redirect_for_localhost_in_non_debug(self):
+        response = self.client.get("/", HTTP_HOST="localhost:8000")
+
+        self.assertEqual(response.status_code, 200)
+
+    @override_settings(DEBUG=False, CANONICAL_HOST="", ALLOWED_HOSTS=["127.0.0.1"])
+    def test_skips_redirect_when_canonical_host_not_configured(self):
+        response = self.client.get("/", HTTP_HOST="127.0.0.1:8000")
+
+        self.assertEqual(response.status_code, 200)

@@ -67,7 +67,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-CANONICAL_HOST = os.getenv("CANONICAL_HOST", "znaipoveche.eu")
+CANONICAL_HOST = os.getenv("CANONICAL_HOST", "")
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
