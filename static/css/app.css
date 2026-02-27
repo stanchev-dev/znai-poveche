@@ -348,11 +348,15 @@ h6 {
 
 @media (max-width: 576px) {
   .subject-tile-icon {
-    display: none;
+    display: block;
+    width: 86px;
+    height: 86px;
+    right: 10px;
+    opacity: 0.88;
   }
 
   .subject-tile {
-    padding-right: 1.05rem;
+    padding-right: 6.2rem;
   }
 }
 
