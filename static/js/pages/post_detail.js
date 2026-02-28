@@ -475,23 +475,45 @@
   });
 
   const form = document.getElementById('comment-form');
-  if (form) {
+  const commentBodyInput = document.getElementById('comment-body');
+  const commentSubmitBtn = form?.querySelector('button[type="submit"]');
+  if (form && commentBodyInput && commentSubmitBtn) {
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      const res = await window.apiUtils.apiFetch(`/api/posts/${postId}/comments/`, {
-        method: 'POST',
-        body: JSON.stringify({ body: document.getElementById('comment-body').value })
-      });
-      if (res.status === 401 || res.status === 403) {
-        postAlert.innerHTML = loginAlert();
+
+      const body = commentBodyInput.value.trim();
+      if (!body) {
+        postAlert.innerHTML = alertHtml('Текстът не може да е празен.', 'danger');
         return;
       }
-      if (!res.ok) {
-        postAlert.innerHTML = alertHtml('Грешка при коментар', 'danger');
-        return;
+
+      commentSubmitBtn.disabled = true;
+      try {
+        const res = await window.apiUtils.apiFetch(`/api/posts/${postId}/comments/`, {
+          method: 'POST',
+          body: JSON.stringify({ body })
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          postAlert.innerHTML = loginAlert();
+          return;
+        }
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const msg = data.body?.[0] || data.detail || data.non_field_errors?.[0] || 'Грешка при коментар.';
+          postAlert.innerHTML = alertHtml(msg, 'danger');
+          return;
+        }
+
+        form.reset();
+        postAlert.innerHTML = '';
+        await loadComments();
+      } catch (error) {
+        postAlert.innerHTML = alertHtml('Неуспешно публикуване на коментар. Опитайте отново.', 'danger');
+      } finally {
+        commentSubmitBtn.disabled = false;
       }
-      form.reset();
-      loadComments();
     });
   }
 
