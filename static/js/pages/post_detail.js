@@ -406,7 +406,7 @@
 
       <section class="mt-3">
         <h2 class="h6 text-muted mb-2">Автор</h2>
-        ${authorCard(post.author, post.subject)}
+        ${authorCard(post.author, post.subject, { badgesUnderName: true })}
       </section>
     </div></article>`;
 
