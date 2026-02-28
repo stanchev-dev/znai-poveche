@@ -366,10 +366,10 @@
     const hasPostImage = postImageUrls.length > 0;
     const postBodyContent = hasPostImage
       ? `<div class="discussion-post-content row g-3 align-items-start">
-          <div class="col-12 col-lg-7">
+          <div class="col-12 col-lg-7 order-1 order-lg-2">
             <p class="discussion-post-description mb-0">${escapeHtml(post.body)}</p>
           </div>
-          <div class="col-12 col-lg-5 discussion-post-image-col">
+          <div class="col-12 col-lg-5 discussion-post-image-col order-2 order-lg-1">
             <div id="discussion-post-image-viewer"></div>
           </div>
         </div>`
