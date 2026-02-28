@@ -397,6 +397,10 @@
   color: #111827;
 }
 
+.discussion-seller-meta {
+  min-width: 0;
+}
+
 .discussion-seller-subline {
   color: #6b7280;
   font-size: 0.875rem;
@@ -486,5 +490,14 @@
   .discussion-post-image-col .discussion-detail-image-frame {
     min-height: 250px;
     height: min(44vh, 420px);
+  }
+}
+
+@media (max-width: 575.98px) {
+  .discussion-detail-page .discussion-seller-name {
+    font-size: 0.95rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.25;
   }
 }
