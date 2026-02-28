@@ -480,6 +480,7 @@
   if (form && commentBodyInput && commentSubmitBtn) {
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
+      let commentCreated = false;
 
       const body = commentBodyInput.value.trim();
       if (!body) {
@@ -506,11 +507,14 @@
           return;
         }
 
+        commentCreated = true;
         form.reset();
         postAlert.innerHTML = '';
         await loadComments();
       } catch (error) {
-        postAlert.innerHTML = alertHtml('Неуспешно публикуване на коментар. Опитайте отново.', 'danger');
+        if (!commentCreated) {
+          postAlert.innerHTML = alertHtml('Неуспешно публикуване на коментар. Опитайте отново.', 'danger');
+        }
       } finally {
         commentSubmitBtn.disabled = false;
       }
