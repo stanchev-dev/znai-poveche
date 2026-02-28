@@ -947,7 +947,7 @@ h6 {
 
 .marketplace-detail-image-frame {
   width: 100%;
-  height: min(60vh, 520px);
+  height: min(30vh, 520px);
   min-height: 320px;
   display: flex;
   align-items: center;
