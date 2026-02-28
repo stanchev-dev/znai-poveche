@@ -9,6 +9,12 @@
   const postAlert = document.getElementById('post-alert');
   const postContainer = document.getElementById('post-container');
   const commentsList = document.getElementById('comments-list');
+  const lightbox = document.getElementById('discussion-image-lightbox');
+  const lightboxDialog = document.getElementById('discussion-lightbox-dialog');
+  const lightboxImage = document.getElementById('discussion-lightbox-image');
+  const lightboxClose = document.getElementById('discussion-lightbox-close');
+  const lightboxPrev = document.getElementById('discussion-lightbox-prev');
+  const lightboxNext = document.getElementById('discussion-lightbox-next');
   let pendingDeleteCommentId = null;
   let currentPostSubject = null;
 
@@ -76,29 +82,30 @@
     `;
   }
 
-  function getImageUrl(payload) {
-    if (!payload || typeof payload !== 'object') return '';
+  function getImageUrls(payload) {
+    if (!payload || typeof payload !== 'object') return [];
+
+    const imageUrls = [];
 
     if (typeof payload.image === 'string' && payload.image) {
-      return payload.image;
+      imageUrls.push(payload.image);
     }
 
     if (Array.isArray(payload.images) && payload.images.length) {
-      const first = payload.images[0];
-      if (typeof first === 'string') return first;
-      if (first && typeof first === 'object') {
-        return first.image || first.image_url || first.url || first.src || '';
-      }
+      payload.images.forEach((entry) => {
+        if (typeof entry === 'string' && entry) {
+          imageUrls.push(entry);
+          return;
+        }
+
+        if (entry && typeof entry === 'object') {
+          const url = entry.image || entry.image_url || entry.url || entry.src || '';
+          if (url) imageUrls.push(url);
+        }
+      });
     }
 
-    return '';
-  }
-
-  function imgIf(payload) {
-    const imageUrl = getImageUrl(payload);
-    return imageUrl
-      ? `<div class="discussion-image-frame marketplace-detail-image-frame rounded"><img src="${escapeHtml(imageUrl)}" class="discussion-image marketplace-detail-image" alt="Илюстрация към дискусия"></div>`
-      : '';
+    return [...new Set(imageUrls)];
   }
 
   function alertHtml(text, type = 'warning') { return `<div class="alert alert-${type}">${text}</div>`; }
@@ -355,14 +362,15 @@
     const post = await res.json();
     currentPostSubject = post.subject;
 
-    const postImage = imgIf(post);
-    const postBodyContent = postImage
+    const postImageUrls = getImageUrls(post);
+    const hasPostImage = postImageUrls.length > 0;
+    const postBodyContent = hasPostImage
       ? `<div class="discussion-post-content row g-3 align-items-start">
           <div class="col-12 col-lg-7">
             <p class="discussion-post-description mb-0">${escapeHtml(post.body)}</p>
           </div>
           <div class="col-12 col-lg-5 discussion-post-image-col">
-            ${postImage}
+            <div id="discussion-post-image-viewer"></div>
           </div>
         </div>`
       : `<p class="discussion-post-description mb-0">${escapeHtml(post.body)}</p>`;
@@ -386,6 +394,23 @@
         ${authorCard(post.author, post.subject)}
       </section>
     </div></article>`;
+
+    if (hasPostImage) {
+      const postImageRoot = document.getElementById('discussion-post-image-viewer');
+      window.marketplaceImageViewer?.init({
+        root: postImageRoot,
+        images: postImageUrls,
+        defaultImage: '/static/img/default-avatar.svg',
+        lightbox,
+        lightboxDialog,
+        lightboxImage,
+        lightboxClose,
+        lightboxPrev,
+        lightboxNext,
+        imageAlt: 'Снимка към дискусия',
+        lightboxAlt: 'Разширена снимка към дискусия'
+      });
+    }
 
     const voteWrap = document.getElementById(`post-vote-${post.id}`);
     voteWrap.innerHTML = votingHtml('post', post.id, post.score, post.user_vote);

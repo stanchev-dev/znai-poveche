@@ -262,7 +262,7 @@
 }
 
 .discussion-post-image-col {
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .discussion-post-image-col .discussion-image-frame.marketplace-detail-image-frame {
@@ -454,4 +454,22 @@
 
 .discussion-delete-modal-content {
   border-radius: 1rem;
+}
+
+
+.discussion-post-image-col .marketplace-detail-gallery-card {
+  border: 1px solid #e9ecef;
+  border-radius: 1rem;
+  box-shadow: 0 6px 16px rgba(17, 24, 39, 0.08);
+}
+
+.discussion-post-image-col .listing-expand-btn {
+  right: 0.75rem;
+  bottom: 0.75rem;
+}
+
+@media (max-width: 991.98px) {
+  .discussion-post-image-col {
+    margin-left: 0;
+  }
 }

@@ -32,9 +32,26 @@
 </div>
 
 <div id="post-page-meta" data-post-id="{{ post_id }}"></div>
+
+<div id="discussion-image-lightbox" class="listing-image-lightbox" aria-hidden="true">
+  <button type="button" class="listing-image-lightbox-close" id="discussion-lightbox-close" aria-label="Затвори разширената снимка">
+    <i class="bi bi-x-lg" aria-hidden="true"></i>
+  </button>
+  <button type="button" class="listing-image-lightbox-nav listing-image-lightbox-prev d-none" id="discussion-lightbox-prev" aria-label="Предишна снимка">
+    &#10094;
+  </button>
+  <div class="listing-image-lightbox-dialog" id="discussion-lightbox-dialog">
+    <img id="discussion-lightbox-image" class="listing-image-lightbox-image" alt="Разширена снимка към дискусия">
+  </div>
+  <button type="button" class="listing-image-lightbox-nav listing-image-lightbox-next d-none" id="discussion-lightbox-next" aria-label="Следваща снимка">
+    &#10095;
+  </button>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'js/subject_badges.js' %}"></script>
+<script src="{% static 'js/pages/marketplace_image_viewer.js' %}"></script>
 <script src="{% static 'js/pages/post_detail.js' %}"></script>
 {% endblock %}
