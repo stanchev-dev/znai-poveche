@@ -286,6 +286,17 @@
     `;
   }
 
+  function imgIf(payload) {
+    const [imageUrl] = getImageUrls(payload);
+    if (!imageUrl) return '';
+
+    return `
+      <div class="discussion-comment-image mt-2">
+        <img src="${escapeHtml(imageUrl)}" alt="Снимка към коментар" class="img-fluid rounded">
+      </div>
+    `;
+  }
+
   function commentCardHtml(comment) {
     const canDelete = Boolean(comment.can_delete)
       || (isAuthenticated && (Number(comment.author?.id) === currentUserId));
