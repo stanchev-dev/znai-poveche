@@ -267,14 +267,14 @@
   margin-left: 0;
 }
 
-.discussion-post-image-col .discussion-image-frame.marketplace-detail-image-frame {
+.discussion-post-image-col .discussion-detail-image-frame {
   margin-top: 0;
 }
 
-.discussion-image-frame.marketplace-detail-image-frame {
+.discussion-detail-image-frame {
   background: var(--surface-subtle, #f8f9fa);
   min-height: 320px;
-  height: min(60vh, 520px);
+  height: min(30vh, 520px);
   border: 1px solid #ece8f8;
 }
 
@@ -483,7 +483,7 @@
 }
 
 @media (min-width: 992px) {
-  .discussion-post-image-col .discussion-image-frame.marketplace-detail-image-frame {
+  .discussion-post-image-col .discussion-detail-image-frame {
     min-height: 250px;
     height: min(44vh, 420px);
   }
