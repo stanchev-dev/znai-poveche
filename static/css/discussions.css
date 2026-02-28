@@ -414,6 +414,10 @@
   gap: 8px;
 }
 
+.discussion-seller-pills--compact {
+  margin-top: 6px;
+}
+
 
 .discussion-comment-delete {
   margin-left: auto;
