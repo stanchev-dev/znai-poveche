@@ -1048,7 +1048,10 @@ h6 {
   }
 
   .marketplace-detail-page .seller-name {
-    font-size: 18px;
+    font-size: 16px;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.25;
   }
 
   .marketplace-detail-page .call-cta-content {
