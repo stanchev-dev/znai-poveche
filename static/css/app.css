@@ -2503,7 +2503,7 @@ main#app-root,
 }
 
 .register-role-select option:checked {
-  background: rgba(196, 181, 253, 0.35);
+  background: var(--footer-purple, #2a0f4d);
   color: #fff;
 }
 
