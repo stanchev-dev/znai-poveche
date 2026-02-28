@@ -8,8 +8,12 @@
     const gradeSelect = document.getElementById('grade');
     const gradeTrigger = document.getElementById('grade-trigger');
     const gradeMenu = form?.querySelector('#grade-trigger + .publish-select-menu');
+    const submitButton = form?.querySelector('button[type="submit"]');
     const prefillSubject = JSON.parse(document.getElementById('prefill-subject').textContent || '""');
-    if (!form || !errorsBox || !subjectSelect || !subjectTrigger || !subjectMenu) return;
+    if (!form || !errorsBox || !subjectSelect || !subjectTrigger || !subjectMenu || !submitButton) return;
+
+    const submitDefaultLabel = submitButton.textContent.trim();
+    let isSubmitting = false;
 
     const touchedFields = new Set();
     const FIELD_RULES = {
@@ -94,6 +98,12 @@
       return PRIORITY_RULES.find((rule) => !rule.isValid()) || null;
     }
 
+    function setSubmitState(submitting) {
+      isSubmitting = submitting;
+      submitButton.disabled = submitting;
+      submitButton.textContent = submitting ? 'Публикуване...' : submitDefaultLabel;
+    }
+
     function bindLiveValidation() {
       ['subject', 'title', 'body'].forEach((fieldName) => {
         const field = form[fieldName];
@@ -145,12 +155,16 @@
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
+      if (isSubmitting) return;
+
+      setSubmitState(true);
       form.classList.add('form-submitted');
       errorsBox.innerHTML = '';
 
       ['subject', 'title', 'body'].forEach(validateField);
       const invalid = firstFailure();
       if (invalid) {
+        setSubmitState(false);
         renderGlobalError(invalid.message);
         return;
       }
@@ -165,6 +179,7 @@
 
       const files = (window.marketplaceImages && window.marketplaceImages.files) || [];
       if (files.length > 1) {
+        setSubmitState(false);
         renderGlobalError('Може да качите само 1 снимка към дискусия.');
         return;
       }
@@ -187,10 +202,12 @@
         const firstMessage = PRIORITY_RULES
           .map((rule) => (Array.isArray(data[rule.field]) ? String(data[rule.field][0]) : null))
           .find(Boolean);
+        setSubmitState(false);
         renderGlobalError(firstMessage || 'Възникна грешка при публикуване.');
         return;
       }
 
+      setSubmitState(false);
       renderGlobalError('Сървърна грешка. Опитай отново.');
     });
 

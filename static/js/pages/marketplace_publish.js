@@ -4,9 +4,12 @@
     const errorsBox = document.getElementById('publish-errors');
     const subjectSelect = document.getElementById('subject');
     const imageInlineError = document.getElementById('image-inline-error');
-    if (!form || !errorsBox || !subjectSelect) return;
+    const submitButton = form?.querySelector('button[type="submit"]');
+    if (!form || !errorsBox || !subjectSelect || !submitButton) return;
 
     const touchedFields = new Set();
+    const submitDefaultLabel = submitButton.textContent.trim();
+    let isSubmitting = false;
 
     const FIELD_RULES = {
       subject: {
@@ -204,6 +207,12 @@
       renderGlobalError('Възникна грешка при публикуване.');
     }
 
+    function setSubmitState(submitting) {
+      isSubmitting = submitting;
+      submitButton.disabled = submitting;
+      submitButton.textContent = submitting ? 'Публикуване...' : submitDefaultLabel;
+    }
+
     async function loadSubjects() {
       const response = await window.apiUtils.apiFetch('/api/subjects/');
       if (!response.ok) {
@@ -220,6 +229,9 @@
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
+      if (isSubmitting) return;
+
+      setSubmitState(true);
       form.classList.add('form-submitted');
       errorsBox.innerHTML = '';
       clearInlineImageError();
@@ -228,6 +240,7 @@
 
       const firstFailure = firstClientValidationFailure();
       if (firstFailure) {
+        setSubmitState(false);
         renderGlobalError(firstFailure.message);
         return;
       }
@@ -262,10 +275,12 @@
         if (errorData && errorData.images && errorData.images.length) {
           setInlineImageError(String(errorData.images[0]));
         }
+        setSubmitState(false);
         renderErrors(errorData);
         return;
       }
 
+      setSubmitState(false);
       renderGlobalError('Сървърна грешка. Опитай отново.');
     });
 
