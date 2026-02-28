@@ -27,6 +27,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-z2$pzxu8z114cnp1r0v4bnx%v-
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DATABASE_URL = os.getenv("DATABASE_URL")
+LOCAL_DATABASE_URL = os.getenv("LOCAL_DATABASE_URL")
 
 debug_env = os.getenv("DEBUG")
 if debug_env is None:
@@ -101,6 +102,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 if DATABASE_URL:
     DATABASES = {
         "default": dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
+    }
+elif LOCAL_DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.config(default=LOCAL_DATABASE_URL, conn_max_age=600)
     }
 else:
     DATABASES = {
