@@ -408,7 +408,8 @@
         lightboxPrev,
         lightboxNext,
         imageAlt: 'Снимка към дискусия',
-        lightboxAlt: 'Разширена снимка към дискусия'
+        lightboxAlt: 'Разширена снимка към дискусия',
+        imageFrameClass: 'marketplace-detail-image-frame discussion-detail-image-frame'
       });
     }
 

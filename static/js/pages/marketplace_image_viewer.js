@@ -11,7 +11,8 @@
       lightboxPrev,
       lightboxNext,
       imageAlt = 'Снимка',
-      lightboxAlt = 'Разширена снимка'
+      lightboxAlt = 'Разширена снимка',
+      imageFrameClass = 'marketplace-detail-image-frame'
     } = options || {};
 
     if (!root || !lightbox || !lightboxDialog || !lightboxImage || !lightboxClose || !lightboxPrev || !lightboxNext) {
@@ -20,7 +21,7 @@
 
     const galleryImages = Array.isArray(images) ? images.filter(Boolean) : [];
     if (!galleryImages.length) {
-      root.innerHTML = `<div class="card marketplace-detail-gallery-card"><div class="card-body p-2 p-md-3"><div class="marketplace-detail-image-frame rounded"><img src="${defaultImage}" alt="${imageAlt}" class="img-fluid marketplace-detail-image"></div></div></div>`;
+      root.innerHTML = `<div class="card marketplace-detail-gallery-card"><div class="card-body p-2 p-md-3"><div class="${imageFrameClass} rounded"><img src="${defaultImage}" alt="${imageAlt}" class="img-fluid marketplace-detail-image"></div></div></div>`;
       return;
     }
 
@@ -76,7 +77,7 @@
           <div class="card-body p-2 p-md-3">
             <div class="marketplace-carousel" data-count="${galleryImages.length}">
               <button type="button" class="carousel-nav carousel-prev" aria-label="Предишна снимка">&#10094;</button>
-              <div class="marketplace-detail-image-frame rounded">
+              <div class="${imageFrameClass} rounded">
                 <img class="img-fluid marketplace-detail-image carousel-main-image" alt="${imageAlt}">
                 <button type="button" class="listing-expand-btn" aria-label="Разшири снимката">
                   <i class="bi bi-arrows-fullscreen" aria-hidden="true"></i>
