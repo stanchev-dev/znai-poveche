@@ -14,7 +14,6 @@ from django.db import transaction
 from apps.accounts.models import Profile
 from apps.discussions.models import Comment, Post, PostVote, Subject
 from apps.marketplace.models import Listing, ListingImage
-from apps.moderation.models import Report
 
 # Invisible marker retained in seeded text so `seed --wipe` can still detect records.
 SEED_MARKER = "\u2060"  # WORD JOINER (zero-width)
@@ -523,9 +522,6 @@ class Command(BaseCommand):
         listing_qs = Listing.objects.filter(description__contains=SEED_MARKER)
         post_qs = Post.objects.filter(title__contains=SEED_MARKER)
         comment_qs = Comment.objects.filter(body__contains=SEED_MARKER)
-        report_qs = Report.objects.filter(message__contains=SEED_MARKER)
-
-        stats["wipe_reports_deleted"], _ = report_qs.delete()
         stats["wipe_comments_deleted"], _ = comment_qs.delete()
         stats["wipe_posts_deleted"], _ = post_qs.delete()
         stats["wipe_listings_deleted"], _ = listing_qs.delete()
