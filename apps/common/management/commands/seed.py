@@ -33,11 +33,190 @@ SUBJECTS = [
 DEMO_USERS = [
     ("admin", "admin12345", True, True, "Админ"),
     ("demo", "demo12345", False, False, "Демо"),
-    ("teacher_ani", "demo12345", False, False, "Ани П."),
-    ("teacher_mario", "demo12345", False, False, "Марио Т."),
-    ("student_iva", "demo12345", False, False, "Ива"),
-    ("student_niki", "demo12345", False, False, "Ники"),
+    ("teacher_ani", "demo12345", False, False, "Ани Петрова"),
+    ("teacher_mario", "demo12345", False, False, "Марио Тодоров"),
+    ("student_iva", "demo12345", False, False, "Ива Георгиева"),
+    ("student_niki", "demo12345", False, False, "Никола Димитров"),
 ]
+
+DISCUSSION_SCENARIOS = {
+    "matematika": [
+        {
+            "author": "student_iva",
+            "title": f"Квадратни уравнения преди контролно {SEED_MARKER}",
+            "body": f"{SEED_MARKER} На задачите с параметър се обърквам кога дискриминантата трябва да е > 0 и кога >= 0. Имате ли лесен алгоритъм как подхождате?",
+            "grade": 10,
+            "comments": [
+                {"author": "teacher_ani", "body": f"{SEED_MARKER} Направи си кратка проверка в 3 стъпки: област на допустимост, знак на дискриминанта, и после проверка с примерни стойности."},
+                {"author": "student_niki", "body": f"{SEED_MARKER} На мен много ми помогна да си пиша отделно случаите D=0 и D>0 с по една решена задача."},
+                {"author": "demo", "body": f"{SEED_MARKER} Ако искаш, качи конкретна задача и ще я разбием на стъпки."},
+            ],
+        },
+        {
+            "author": "student_niki",
+            "title": f"Как тренирате текстови задачи за движение? {SEED_MARKER}",
+            "body": f"{SEED_MARKER} В тестове губя точки на задачи с влакове/срещи, защото бъркам величините. Някой ползва ли шаблон на таблица?",
+            "grade": 8,
+            "comments": [
+                {"author": "teacher_mario", "body": f"{SEED_MARKER} Да — време, скорост, път в три колони. Попълваш две, третата се намира веднага и намалява грешките."},
+                {"author": "student_iva", "body": f"{SEED_MARKER} Аз добавям и единици до всяко число, иначе лесно смесвам км/ч с м/с."},
+            ],
+        },
+    ],
+    "bulgarski": [
+        {
+            "author": "student_niki",
+            "title": f"Аргументативен текст: как да звучи по-убедително? {SEED_MARKER}",
+            "body": f"{SEED_MARKER} Учителката казва, че тезата ми е добра, но аргументите са общи. Как конкретизирате примери, без да става прекалено дълго?",
+            "grade": 9,
+            "comments": [
+                {"author": "teacher_ani", "body": f"{SEED_MARKER} Ползвай схема твърдение → доказателство → извод. Един конкретен пример тежи повече от три общи изречения."},
+                {"author": "demo", "body": f"{SEED_MARKER} Ако имаш чернова, можеш да махнеш всяко второ прилагателно и текстът става по-ясен."},
+            ],
+        },
+    ],
+    "literatura": [
+        {
+            "author": "student_iva",
+            "title": f"Сравнение между герои в интерпретативно съчинение {SEED_MARKER}",
+            "body": f"{SEED_MARKER} Трудно ми е да направя плавен преход между двама герои, без да звучи като две отделни части. Как го структурирате?",
+            "grade": 11,
+            "comments": [
+                {"author": "teacher_mario", "body": f"{SEED_MARKER} Пробвай по критерии: ценности, избори, последици. За всеки критерий сравняваш и двамата, вместо да ги описваш отделно."},
+                {"author": "student_niki", "body": f"{SEED_MARKER} Ползвам и кратко изречение-предход: „Подобно на..., но за разлика от...“ и ми държи логиката."},
+            ],
+        },
+    ],
+    "biologiq": [
+        {
+            "author": "student_niki",
+            "title": f"Клетъчно делене: как помните фазите на митоза? {SEED_MARKER}",
+            "body": f"{SEED_MARKER} При профаза/метафаза ги обърквам на тест. Имате ли асоциации или визуални трикове, които работят?",
+            "grade": 7,
+            "comments": [
+                {"author": "teacher_ani", "body": f"{SEED_MARKER} Запомни „П-МА-ТА“ и си рисувай по една скица към всяка фаза. Визуалната памет помага много."},
+                {"author": "demo", "body": f"{SEED_MARKER} В YouTube има хубави 3D анимации, след тях въпросите от учебника са по-лесни."},
+            ],
+        },
+    ],
+    "himiq": [
+        {
+            "author": "student_iva",
+            "title": f"Стехиометрия: откъде почвате при по-дълги задачи? {SEED_MARKER}",
+            "body": f"{SEED_MARKER} Знам формулите, но на задачи с няколко реакции се губя. Подреждате ли ги в някакъв стандартен ред?",
+            "grade": 10,
+            "comments": [
+                {"author": "teacher_mario", "body": f"{SEED_MARKER} Първо изравнявам уравненията, после отбелязвам известните молове и едва след това минавам към маси/обеми."},
+                {"author": "student_niki", "body": f"{SEED_MARKER} На мен ми помага да ограждам „ограничаващ реагент“ с различен цвят."},
+            ],
+        },
+    ],
+    "fizika": [
+        {
+            "author": "student_niki",
+            "title": f"Кинематика: кога да ползвам графики вместо формули? {SEED_MARKER}",
+            "body": f"{SEED_MARKER} На задачи с променлива скорост губя време. По-бързо ли е първо с v(t) графика и после сметки?",
+            "grade": 9,
+            "comments": [
+                {"author": "teacher_ani", "body": f"{SEED_MARKER} Ако има етапи на движение, графиката е супер начало. Площта под v(t) веднага дава изминат път."},
+                {"author": "demo", "body": f"{SEED_MARKER} Направи си шаблон за оси и мащаб, за да не губиш време на контролно."},
+            ],
+        },
+    ],
+    "istoriq": [
+        {
+            "author": "student_iva",
+            "title": f"Най-добър начин за учене на дати и събития {SEED_MARKER}",
+            "body": f"{SEED_MARKER} Когато уча само по списък, бързо ги забравям. Някой прави ли времеви линии или карти на причините?",
+            "grade": 8,
+            "comments": [
+                {"author": "teacher_mario", "body": f"{SEED_MARKER} Комбинирай дата + причина + последица в една карта. Така не учиш сухи факти, а връзки между тях."},
+                {"author": "student_niki", "body": f"{SEED_MARKER} Аз си правя мини тест в края на седмицата с 10 въпроса и помага много."},
+            ],
+        },
+    ],
+    "informacionni-tehnologii": [
+        {
+            "author": "student_iva",
+            "title": f"Python проект за училище: идеи за по-добра структура {SEED_MARKER}",
+            "body": f"{SEED_MARKER} Имам малко приложение, но всичко е в един файл. Как бихте го разделили, за да е по-четимо за предаване?",
+            "grade": 11,
+            "comments": [
+                {"author": "teacher_ani", "body": f"{SEED_MARKER} Отдели логика, вход/изход и данни в различни модули. Добави README с как се стартира проектът."},
+                {"author": "demo", "body": f"{SEED_MARKER} И сложи поне 2-3 теста за основните функции — прави много добро впечатление."},
+            ],
+        },
+    ],
+    "drugo": [
+        {
+            "author": "demo",
+            "title": f"Как комбинирате подготовка по много предмети в една седмица? {SEED_MARKER}",
+            "body": f"{SEED_MARKER} Имам натоварена програма и все не ми стига време за преговор. Търся реален график, който работи в училищен ритъм.",
+            "grade": 10,
+            "comments": [
+                {"author": "student_iva", "body": f"{SEED_MARKER} Ползвам 45/10 блокове и в неделя планирам само 3 приоритета за седмицата."},
+                {"author": "teacher_mario", "body": f"{SEED_MARKER} Оставяй буфер за непредвидени домашни, иначе планът се чупи още във вторник."},
+            ],
+        },
+    ],
+}
+
+LISTING_SCENARIOS = {
+    "matematika": {
+        "owner": "teacher_ani",
+        "price": Decimal("42.00"),
+        "mode": Listing.LessonMode.ONLINE_AND_IN_PERSON,
+        "description": f"{SEED_MARKER} Подготовка за НВО и матури по математика (7.–12. клас). Работим с диагностичен тест, седмичен план и целенасочени задачи по темите, в които ученикът губи най-много точки.",
+    },
+    "bulgarski": {
+        "owner": "teacher_mario",
+        "price": Decimal("36.00"),
+        "mode": Listing.LessonMode.ONLINE,
+        "description": f"{SEED_MARKER} Уроци по български език с фокус върху преразказ, аргументативен текст и граматика. Давам кратка писмена обратна връзка след всяко домашно.",
+    },
+    "literatura": {
+        "owner": "teacher_ani",
+        "price": Decimal("38.00"),
+        "mode": Listing.LessonMode.ONLINE,
+        "description": f"{SEED_MARKER} Литература за 11.–12. клас: анализ на произведения, теми и структура на интерпретативно съчинение. Подходящо за системна подготовка преди матура.",
+    },
+    "biologiq": {
+        "owner": "demo",
+        "price": Decimal("34.00"),
+        "mode": Listing.LessonMode.ONLINE_AND_IN_PERSON,
+        "description": f"{SEED_MARKER} Уроци по биология за кандидат-студентска подготовка и училищни изпити. Работим с кратки тестове, схеми и преговор на пропуските след всеки модул.",
+    },
+    "himiq": {
+        "owner": "teacher_mario",
+        "price": Decimal("40.00"),
+        "mode": Listing.LessonMode.IN_PERSON,
+        "description": f"{SEED_MARKER} Химия с практика върху задачи от реални изпити. Подготвям индивидуални листове по стехиометрия, разтвори и органична химия.",
+    },
+    "fizika": {
+        "owner": "teacher_ani",
+        "price": Decimal("39.00"),
+        "mode": Listing.LessonMode.ONLINE,
+        "description": f"{SEED_MARKER} Физика за 8.–12. клас с акцент върху кинематика, динамика и електричество. Всеки урок завършва с мини тест и план за самостоятелна работа.",
+    },
+    "istoriq": {
+        "owner": "demo",
+        "price": Decimal("33.00"),
+        "mode": Listing.LessonMode.ONLINE_AND_IN_PERSON,
+        "description": f"{SEED_MARKER} История и цивилизации с фокус върху разбиране на причинно-следствени връзки, а не механично учене на дати. Подходящо за текущи оценки и НВО.",
+    },
+    "informacionni-tehnologii": {
+        "owner": "teacher_mario",
+        "price": Decimal("45.00"),
+        "mode": Listing.LessonMode.ONLINE,
+        "description": f"{SEED_MARKER} Програмиране и ИТ за ученици: Python основи, проекти и подготовка за състезания/изпити. Помагам и с портфолио за кандидатстване.",
+    },
+    "drugo": {
+        "owner": "demo",
+        "price": Decimal("32.00"),
+        "mode": Listing.LessonMode.ONLINE,
+        "description": f"{SEED_MARKER} Менторство по учебни навици и организация на подготовката. Изграждаме реалистичен седмичен график и стратегия за контролни и изпити.",
+    },
+}
 
 REPORT_REASONS = [
     Report.REASON_SPAM,
@@ -178,54 +357,50 @@ class Command(BaseCommand):
         if not context.subjects:
             return
 
-        authors = [
-            context.users.get("demo"),
-            context.users.get("student_iva"),
-            context.users.get("teacher_ani"),
-        ]
-        commenters = [
-            context.users.get("demo"),
-            context.users.get("student_niki"),
-            context.users.get("teacher_mario"),
-        ]
         voters = [user for key, user in context.users.items() if key not in {"admin"}]
 
-        if not all(authors) or not all(commenters):
-            return
-
         for subject_index, subject in enumerate(context.subjects.values(), start=1):
-            for post_index in range(1, 4):
-                author = authors[(subject_index + post_index) % len(authors)]
-                title = f"{subject.name}: подготовка за тест {post_index} {SEED_MARKER}"
-                body = (
-                    f"{SEED_MARKER} Търся идеи за по-ефективна подготовка по {subject.name}. "
-                    "Кои задачи и ресурси ви помогнаха най-много през последната седмица?"
-                )
+            scenarios = DISCUSSION_SCENARIOS.get(subject.slug)
+            if not scenarios:
+                continue
+
+            for post_index, scenario in enumerate(scenarios, start=1):
+                author = context.users.get(scenario.get("author", ""))
+                if author is None:
+                    continue
+
+                title = scenario["title"]
+                body = scenario["body"]
                 post, created = Post.objects.get_or_create(
                     subject=subject,
                     author=author,
                     title=title,
-                    defaults={"body": body, "grade": min(12, 5 + post_index)},
+                    defaults={"body": body, "grade": scenario.get("grade", min(12, 5 + post_index))},
                 )
                 stats["posts_created" if created else "posts_existing"] += 1
 
+                updates = []
                 if post.body != body:
                     post.body = body
-                    post.save(update_fields=["body"])
+                    updates.append("body")
+                desired_grade = scenario.get("grade", post.grade)
+                if post.grade != desired_grade:
+                    post.grade = desired_grade
+                    updates.append("grade")
+                if updates:
+                    post.save(update_fields=updates)
 
                 if post_index % 2 == 0:
                     self._attach_image_if_needed(post, context.image_paths[post_index % len(context.image_paths)], f"post-{subject.slug}-{post_index}.png", stats, "post_images")
 
-                for comment_index in range(1, 4):
-                    commenter = commenters[(post_index + comment_index) % len(commenters)]
-                    comment_body = (
-                        f"{SEED_MARKER} Според мен пробвай с 30 минути задачи и кратко обобщение след всяка тема. "
-                        f"(коментар {comment_index})"
-                    )
+                for comment in scenario.get("comments", []):
+                    commenter = context.users.get(comment.get("author", ""))
+                    if commenter is None:
+                        continue
                     _, comment_created = Comment.objects.get_or_create(
                         post=post,
                         author=commenter,
-                        body=comment_body,
+                        body=comment["body"],
                     )
                     stats["comments_created" if comment_created else "comments_existing"] += 1
 
@@ -266,25 +441,30 @@ class Command(BaseCommand):
         if not owners:
             return
 
-        lesson_modes = [
-            Listing.LessonMode.ONLINE,
-            Listing.LessonMode.IN_PERSON,
-            Listing.LessonMode.ONLINE_AND_IN_PERSON,
-        ]
-
         for idx, subject in enumerate(context.subjects.values(), start=1):
-            owner = owners[idx % len(owners)]
-            description = (
+            scenario = LISTING_SCENARIOS.get(subject.slug)
+            if scenario:
+                owner = context.users.get(scenario.get("owner", ""))
+            else:
+                owner = owners[idx % len(owners)]
+
+            if owner is None:
+                continue
+
+            lesson_mode = scenario["mode"] if scenario else Listing.LessonMode.ONLINE_AND_IN_PERSON
+            description = scenario["description"] if scenario else (
                 f"{SEED_MARKER} Индивидуални уроци по {subject.name}. "
                 "Работя с план за всяка седмица, домашни и обратна връзка след всеки урок. "
                 "Локация: София / онлайн според режима на обучение."
             )
+            price_per_hour = scenario["price"] if scenario else Decimal(30 + idx)
+
             listing, created = Listing.objects.get_or_create(
                 subject=subject,
                 owner=owner,
-                lesson_mode=lesson_modes[idx % len(lesson_modes)],
+                lesson_mode=lesson_mode,
                 defaults={
-                    "price_per_hour": Decimal(30 + idx),
+                    "price_per_hour": price_per_hour,
                     "description": description,
                     "contact_name": owner.username,
                     "contact_phone": "+359888123456",
@@ -293,9 +473,15 @@ class Command(BaseCommand):
             )
             stats["listings_created" if created else "listings_existing"] += 1
 
+            update_fields = []
             if listing.description != description:
                 listing.description = description
-                listing.save(update_fields=["description"])
+                update_fields.append("description")
+            if listing.price_per_hour != price_per_hour:
+                listing.price_per_hour = price_per_hour
+                update_fields.append("price_per_hour")
+            if update_fields:
+                listing.save(update_fields=update_fields)
 
             self._attach_image_if_needed(
                 listing,
