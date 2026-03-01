@@ -62,7 +62,7 @@ class ReportCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {
                     "non_field_errors": [
-                        _("Вече сте изпратили репорт за това съдържание.")
+                        _("Вече имаш отворен/преглеждан сигнал за това съдържание.")
                     ]
                 }
             )

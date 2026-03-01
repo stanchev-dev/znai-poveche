@@ -7,7 +7,6 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import File
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
@@ -34,7 +33,6 @@ SUBJECTS = [
 DEMO_USERS = [
     ("admin", "admin12345", True, True, "Админ"),
     ("demo", "demo12345", False, False, "Демо"),
-    ("seed_reporter", "demo12345", False, False, "Seed Reporter"),
     ("teacher_ani", "demo12345", False, False, "Ани Петрова"),
     ("teacher_mario", "demo12345", False, False, "Марио Тодоров"),
     ("teacher_elena", "demo12345", False, False, "Елена Стоянова"),
@@ -43,8 +41,6 @@ DEMO_USERS = [
     ("student_maria", "demo12345", False, False, "Мария Иванова"),
     ("student_dani", "demo12345", False, False, "Даниел Колев"),
 ]
-
-SEED_REPORTER_USERNAME = "seed_reporter"
 
 DISCUSSION_SCENARIOS = {
     "matematika": [
@@ -223,14 +219,6 @@ LISTING_SCENARIOS = {
         "description": f"{SEED_MARKER} Учебен коучинг за ученици: управление на време, седмично планиране и техника за учене преди контролни. Подходящо за ученици с натоварен график и много извънкласни дейности.",
     },
 }
-
-REPORT_REASONS = [
-    Report.REASON_SPAM,
-    Report.REASON_ABUSE,
-    Report.REASON_OFF_TOPIC,
-    Report.REASON_OTHER,
-]
-
 
 @dataclass
 class SeedContext:
@@ -411,10 +399,6 @@ class Command(BaseCommand):
                     stats["comments_created" if comment_created else "comments_existing"] += 1
 
                 self._seed_post_votes(post, voters, stats)
-                self._seed_report(post, context.users.get(SEED_REPORTER_USERNAME), "post", stats)
-                first_comment = post.comments.order_by("id").first()
-                if first_comment is not None:
-                    self._seed_report(first_comment, context.users.get(SEED_REPORTER_USERNAME), "comment", stats)
 
     def _seed_post_votes(self, post: Post, voters: list, stats: Counter) -> None:
         vote_pattern = [1, 1, -1, 1]
@@ -513,32 +497,6 @@ class Command(BaseCommand):
                     stats["listing_gallery_images_created"] += 1
                 else:
                     stats["listing_gallery_images_existing"] += 1
-
-            self._seed_report(listing, context.users.get(SEED_REPORTER_USERNAME), "listing", stats)
-
-    def _seed_report(self, target, reporter, target_key: str, stats: Counter) -> None:
-        if reporter is None:
-            return
-        content_type = ContentType.objects.get_for_model(target.__class__)
-        reason = REPORT_REASONS[target.pk % len(REPORT_REASONS)]
-        message = f"{SEED_MARKER} Автоматично създаден сигнал за демонстрация ({target_key})."
-        report, created = Report.objects.get_or_create(
-            reporter=reporter,
-            content_type=content_type,
-            object_id=target.pk,
-            defaults={"reason": reason, "message": message},
-        )
-        if not created:
-            updates = []
-            if report.reason != reason:
-                report.reason = reason
-                updates.append("reason")
-            if report.message != message:
-                report.message = message
-                updates.append("message")
-            if updates:
-                report.save(update_fields=updates)
-        stats["reports_created" if created else "reports_existing"] += 1
 
     def _attach_image_if_needed(self, instance, image_path: Path, filename: str, stats: Counter, key: str) -> None:
         image_field = instance.image
