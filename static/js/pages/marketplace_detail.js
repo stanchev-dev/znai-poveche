@@ -76,17 +76,6 @@
     successAlert.classList.add('alert-pop-highlight');
   }
 
-
-  const DUPLICATE_REPORT_MESSAGE = 'Вече сте изпратили репорт за това съдържание.';
-
-  function getReportErrorMessage(payload) {
-    const backendMessage = payload?.non_field_errors?.[0] || payload?.detail || '';
-    if (backendMessage === DUPLICATE_REPORT_MESSAGE) {
-      return DUPLICATE_REPORT_MESSAGE;
-    }
-    return 'Неуспешно изпращане на репорт.';
-  }
-
   const reportUrl = meta.dataset.reportUrl || '/api/reports/';
 
   async function submitReport() {
@@ -107,8 +96,7 @@
         return;
       }
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        alertBox.innerHTML = alertHtml(getReportErrorMessage(data), 'danger');
+        alertBox.innerHTML = alertHtml('Неуспешно изпращане на репорт.', 'danger');
         return;
       }
       alertBox.innerHTML = alertHtml('Репортът ви е изпратен успешно.', 'success');
