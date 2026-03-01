@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass
 from decimal import Decimal
-import math
 from pathlib import Path
 
 from django.conf import settings
@@ -361,10 +360,6 @@ class Command(BaseCommand):
             return
 
         voters = [user for key, user in context.users.items() if key not in {"admin"}]
-        total_posts = self._count_seedable_discussion_posts(context)
-        posts_with_images = self._discussion_image_post_indices(total_posts)
-        global_post_index = 0
-        discussion_image_counter = 0
 
         for subject_index, subject in enumerate(context.subjects.values(), start=1):
             scenarios = DISCUSSION_SCENARIOS.get(subject.slug)
@@ -375,7 +370,6 @@ class Command(BaseCommand):
                 author = context.users.get(scenario.get("author", ""))
                 if author is None:
                     continue
-                global_post_index += 1
 
                 title = scenario["title"]
                 body = scenario["body"]
@@ -398,16 +392,8 @@ class Command(BaseCommand):
                 if updates:
                     post.save(update_fields=updates)
 
-                if global_post_index in posts_with_images:
-                    image_path = context.image_paths[(global_post_index + discussion_image_counter) % len(context.image_paths)]
-                    self._attach_image_if_needed(
-                        post,
-                        image_path,
-                        f"post-{subject.slug}-{post_index}.png",
-                        stats,
-                        "post_images",
-                    )
-                    discussion_image_counter += 1
+                if post_index % 2 == 0:
+                    self._attach_image_if_needed(post, context.image_paths[post_index % len(context.image_paths)], f"post-{subject.slug}-{post_index}.png", stats, "post_images")
 
                 for comment in scenario.get("comments", []):
                     commenter = context.users.get(comment.get("author", ""))
@@ -499,27 +485,22 @@ class Command(BaseCommand):
             if update_fields:
                 listing.save(update_fields=update_fields)
 
-            desired_gallery_count = 2 + ((idx - 1) % 3)
-            listing_cover_path, gallery_paths = self._listing_image_selection(
-                context.image_paths,
-                idx,
-                desired_gallery_count,
-            )
             self._attach_image_if_needed(
                 listing,
-                listing_cover_path,
+                context.image_paths[idx % len(context.image_paths)],
                 f"listing-{subject.slug}.png",
                 stats,
                 "listing_cover_images",
             )
 
+            desired_gallery_count = 1 + (idx % 3)
             for position in range(desired_gallery_count):
                 gallery_image, image_created = ListingImage.objects.get_or_create(
                     listing=listing,
                     position=position,
                 )
                 if image_created or not gallery_image.image:
-                    with gallery_paths[position].open("rb") as image_file:
+                    with context.image_paths[(idx + position) % len(context.image_paths)].open("rb") as image_file:
                         gallery_image.image.save(
                             f"listing-{subject.slug}-{position}.png",
                             File(image_file),
@@ -563,31 +544,6 @@ class Command(BaseCommand):
         with image_path.open("rb") as image_file:
             image_field.save(filename, File(image_file), save=True)
         stats[f"{key}_created"] += 1
-
-    def _count_seedable_discussion_posts(self, context: SeedContext) -> int:
-        total_posts = 0
-        for subject in context.subjects.values():
-            scenarios = DISCUSSION_SCENARIOS.get(subject.slug, [])
-            total_posts += sum(1 for scenario in scenarios if context.users.get(scenario.get("author", "")) is not None)
-        return total_posts
-
-    def _discussion_image_post_indices(self, total_posts: int) -> set[int]:
-        if total_posts <= 0:
-            return set()
-        if total_posts == 1:
-            return {1}
-        if total_posts == 2:
-            return {1, 2}
-
-        middle_post = math.ceil(total_posts / 2)
-        return {2, middle_post, total_posts}
-
-    def _listing_image_selection(self, image_paths: list[Path], listing_index: int, gallery_count: int) -> tuple[Path, list[Path]]:
-        image_count = len(image_paths)
-        start_idx = ((listing_index - 1) * 3) % image_count
-        cover_idx = (start_idx - 1) % image_count
-        gallery_paths = [image_paths[(start_idx + offset) % image_count] for offset in range(gallery_count)]
-        return image_paths[cover_idx], gallery_paths
 
     def _seed_image_paths(self) -> list[Path]:
         seed_dir = Path(settings.BASE_DIR) / "static" / "seed_images"
