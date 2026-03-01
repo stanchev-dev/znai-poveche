@@ -1,4 +1,6 @@
-from django.db import transaction
+import re
+
+from django.db import connection, transaction
 from django.db.models import (
     ExpressionWrapper,
     F,
@@ -116,9 +118,16 @@ class PostListView(ListCreateAPIView):
 
         search_text = self.request.query_params.get("q")
         if search_text:
-            queryset = queryset.filter(
-                Q(title__icontains=search_text) | Q(body__icontains=search_text)
-            )
+            if connection.vendor == "sqlite":
+                escaped_search_text = re.escape(search_text)
+                queryset = queryset.filter(
+                    Q(title__iregex=escaped_search_text)
+                    | Q(body__iregex=escaped_search_text)
+                )
+            else:
+                queryset = queryset.filter(
+                    Q(title__icontains=search_text) | Q(body__icontains=search_text)
+                )
 
         sort = self.request.query_params.get("sort", "new")
         if sort == "top":

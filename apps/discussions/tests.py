@@ -1012,6 +1012,24 @@ class DiscussionImageUploadTests(APITestCase):
         exif_transpose_mock.assert_called()
 
 
+class PostSearchTests(APITestCase):
+    def setUp(self):
+        self.subject = Subject.objects.create(name="Literature", slug="literature")
+        self.post = Post.objects.create(
+            subject=self.subject,
+            author=User.objects.create_user(username="search-user", password="pass12345"),
+            title="други новини",
+            body="Тестово съдържание",
+        )
+
+    def test_search_matches_cyrillic_case_insensitively(self):
+        response = self.client.get(reverse("api-posts-list"), {"q": "Други"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["id"], self.post.id)
+
+
 class MyDiscussionsPageTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="owner", password="pass12345")
