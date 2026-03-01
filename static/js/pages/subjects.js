@@ -6,6 +6,17 @@
   const PAGE_SIZE = 10;
   let currentUrl = null;
 
+  function getScoreOverrides() {
+    try {
+      const raw = sessionStorage.getItem('zp_post_score_overrides');
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (_error) {
+      return {};
+    }
+  }
+
   function getAuthorInitial(author) {
     const label = author.display_name || author.username || '?';
     return label.charAt(0).toUpperCase();
@@ -67,12 +78,17 @@
 
   function render(posts) {
     const isGlobalFeed = slug === 'all';
+    const scoreOverrides = getScoreOverrides();
     if (!posts.length) {
       list.innerHTML = '<div class="alert alert-info">Няма резултати</div>';
       return;
     }
 
-    list.innerHTML = posts.map((post) => `
+    list.innerHTML = posts.map((post) => {
+      const overrideScore = scoreOverrides[String(post.id)];
+      const displayScore = Number.isFinite(Number(overrideScore)) ? Number(overrideScore) : post.score;
+
+      return `
       <article class="discussion-card">
         <div class="discussion-card__top d-flex align-items-start w-100 gap-3">
           <div class="discussion-main discussion-card__main">
@@ -81,11 +97,12 @@
             ${authorMeta(post, isGlobalFeed)}
           </div>
           <div class="discussion-side discussion-card__points ms-auto flex-shrink-0">
-            <span class="discussion-points-pill">${post.score} точки</span>
+            <span class="discussion-points-pill">${displayScore} точки</span>
           </div>
         </div>
         <a href="/posts/${post.id}/" class="stretched-link discussion-card-link" aria-label="Отвори дискусията: ${escapeHtml(post.title)}"></a>
-      </article>`).join('');
+      </article>`;
+    }).join('');
   }
 
   async function load(url) {
