@@ -34,6 +34,7 @@ SUBJECTS = [
 DEMO_USERS = [
     ("admin", "admin12345", True, True, "Админ"),
     ("demo", "demo12345", False, False, "Демо"),
+    ("seed_reporter", "demo12345", False, False, "Seed Reporter"),
     ("teacher_ani", "demo12345", False, False, "Ани Петрова"),
     ("teacher_mario", "demo12345", False, False, "Марио Тодоров"),
     ("teacher_elena", "demo12345", False, False, "Елена Стоянова"),
@@ -42,6 +43,8 @@ DEMO_USERS = [
     ("student_maria", "demo12345", False, False, "Мария Иванова"),
     ("student_dani", "demo12345", False, False, "Даниел Колев"),
 ]
+
+SEED_REPORTER_USERNAME = "seed_reporter"
 
 DISCUSSION_SCENARIOS = {
     "matematika": [
@@ -408,10 +411,10 @@ class Command(BaseCommand):
                     stats["comments_created" if comment_created else "comments_existing"] += 1
 
                 self._seed_post_votes(post, voters, stats)
-                self._seed_report(post, context.users.get("admin"), "post", stats)
+                self._seed_report(post, context.users.get(SEED_REPORTER_USERNAME), "post", stats)
                 first_comment = post.comments.order_by("id").first()
                 if first_comment is not None:
-                    self._seed_report(first_comment, context.users.get("admin"), "comment", stats)
+                    self._seed_report(first_comment, context.users.get(SEED_REPORTER_USERNAME), "comment", stats)
 
     def _seed_post_votes(self, post: Post, voters: list, stats: Counter) -> None:
         vote_pattern = [1, 1, -1, 1]
@@ -511,7 +514,7 @@ class Command(BaseCommand):
                 else:
                     stats["listing_gallery_images_existing"] += 1
 
-            self._seed_report(listing, context.users.get("admin"), "listing", stats)
+            self._seed_report(listing, context.users.get(SEED_REPORTER_USERNAME), "listing", stats)
 
     def _seed_report(self, target, reporter, target_key: str, stats: Counter) -> None:
         if reporter is None:

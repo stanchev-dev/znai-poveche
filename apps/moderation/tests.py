@@ -141,6 +141,10 @@ class ModerationAPITests(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data["non_field_errors"][0],
+            "Вече сте изпратили репорт за това съдържание.",
+        )
 
     def test_can_create_new_report_after_previous_is_resolved(self):
         self.client.force_authenticate(self.user)

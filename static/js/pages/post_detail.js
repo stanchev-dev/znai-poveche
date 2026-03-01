@@ -113,6 +113,16 @@
   }
 
   function alertHtml(text, type = 'warning') { return `<div class="alert alert-${type}">${text}</div>`; }
+
+  const DUPLICATE_REPORT_MESSAGE = 'Вече сте изпратили репорт за това съдържание.';
+
+  function getReportErrorMessage(payload) {
+    const backendMessage = payload?.non_field_errors?.[0] || payload?.detail || '';
+    if (backendMessage === DUPLICATE_REPORT_MESSAGE) {
+      return DUPLICATE_REPORT_MESSAGE;
+    }
+    return 'Неуспешно изпращане на репорта. Опитайте отново.';
+  }
   function loginAlert() { return `${alertHtml(`Трябва да сте логнати. <a href="${loginUrl}">Вход</a>`, 'warning')}`; }
 
   function animateSuccessAlert() {
@@ -259,7 +269,8 @@
         return;
       }
       if (!res.ok) {
-        postAlert.innerHTML = alertHtml('Неуспешно изпращане на репорта. Опитайте отново.', 'danger');
+        const data = await res.json().catch(() => ({}));
+        postAlert.innerHTML = alertHtml(getReportErrorMessage(data), 'danger');
         return;
       }
       postAlert.innerHTML = alertHtml('Репортът ви е изпратен успешно.', 'success');
