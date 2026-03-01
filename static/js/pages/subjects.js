@@ -17,6 +17,21 @@
     }
   }
 
+
+  function applyScoreOverridesToDom() {
+    const scoreOverrides = getScoreOverrides();
+
+    Object.entries(scoreOverrides).forEach(([postId, score]) => {
+      const parsedScore = Number(score);
+      if (!Number.isFinite(parsedScore)) return;
+
+      const scoreNodes = list.querySelectorAll(`[data-post-id="${postId}"] .js-discussion-score`);
+      scoreNodes.forEach((node) => {
+        node.textContent = `${parsedScore} точки`;
+      });
+    });
+  }
+
   function getAuthorInitial(author) {
     const label = author.display_name || author.username || '?';
     return label.charAt(0).toUpperCase();
@@ -89,7 +104,7 @@
       const displayScore = Number.isFinite(Number(overrideScore)) ? Number(overrideScore) : post.score;
 
       return `
-      <article class="discussion-card">
+      <article class="discussion-card" data-post-id="${post.id}">
         <div class="discussion-card__top d-flex align-items-start w-100 gap-3">
           <div class="discussion-main discussion-card__main">
             <h2 class="discussion-title mb-2">${escapeHtml(post.title)}</h2>
@@ -97,7 +112,7 @@
             ${authorMeta(post, isGlobalFeed)}
           </div>
           <div class="discussion-side discussion-card__points ms-auto flex-shrink-0">
-            <span class="discussion-points-pill">${displayScore} точки</span>
+            <span class="discussion-points-pill js-discussion-score">${displayScore} точки</span>
           </div>
         </div>
         <a href="/posts/${post.id}/" class="stretched-link discussion-card-link" aria-label="Отвори дискусията: ${escapeHtml(post.title)}"></a>
@@ -120,6 +135,7 @@
     const data = await res.json();
     currentUrl = url;
     render(data.results || []);
+    applyScoreOverridesToDom();
     window.zpPagination.render({
       containerId: 'posts-pagination',
       count: data.count,
@@ -139,6 +155,10 @@
 
   document.getElementById('search-btn').addEventListener('click', () => load(buildUrl()));
   document.getElementById('sort-select').addEventListener('change', () => load(buildUrl()));
+
+  window.addEventListener('pageshow', () => {
+    applyScoreOverridesToDom();
+  });
 
   load(buildUrl());
 })();
