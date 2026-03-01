@@ -17,7 +17,8 @@ from apps.discussions.models import Comment, Post, PostVote, Subject
 from apps.marketplace.models import Listing, ListingImage
 from apps.moderation.models import Report
 
-SEED_MARKER = "[seed-demo]"
+# Invisible marker retained in seeded text so `seed --wipe` can still detect records.
+SEED_MARKER = "\u2060"  # WORD JOINER (zero-width)
 SUBJECTS = [
     {"name": "Български език", "slug": "bulgarski", "theme_color": "#FB923C", "tile_image": "img/bulgarski.svg"},
     {"name": "Литература", "slug": "literatura", "theme_color": "#BEEA00", "tile_image": "img/literatura.svg"},
