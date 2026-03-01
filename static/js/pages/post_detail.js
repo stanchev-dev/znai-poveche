@@ -154,6 +154,23 @@
     return undefined;
   }
 
+  function persistPostScore(postIdValue, scoreValue) {
+    const parsedPostId = Number(postIdValue);
+    const parsedScore = Number(scoreValue);
+    if (!Number.isFinite(parsedPostId) || !Number.isFinite(parsedScore)) return;
+
+    const key = 'zp_post_score_overrides';
+    let cache = {};
+    try {
+      cache = JSON.parse(sessionStorage.getItem(key) || '{}');
+    } catch (_error) {
+      cache = {};
+    }
+
+    cache[String(parsedPostId)] = parsedScore;
+    sessionStorage.setItem(key, JSON.stringify(cache));
+  }
+
   async function fetchFallbackScoreAndVote(root) {
     const targetType = root.dataset.type;
     const targetId = root.dataset.id;
@@ -220,6 +237,11 @@
         score: responseScore,
         userVote: responseVote
       });
+
+      if (targetType === 'post' && responseScore !== undefined) {
+        persistPostScore(targetId, responseScore);
+      }
+
       postAlert.innerHTML = '';
     } catch (error) {
       postAlert.innerHTML = alertHtml('Грешка при гласуване', 'danger');
