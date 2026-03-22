@@ -1063,6 +1063,16 @@ class MyDiscussionsPageTests(TestCase):
         self.assertContains(response, self.my_post.title)
         self.assertNotContains(response, self.other_post.title)
 
+    def test_my_discussions_renders_page_header_include(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("my-discussions-page"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Твоите дискусии")
+        self.assertContains(response, "+ Публикувай")
+        self.assertNotContains(response, "{% include \"common/includes/page_pill_header.html\" with")
+
     def test_edit_discussion_changes_only_body(self):
         self.client.force_login(self.user)
         response = self.client.post(
